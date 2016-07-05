@@ -1,0 +1,10 @@
+[package]
+name = "count"
+version = "0.1.0"
+authors = ["Curtis Gagliardi <curtis@curtis.io>"]
+
+[dependencies]
+thread-scoped = "*"
+memmap = "*"
+libc = "*"
+errno = "*"
