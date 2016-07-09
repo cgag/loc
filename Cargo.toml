@@ -6,5 +6,7 @@ authors = ["Curtis Gagliardi <curtis@curtis.io>"]
 [dependencies]
 thread-scoped = "*"
 memmap = "*"
+mmap = "*"
 libc = "*"
 errno = "*"
+memchr = "*"
