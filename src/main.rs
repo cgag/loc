@@ -1,4 +1,5 @@
 extern crate memmap;
+extern crate thread_scoped;
 extern crate libc;
 
 use std::env;
@@ -17,38 +18,48 @@ fn main() {
         exit(1);
     }
     let filepath = &args[1];
+    let total_lines = count_mmap_serial(filepath);
+    // let total_lines = count_mmap_parallel(filepath);
+    println!("lines: {}", total_lines);
+}
 
+fn count_mmap_serial(filepath: &str) -> u64 {
     let fmmap = Mmap::open_path(filepath, Protection::Read).expect("mmap err");
     let bytes: &[u8] = unsafe { fmmap.as_slice() };
 
-    // TODO(cgag): try MAP_POPULATE?
-    // let mut bytes_ptr = &mut *bytes as *mut _ as *mut libc::c_void;
-    // let ret = unsafe { madvise(bytes_ptr, bytes.len(), MADV_SEQUENTIAL) };
-    // if ret != 0 {
-    //     println!("error in madvise: {}", ret);
-    //     exit(ret);
-    // }
-
     let mut lines = 0;
+    for byte in bytes {
+        if *byte == b'\n' {
+            lines += 1;
+        }
+    }
+    lines
+}
 
-    let mut handles: Vec<thread::JoinHandle<()>> = Vec::new();
+fn count_mmap_parallel(filepath: &str) -> u64 {
+    let fmmap = Mmap::open_path(filepath, Protection::Read).expect("mmap err");
+    let bytes: &[u8] = unsafe { fmmap.as_slice() };
 
-    for (i, chunk) in bytes.chunks(bytes.len() / 4).enumerate() {
-        let t = thread::spawn(move || {
-            for byte in chunk {
-                if *byte == b'\n' {
-                    lines += 1;
+    let mut handles: Vec<thread_scoped::JoinGuard<u64>> = Vec::new();
+
+    for chunk in bytes.chunks(bytes.len() / 4) {
+        unsafe {
+            let t = thread_scoped::scoped(move || {
+                let mut lines = 0;
+                for byte in chunk {
+                    if *byte == b'\n' {
+                        lines += 1;
+                    }
                 }
-            }
-        });
-
-        handles.push(t);
-        println!("i: {}", i)
+                lines
+            });
+            handles.push(t);
+        };
     }
 
+    let mut total_lines = 0;
     for h in handles {
-        h.join();
+        total_lines += h.join()
     }
-
-    println!("lines: {}", lines);
+    total_lines
 }
