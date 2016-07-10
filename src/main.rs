@@ -31,8 +31,7 @@ fn main() {
     // let total_lines = count_mmap_serial_memchr(filepath);
     // let total_lines = count_mmap_serial_madvise_memchr(filepath);
     // let total_lines = count_mmap_parallel(filepath);
-    // let total_lines = count_mmap_parallel_memchr(filepath);
-    let total_lines = count_mmap_parallel_memchr_populate(filepath);
+    let total_lines = count_mmap_parallel_memchr(filepath);
     println!("lines: {}", total_lines);
 }
 
