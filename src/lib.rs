@@ -66,13 +66,13 @@ pub fn count_regex(filepath: &str) -> Count {
     let mut lines = 0;
     let mut code = 0;
     let mut comments = 0;
-    let mut blank = 0;
+    let mut blanks = 0;
 
-    let is_comment = Regex::new(r"^\s*//").unwrap();
-    let is_comment_start = Regex::new(r"/\*").unwrap();
-    let is_comment_start_with_blank = Regex::new(r"^\s*/\*").unwrap();
-    let is_comment_end = Regex::new(r"\s*\*/").unwrap();
-    let is_blank = Regex::new(r"^[:space:]*$").unwrap();
+    let single_comment = Regex::new(r"^\s*//").unwrap();
+    let multi_comment_start_with_blank = Regex::new(r"^\s*/\*").unwrap();
+    let multi_comment_start = Regex::new(r"/\*").unwrap();
+    let multi_comment_end = Regex::new(r"\s*\*/").unwrap();
+    let blank = Regex::new(r"^[:space:]*$").unwrap();
 
     let mut in_comment = false;
     for line in reader.lines() {
@@ -81,7 +81,7 @@ pub fn count_regex(filepath: &str) -> Count {
 
         if in_comment {
             comments += 1;
-            if is_comment_end.is_match(&line) {
+            if multi_comment_end.is_match(&line) {
                 in_comment = false;
             }
             continue;
@@ -89,21 +89,21 @@ pub fn count_regex(filepath: &str) -> Count {
 
         // TODO(cgag): try parsers, regex, operating on non-utf8, etc.
         // Only escelate to utf8 if needed?  When is it needed?
-        if is_blank.is_match(&line) {
-            blank += 1;
-        } else if is_comment.is_match(&line) {
+        if blank.is_match(&line) {
+            blanks += 1;
+        } else if single_comment.is_match(&line) {
             comments += 1;
-        } else if is_comment_start.is_match(&line) {
-            if is_comment_start_with_blank.is_match(&line) {
+        } else if multi_comment_start.is_match(&line) {
+            if multi_comment_start_with_blank.is_match(&line) {
                 comments += 1;
-                if is_comment_end.is_match(&line) {
+                if multi_comment_end.is_match(&line) {
                     continue;
                 } else {
                     in_comment = true
                 }
             } else {
                 code += 1;
-                if is_comment_end.is_match(&line) {
+                if multi_comment_end.is_match(&line) {
                     continue;
                 } else {
                     in_comment = true
@@ -117,7 +117,7 @@ pub fn count_regex(filepath: &str) -> Count {
     Count {
         code: code,
         comment: comments,
-        blank: blank,
+        blank: blanks,
         lines: lines,
     }
 }
