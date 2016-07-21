@@ -14,7 +14,7 @@ use memmap::{Mmap, Protection};
 use memchr::memchr;
 
 use regex::Regex;
-use nom::*;
+// use nom::*;
 
 // pub mod lang;
 
@@ -25,7 +25,7 @@ pub enum Lang {
         * Perl,
         * BourneShell, */
 }
-use self::Lang::*;
+// use self::Lang::*;
 
 // Why is it called partialEq?
 #[derive(Debug, PartialEq)]
@@ -36,17 +36,17 @@ pub struct Count {
     pub lines: u32,
 }
 
-fn lang_from_extension(ext: &str) -> Lang {
-    match ext {
-        "c" => C,
-        // "rs" => Rust,
-        // "h" => C_CPP_HEADER,
-        // "hs" => Haskell,
-        // "perl" => Perl,
-        // "sh" => BourneShell,
-        _ => panic!("unrecognized ext"),
-    }
-}
+// fn lang_from_extension(ext: &str) -> Lang {
+//     match ext {
+//         "c" => C,
+//         // "rs" => Rust,
+//         // "h" => C_CPP_HEADER,
+//         // "hs" => Haskell,
+//         // "perl" => Perl,
+//         // "sh" => BourneShell,
+//         _ => panic!("unrecognized ext"),
+//     }
+// }
 
 // fn couter_for_lang(lang: Lang) -> Counter {
 //     return match lang {
@@ -72,7 +72,6 @@ pub fn count_regex(filepath: &str) -> Count {
 
     let single_comment = Regex::new(r"^\s*//").unwrap();
     let multi_comment_start_with_blank = Regex::new(r"^\s*/\*").unwrap();
-    let multi_comment_start = Regex::new(r"/\*").unwrap();
     let multi_comment_end = Regex::new(r"\s*\*/").unwrap();
     let blank = Regex::new(r"^[:space:]*$").unwrap();
 
@@ -95,7 +94,7 @@ pub fn count_regex(filepath: &str) -> Count {
             blanks += 1;
         } else if single_comment.is_match(&line) {
             comments += 1;
-        } else if multi_comment_start.is_match(&line) {
+        } else if line.contains("/*") {
             if multi_comment_start_with_blank.is_match(&line) {
                 comments += 1;
                 if multi_comment_end.is_match(&line) {
@@ -183,7 +182,7 @@ pub fn count_manual_bytes_with_iterator(filepath: &str) -> Count {
     let comments = 0;
     let blank = 0;
 
-    for line in Ascii(bytes).lines() {
+    for _ in Ascii(bytes).lines() {
         lines += 1;
     }
 
@@ -212,13 +211,13 @@ pub fn count_manual_bytes_try1(filepath: &str) -> Count {
 
     let mut prev_byte: &u8 = &0;
     for byte in bytes {
-        state = match byte {
-            &b' ' | &b'\t' | &b'\r' | &b'\x0B' | &b'\x0C' => {
+        state = match *byte {
+            b' ' | b'\t' | b'\r' | b'\x0B' | b'\x0C' => {
                 match state {
                     _ => state,
                 }
             }
-            &b'/' => {
+            b'/' => {
                 match state {
                     InCode => InCode,
                     LineStart => {
@@ -238,7 +237,7 @@ pub fn count_manual_bytes_try1(filepath: &str) -> Count {
                     }
                 }
             }
-            &b'*' => {
+            b'*' => {
                 match state {
                     LineStart => {
                         if prev_byte == &b'/' {
@@ -251,7 +250,7 @@ pub fn count_manual_bytes_try1(filepath: &str) -> Count {
                     InComment => InComment,
                 }
             }
-            &b'\n' => {
+            b'\n' => {
                 lines += 1;
                 match state {
                     InCode => {
@@ -268,13 +267,7 @@ pub fn count_manual_bytes_try1(filepath: &str) -> Count {
                     }
                 }
             }
-            &_ => {
-                match state {
-                    LineStart => InCode,
-                    InCode => InCode,
-                    InComment => InComment,
-                }
-            }
+            _ => state,
         };
         prev_byte = byte;
     }

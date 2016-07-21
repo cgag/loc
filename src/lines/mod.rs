@@ -55,8 +55,8 @@ pub fn count_manual_read_fadvise(filepath: &str) -> u64 {
         match file.read(&mut buf) {
             Ok(0) => break,
             Ok(n) => {
-                for i in 0..n {
-                    if buf[i] == b'\n' {
+                for byte in buf.iter().take(n) {
+                    if *byte == b'\n' {
                         lines += 1;
                     }
                 }
@@ -118,7 +118,7 @@ pub fn count_mmap_serial_madvise(filepath: &str) -> u64 {
     let mut bytes: &mut [u8] = unsafe { fmmap.as_mut_slice() };
 
     // TODO(cgag): try MAP_POPULATE?
-    let mut bytes_ptr = &mut *bytes as *mut _ as *mut libc::c_void;
+    let bytes_ptr = &mut *bytes as *mut _ as *mut libc::c_void;
     let ret = unsafe { madvise(bytes_ptr, bytes.len(), POSIX_MADV_SEQUENTIAL) };
     // let ret = unsafe { madvise(bytes_ptr, bytes.len(), MADV_SEQUENTIAL) };
     if ret != 0 {
@@ -140,7 +140,7 @@ pub fn count_mmap_serial_madvise_memchr(filepath: &str) -> u64 {
     let mut bytes: &mut [u8] = unsafe { fmmap.as_mut_slice() };
 
     // TODO(cgag): try MAP_POPULATE?
-    let mut bytes_ptr = &mut *bytes as *mut _ as *mut libc::c_void;
+    let bytes_ptr = &mut *bytes as *mut _ as *mut libc::c_void;
     let ret = unsafe { madvise(bytes_ptr, bytes.len(), POSIX_MADV_SEQUENTIAL) };
     // let ret = unsafe { madvise(bytes_ptr, bytes.len(), MADV_SEQUENTIAL) };
     if ret != 0 {
@@ -203,16 +203,9 @@ pub fn count_mmap_parallel_memchr(filepath: &str) -> u64 {
 fn count_buf_lines(buf: &[u8]) -> u64 {
     let mut lines = 0;
     let mut start = 0;
-    loop {
-        match memchr(b'\n', &buf[start..buf.len()]) {
-            Some(n) => {
-                start = start + n + 1;
-                lines += 1;
-            }
-            None => {
-                break;
-            }
-        }
+    while let Some(n) = memchr(b'\n', &buf[start..buf.len()]) {
+        start = start + n + 1;
+        lines += 1;
     }
     lines
 }

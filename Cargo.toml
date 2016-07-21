@@ -1,15 +1,15 @@
-[package]
+[package] 
 name = "count"
 version = "0.1.0"
 authors = ["Curtis Gagliardi <curtis@curtis.io>"]
 
 [dependencies]
 thread-scoped = "*"
-memmap = "*"
-mmap = "*"
-libc = "*"
-errno = "*"
-memchr = "*"
-clap = "*"
-nom = "*"
-regex = "*"
+memmap        = "*"
+mmap          = "*"
+libc          = "*"
+errno         = "*"
+memchr        = "*"
+clap          = "*"
+nom           = "*"
+regex         = "*"
