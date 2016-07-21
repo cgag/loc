@@ -5,11 +5,13 @@ extern crate nom;
 
 extern crate regex;
 extern crate memmap;
+extern crate memchr;
 
 use std::io::{BufReader, BufRead};
 use std::fs::File;
 
 use memmap::{Mmap, Protection};
+use memchr::memchr;
 
 use regex::Regex;
 use nom::*;
@@ -25,7 +27,7 @@ pub enum Lang {
 }
 use self::Lang::*;
 
-// Why partialeq and not total?
+// Why is it called partialEq?
 #[derive(Debug, PartialEq)]
 pub struct Count {
     pub code: u32,
@@ -133,14 +135,57 @@ enum State {
 }
 use self::State::*;
 
+struct AsciiLines<'a> {
+    buf: &'a [u8],
+    pos: usize,
+}
+
+struct Ascii<'a>(&'a [u8]);
+impl<'a> Ascii<'a> {
+    fn lines(&self) -> AsciiLines {
+        AsciiLines {
+            buf: self.0,
+            pos: 0,
+        }
+    }
+}
+
+// Appears to work, now we just neeed
+impl<'a> Iterator for AsciiLines<'a> {
+    type Item = &'a [u8];
+
+    fn next(&mut self) -> Option<&'a [u8]> {
+        match memchr(b'\n', &self.buf[self.pos..self.buf.len()]) {
+            Some(n) => {
+                let start = self.pos;
+                self.pos = self.pos + n + 1;
+                Some(&self.buf[start..self.pos])
+            }
+            None => {
+                if self.pos == self.buf.len() {
+                    return None;
+                }
+                let start = self.pos;
+                self.pos = self.buf.len();
+                Some(&self.buf[start..self.pos])
+            }
+        }
+    }
+}
+
 pub fn count_manual_bytes_with_iterator(filepath: &str) -> Count {
     let fmmap = Mmap::open_path(filepath, Protection::Read).expect("mmap err");
     let bytes: &[u8] = unsafe { fmmap.as_slice() };
 
+
     let mut lines = 0;
-    let mut code = 0;
-    let mut comments = 0;
-    let mut blank = 0;
+    let code = 0;
+    let comments = 0;
+    let blank = 0;
+
+    for line in Ascii(bytes).lines() {
+        lines += 1;
+    }
 
     Count {
         code: code,
