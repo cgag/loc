@@ -1,11 +1,20 @@
-extern crate clap;
 extern crate count;
 
-use clap::{Arg, App, AppSettings};
+extern crate clap;
+extern crate walkdir;
+extern crate itertools;
 
-use count::*;
+use clap::{Arg, App, AppSettings};
+use walkdir::WalkDir;
+// use itertools::Itertools;
+
+use std::collections::HashMap;
+use std::collections::hash_map::Entry;
+
+use count as c;
 
 fn main() {
+
     let matches = App::new("count")
         .global_settings(&[AppSettings::ColoredHelp])
         .version("0.1")
@@ -23,8 +32,47 @@ fn main() {
             .help("The file or directory to count lines in/of"))
         .get_matches();
 
-    for filepath in matches.values_of("target").unwrap() {
-        println!("filepath: {}", filepath);
-        println!("count: {:?}", count_regex(filepath));
+    let filepaths = matches.values_of("target").unwrap();
+    let mut counts: Vec<(c::Lang, &str, c::Count)> = Vec::new();
+    let mut files_processed = 0;
+    for filepath in filepaths {
+        for entry in WalkDir::new(filepath) {
+            let entry = entry.unwrap();
+            if entry.file_type().is_file() {
+                let p = entry.path().to_str().unwrap();
+                let lang = c::lang_from_ext(p);
+                if lang != c::Lang::Unrecognized {
+                    files_processed += 1;
+                    let count = c::count_mmap_unsafe(&p, &c::counter_config_for_lang(&lang));
+                    counts.push((lang, filepath, count));
+                }
+            }
+        }
     }
+
+    let mut lang_counts: HashMap<c::Lang, c::Count> = HashMap::new();
+    for &(ref lang, _, ref count) in &counts {
+        match lang_counts.entry(*lang) {
+            Entry::Occupied(mut lang_count) => lang_count.get_mut().merge(&count),
+            Entry::Vacant(lang_count) => {
+                let new_count: c::Count = Default::default();
+                lang_count.insert(new_count);
+            }
+        };
+    }
+
+    for (k, v) in lang_counts {
+        println!("k: {:?}, v: {:?}", k, v);
+    }
+
+    println!("files processed {}", files_processed);
+
+    // for (group_lang, group) in counts.iter().group_by(|&&(ref lang, _, _)| lang) {
+    //     let mut total_count: c::Count = Default::default();
+    //     for &(_, _, ref count) in group {
+    //         total_count.merge(count);
+    //     }
+    //     println!("Total count: {:?}", total_count);
+    // }
+
 }

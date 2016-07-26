@@ -1,9 +1,9 @@
 extern crate count;
 
-use count::{Count, count_regex, count_manual_bytes_try1, count_manual_bytes_with_iterator};
+use count::*;
 
 #[test]
-fn test_count_c() {
+fn test_count_regex() {
     let exp = Count {
         code: 32032,
         blank: 8848,
@@ -14,15 +14,63 @@ fn test_count_c() {
 }
 
 #[test]
-fn test_count_c_manual_bytes() {
+fn test_count_reader() {
     let exp = Count {
         code: 32032,
         blank: 8848,
         comment: 3792,
         lines: 44672,
     };
-    assert_eq!(exp, count_manual_bytes_try1("tests/data/plasma.c"));
+    assert_eq!(exp, count_reader("tests/data/plasma.c"));
 }
+
+
+#[test]
+fn test_count_reader2() {
+    let exp = Count {
+        code: 32032,
+        blank: 8848,
+        comment: 3792,
+        lines: 44672,
+    };
+    assert_eq!(exp, count_reader2("tests/data/plasma.c"));
+}
+
+#[test]
+fn test_count_mmap_safe() {
+    let exp = Count {
+        code: 32032,
+        blank: 8848,
+        comment: 3792,
+        lines: 44672,
+    };
+    assert_eq!(exp, count_mmap_safe("tests/data/plasma.c"));
+}
+
+#[test]
+fn test_count_mmap_unsafe() {
+    let exp = Count {
+        code: 32032,
+        blank: 8848,
+        comment: 3792,
+        lines: 44672,
+    };
+    assert_eq!(exp, count_mmap_unsafe("tests/data/plasma.c"));
+}
+
+
+
+
+// #[test]
+// fn test_count_c_manual_bytes() {
+//     let exp = Count {
+//         code: 32032,
+//         blank: 8848,
+//         comment: 3792,
+//         lines: 44672,
+//     };
+//     assert_eq!(exp, count_manual_bytes_try1("tests/data/plasma.c"));
+// }
 
 
 #[test]
