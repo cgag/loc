@@ -71,7 +71,8 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "rs" => Lang::Rust,
         "hs" => Lang::Haskell,
         "pl" => Lang::Perl,
-
+        // TODO(cgag): What's the correct extension? Any? Pragma?
+        "sh" => Lang::BourneShell,
         // Probably dumb to just default to C.
         _ => Lang::Unrecognized,
     }
@@ -150,12 +151,10 @@ impl<'a> Iterator for AsciiLines<'a> {
 
 pub fn count(filepath: &str, config: CounterConfig) -> Count {
     match config {
-        CounterConfig::SingleLineCommentConfig { single_start: single_start } => {
-            count_mmap_unsafe_single(filepath, single_start)
+        CounterConfig::SingleLine { single_start: single } => {
+            count_mmap_unsafe_single(filepath, single)
         }
-        CounterConfig::MultiLineConfig { single_start: single,
-                                         multi_start: multi_start,
-                                         multi_end: multi_end } => {
+        CounterConfig::MultiLine { single_start: single, multi_start, multi_end } => {
             count_mmap_unsafe_multi(filepath, single, multi_start, multi_end)
         }
     }
@@ -202,8 +201,8 @@ pub fn count_mmap_unsafe_multi(filepath: &str,
                                -> Count {
 
     let single_line_start = single_start;
-    let multiline_start_char = multi_start;
-    let multiline_end_char = multi_end;
+    let multine_start = multi_start;
+    let multiline_end = multi_end;
 
     let fmmap = Mmap::open_path(filepath, Protection::Read).expect("mmap err");
     let bytes: &[u8] = unsafe { fmmap.as_slice() };
@@ -222,37 +221,45 @@ pub fn count_mmap_unsafe_multi(filepath: &str,
 
         let trimmed = line.trim_left();
         if trimmed == "" {
+            println!("Blank: {}", line);
             blanks += 1;
             continue;
         };
 
         if in_comment {
+            println!("Comment: {}", line);
             comments += 1;
-            if trimmed.contains(multiline_end_char) {
+            if trimmed.contains(multiline_end) {
                 in_comment = false;
             }
         } else {
             if trimmed.starts_with(single_line_start) {
+                println!("Comment: {}", line);
                 comments += 1;
                 continue;
             }
 
-            if trimmed.starts_with(multiline_start_char) {
+            if trimmed.starts_with(multine_start) {
+                println!("Comment: {}", line);
                 comments += 1;
-                if trimmed.contains(multiline_end_char) {
+                if trimmed.contains(multiline_end) {
                     continue;
                 }
                 in_comment = true;
             } else {
-                match trimmed.find(multiline_start_char) {
+                match trimmed.find(multine_start) {
                     Some(pos) => {
+                        println!("Code: {}", line);
                         code += 1;
-                        if trimmed[pos + 2..].contains(multiline_end_char) {
+                        let rest = &trimmed[pos + multine_start.len()..];
+                        // TODO(cgag): What the hell is +2.  len of of what?
+                        if rest.contains(multiline_end) {
                             continue;
                         }
                         in_comment = true;
                     }
                     None => {
+                        println!("Code: {}", line);
                         code += 1;
                     }
                 }

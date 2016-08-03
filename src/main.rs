@@ -33,46 +33,61 @@ fn main() {
         .get_matches();
 
     let filepaths = matches.values_of("target").unwrap();
-    let mut counts: Vec<(c::Lang, &str, c::Count)> = Vec::new();
+    let mut counts: Vec<(c::Lang, String, c::Count)> = Vec::new();
     let mut files_processed = 0;
     for filepath in filepaths {
         for entry in WalkDir::new(filepath) {
             let entry = entry.unwrap();
             if entry.file_type().is_file() {
-                let p = entry.path().to_str().unwrap();
-                let lang = c::lang_from_ext(p);
+                let path = entry.path().to_str().unwrap();
+                let lang = c::lang_from_ext(path);
                 if lang != c::Lang::Unrecognized {
                     files_processed += 1;
-                    let count = c::count_mmap_unsafe(&p, &c::counter_config_for_lang(&lang));
-                    counts.push((lang, filepath, count));
+                    let count = c::count(&path, c::counter_config_for_lang(&lang));
+                    println!("count: {:?}", count);
+                    counts.push((lang, String::from(path), count));
                 }
             }
         }
     }
 
-    let mut lang_counts: HashMap<c::Lang, c::Count> = HashMap::new();
-    for &(ref lang, _, ref count) in &counts {
-        match lang_counts.entry(*lang) {
-            Entry::Occupied(mut lang_count) => lang_count.get_mut().merge(&count),
+    let mut lang_counts: HashMap<c::Lang, Vec<(String, c::Count)>> = HashMap::new();
+    for (lang, filepath, count) in counts {
+        match lang_counts.entry(lang) {
+            Entry::Occupied(mut lang_counts) => lang_counts.get_mut().push((filepath, count)),
             Entry::Vacant(lang_count) => {
-                let new_count: c::Count = Default::default();
-                lang_count.insert(new_count);
+                lang_count.insert(vec![(filepath, count)]);
             }
         };
     }
 
-    for (k, v) in lang_counts {
-        println!("k: {:?}, v: {:?}", k, v);
+    for (ref lang, ref mut count_vec) in &mut lang_counts {
+        count_vec.sort_by(|&(_, ref c1), &(_, ref c2)| c1.code.cmp(&c2.code).reverse());
+        for &(ref fpath, ref count) in count_vec.iter() {
+            println!("fpath: {}, lang: {:?}, v: {:?}", fpath, lang, count);
+        }
     }
 
+    for (ref lang, ref mut count_vec) in &mut lang_counts {
+        let mut lang_total: c::Count = Default::default();
+        let mut lang_files = 0;
+        for &(_, ref count) in count_vec.iter() {
+            lang_total.merge(count);
+            lang_files += 1;
+        }
+        println!("lang: {:?}, files: {}, c: {:?}",
+                 lang,
+                 lang_files,
+                 lang_total);
+    }
+
+    let mut total_count: c::Count = Default::default();
+    for (_, count_vec) in &lang_counts {
+        for &(_, ref count) in count_vec {
+            total_count.merge(&count);
+        }
+    }
+
+    println!("total count: {:?}", total_count);
     println!("files processed {}", files_processed);
-
-    // for (group_lang, group) in counts.iter().group_by(|&&(ref lang, _, _)| lang) {
-    //     let mut total_count: c::Count = Default::default();
-    //     for &(_, _, ref count) in group {
-    //         total_count.merge(count);
-    //     }
-    //     println!("Total count: {:?}", total_count);
-    // }
-
 }
