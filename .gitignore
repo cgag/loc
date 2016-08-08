@@ -10,3 +10,5 @@ plasma.c
 plasma-huge.c
 test.c
 lines.c
+
+cloc-out
