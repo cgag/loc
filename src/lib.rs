@@ -41,14 +41,14 @@ pub enum LineConfig<'a> {
         single_start: &'a str,
     },
 }
+
 // Do any languages actually use utf8 chars as comment chars?
-
-
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Copy, Clone)]
 pub enum Lang {
     C,
     CCppHeader,
     Rust,
+    Ruby,
     Haskell,
     Perl,
     BourneShell,
@@ -67,6 +67,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "rs" => Lang::Rust,
         "hs" => Lang::Haskell,
         "pl" => Lang::Perl,
+        "rb" => Lang::Ruby,
         // TODO(cgag): What's the correct extension? Any? Pragma?
         "sh" => Lang::BourneShell,
         // Probably dumb to just default to C.
@@ -82,10 +83,12 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
     // use self::ConfigTuple::*;
 
     let c_style = CT::Multi("//", "/*", "*/");
+    let sh_style = CT::Single("#");
+
     let ctuple = match *lang {
         Lang::Haskell => CT::Multi("--", "{-", "-}"),
         Lang::Perl => CT::Multi("#", "=pod", "=cut"),
-        Lang::BourneShell => CT::Single("#"),
+        Lang::BourneShell | Lang::Ruby => sh_style,
         // Lang::C | Lang::CCppHeader | Lang::Rust => c_style,
         // Default to C style
         _ => c_style,
@@ -168,12 +171,10 @@ pub fn count_mmap_unsafe_single(filepath: &str, single_start: &str) -> Count {
         lines += 1;
 
         let trimmed = line.trim_left();
-        if trimmed == "" {
+        if trimmed.is_empty() {
             blanks += 1;
-            continue;
         } else if trimmed.starts_with(single_start) {
             comments += 1;
-            continue;
         } else {
             code += 1;
         }
@@ -213,7 +214,7 @@ pub fn count_mmap_unsafe_multi(filepath: &str,
         lines += 1;
 
         let trimmed = line.trim_left();
-        if trimmed == "" {
+        if trimmed.is_empty() {
             println!("Blank: {}", line);
             blanks += 1;
             continue;
