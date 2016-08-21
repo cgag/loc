@@ -210,73 +210,79 @@ pub fn count_mmap_unsafe_multi(filepath: &str,
 
     let a = Ascii(bytes);
     for byte_line in a.lines() {
+        println!("reading line");
         let line = unsafe { std::str::from_utf8_unchecked(byte_line) };
+        println!("read line");
         lines += 1;
 
         let trimmed = line.trim_left();
         if trimmed.is_empty() {
-            println!("Blank: {}", line);
+            // println!("Blank: {}", line);
             blanks += 1;
             continue;
         };
 
-        if in_comment {
-            println!("Comment: {}", line);
-            comments += 1;
-            if trimmed.contains(multiline_end) {
-                in_comment = false;
-            }
-        } else {
+        // if in_comment {
+        //     println!("Comment: {}", line);
+        //     if trimmed.contains(multi_end) {
+        //         // tmp
+        //         in_comment = false;
+        //     } else {
+        //         comments += 1;
+        //     }
+        // } else {
+
+        if !in_comment {
             if trimmed.starts_with(single_line_start) {
                 println!("Comment: {}", line);
                 comments += 1;
                 continue;
             }
+        }
 
-            // This code really sucks. Handles `/* lol */ func()` correctly as code, but
-            // it's not recursive in any way.  It would count /* x */ /* x */ func() as a
-            // comment.
-            if trimmed.starts_with(multiline_start) {
-                if trimmed.contains(multiline_end) {
-                    let rest = &trimmed[multiline_start.len()..];
-                    if let Some(end_pos) = rest.find(multiline_end) {
-                        let after_comment = &rest[end_pos + multiline_end.len()..];
-                        let after_trimmed = after_comment.trim_left();
-                        if after_trimmed.is_empty() {
-                            println!("Comment: {}", line);
-                            comments += 1;
-                        } else if after_trimmed.starts_with(multiline_start) ||
-                           after_trimmed.starts_with(single_start) {
-                            println!("Comment: {}", line);
-                            comments += 1;
-                        } else {
-                            println!("Code: {}", line);
-                            code += 1;
-                        }
-                    }
-                } else {
-                    println!("Comment: {}", line);
-                    comments += 1;
-                    in_comment = true;
-                }
+        let mut pos = 0;
+        let mut found_code = false;
+
+        let start_len = multiline_start.len();
+        let end_len = multiline_end.len();
+
+        // TODO(cgag): Skip this loop if we don't contain start or end?
+        // Should be faster.  Test it.
+        while pos < trimmed.len() {
+            if pos + start_len <= trimmed.len() {
+                // println!("start: {}", &trimmed[pos..pos + start_len])
+            }
+
+            if pos + end_len <= trimmed.len() {
+                // println!("end: {}", &trimmed[pos..pos + end_len])
+            }
+
+            if pos + start_len <= trimmed.len() &&
+               &trimmed[pos..pos + start_len] == multiline_start {
+                // println!("Found start {}", pos);
+                pos += start_len;
+                in_comment = true;
+            } else if pos + end_len <= trimmed.len() && &trimmed[pos..pos + end_len] == multiline_end {
+                // println!("Found end: {}", trimmed);
+                pos += end_len;
+                in_comment = false;
+            } else if !in_comment {
+                // println!("Found code: {}", trimmed);
+                found_code = true;
+                pos += 1;
             } else {
-                match trimmed.find(multiline_start) {
-                    Some(pos) => {
-                        println!("Code: {}", line);
-                        code += 1;
-                        // TODO(cgag): What the hell is +2.  len of of what?
-                        if trimmed[pos + multiline_start.len()..].contains(multiline_end) {
-                            continue;
-                        }
-                        in_comment = true;
-                    }
-                    None => {
-                        println!("Code: {}", line);
-                        code += 1;
-                    }
-                }
+                pos += 1;
             }
         }
+
+        if found_code {
+            // println!("Code: {}", trimmed);
+            code += 1;
+        } else {
+            // println!("Comment: {}", trimmed);
+            comments += 1;
+        }
+        // }
     }
 
     // TODO(cgag): try parsers, regex, operating on non-utf8, etc.

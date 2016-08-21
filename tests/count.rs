@@ -90,6 +90,9 @@ fn test_ebc_code() {
 
 #[test]
 fn test_ebc_comment() {
+    println!("Expected {} comment lines, got {}",
+             EBC_EXPECTED.comment,
+             count(EBC).comment);
     assert_eq!(EBC_EXPECTED.comment, count(EBC).comment);
 }
 
@@ -101,4 +104,37 @@ fn test_ebc_blank() {
 #[test]
 fn test_ebc_lines() {
     assert_eq!(EBC_EXPECTED.lines, count(EBC).lines);
+}
+
+const DUMB: &'static str = "tests/data/dumb.c";
+const DUMB_EXPECTED: Count = Count {
+    code: 2,
+    blank: 0,
+    comment: 3,
+    lines: 5,
+};
+
+#[test]
+fn test_dumb_count() {
+    assert_eq!(DUMB_EXPECTED, count(DUMB));
+}
+
+#[test]
+fn test_dumb_code() {
+    assert_eq!(DUMB_EXPECTED.code, count(DUMB).code);
+}
+
+#[test]
+fn test_dumb_comment() {
+    assert_eq!(DUMB_EXPECTED.comment, count(DUMB).comment);
+}
+
+#[test]
+fn test_dumb_blank() {
+    assert_eq!(DUMB_EXPECTED.blank, count(DUMB).blank);
+}
+
+#[test]
+fn test_dumb_lines() {
+    assert_eq!(DUMB_EXPECTED.lines, count(DUMB).lines);
 }
