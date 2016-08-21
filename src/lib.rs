@@ -9,6 +9,7 @@ extern crate memchr;
 extern crate ascii;
 
 use std::path::Path;
+use std::cmp;
 
 use memmap::{Mmap, Protection};
 use memchr::memchr;
@@ -52,13 +53,19 @@ pub enum Lang {
     Haskell,
     Perl,
     BourneShell,
+    Make,
+    INI,
+    Assembly,
+    Yacc,
+    Awk,
     Unrecognized,
 }
 
 pub fn lang_from_ext(filepath: &str) -> Lang {
-    let ext = match Path::new(filepath).extension() {
+    let path = Path::new(filepath);
+    let ext = match path.extension() {
         Some(os_str) => os_str.to_str().unwrap().to_lowercase(),
-        None => String::from(""),
+        None => path.file_name().unwrap().to_str().unwrap().to_lowercase(),
     };
 
     match &*ext {
@@ -68,6 +75,12 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "hs" => Lang::Haskell,
         "pl" => Lang::Perl,
         "rb" => Lang::Ruby,
+        "makefile" | "mk" => Lang::Make,
+        "ini" => Lang::INI,
+        "s" | "asm" => Lang::Assembly,
+        "y" => Lang::Yacc,
+        "awk" => Lang::Awk,
+
         // TODO(cgag): What's the correct extension? Any? Pragma?
         "sh" => Lang::BourneShell,
         // Probably dumb to just default to C.
@@ -88,10 +101,15 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
     let ctuple = match *lang {
         Lang::Haskell => CT::Multi("--", "{-", "-}"),
         Lang::Perl => CT::Multi("#", "=pod", "=cut"),
-        Lang::BourneShell | Lang::Ruby => sh_style,
-        // Lang::C | Lang::CCppHeader | Lang::Rust => c_style,
+        Lang::INI => CT::Single(";"),
+        // TODO(cgag): Well, some architectures use ;, @, |, etc.
+        // Need a way to specify more than one possible comment char.
+        Lang::Assembly => CT::Multi("#", "/*", "*/"),
+        Lang::BourneShell | Lang::Ruby | Lang::Make | Lang::Awk => sh_style,
+        // TODO(cgag): not 100% that yacc belongs here.
+        Lang::C | Lang::CCppHeader | Lang::Rust | Lang::Yacc => c_style,
         // Default to C style
-        _ => c_style,
+        Lang::Unrecognized => c_style,
     };
 
     match ctuple {
@@ -210,9 +228,7 @@ pub fn count_mmap_unsafe_multi(filepath: &str,
 
     let a = Ascii(bytes);
     for byte_line in a.lines() {
-        println!("reading line");
         let line = unsafe { std::str::from_utf8_unchecked(byte_line) };
-        println!("read line");
         lines += 1;
 
         let trimmed = line.trim_left();
@@ -222,22 +238,21 @@ pub fn count_mmap_unsafe_multi(filepath: &str,
             continue;
         };
 
-        // if in_comment {
-        //     println!("Comment: {}", line);
-        //     if trimmed.contains(multi_end) {
-        //         // tmp
-        //         in_comment = false;
-        //     } else {
-        //         comments += 1;
-        //     }
-        // } else {
-
         if !in_comment {
             if trimmed.starts_with(single_line_start) {
-                println!("Comment: {}", line);
+                // println!("Comment: {}", line);
                 comments += 1;
                 continue;
             }
+        }
+
+        if !(trimmed.contains(multiline_start) || trimmed.contains(multiline_end)) {
+            if in_comment {
+                comments += 1;
+            } else {
+                code += 1;
+            }
+            continue;
         }
 
         let mut pos = 0;
@@ -246,15 +261,16 @@ pub fn count_mmap_unsafe_multi(filepath: &str,
         let start_len = multiline_start.len();
         let end_len = multiline_end.len();
 
-        // TODO(cgag): Skip this loop if we don't contain start or end?
-        // Should be faster.  Test it.
-        while pos < trimmed.len() {
-            if pos + start_len <= trimmed.len() {
-                // println!("start: {}", &trimmed[pos..pos + start_len])
-            }
-
-            if pos + end_len <= trimmed.len() {
-                // println!("end: {}", &trimmed[pos..pos + end_len])
+        'outer: while pos < trimmed.len() {
+            // println!("in while loop");
+            // TODO(cgag): must be a less stupid way to do this
+            for i in pos..(pos + cmp::max(start_len, end_len) + 1) {
+                // println!("i: {}", i);
+                if !trimmed.is_char_boundary(i) {
+                    // println!("NOT ON CHAR BOUNDARY");
+                    pos += 1;
+                    continue 'outer;
+                }
             }
 
             if pos + start_len <= trimmed.len() &&

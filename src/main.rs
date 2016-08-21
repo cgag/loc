@@ -43,7 +43,7 @@ fn main() {
                 let lang = c::lang_from_ext(path);
                 if lang != c::Lang::Unrecognized {
                     files_processed += 1;
-                    println!("{}", path);
+                    // println!("{}", path);
                     let count = c::count(path);
                     // println!("count: {:?}", count);
                     counts.push((lang, String::from(path), count));
@@ -92,11 +92,11 @@ fn main() {
     println!("total count: {:?}", total_count);
     println!("files processed {}", files_processed);
 
-    // for (ref lang, ref mut count_vec) in &mut lang_counts {
-    //     for &(ref fpath, ref count) in count_vec.iter() {
-    //         if **lang == c::Lang::C {
-    //             println!("{} {}", fpath, count.code);
-    //         }
-    //     }
-    // }
+    for (ref lang, ref mut count_vec) in &mut lang_counts {
+        for &(ref fpath, ref count) in count_vec.iter() {
+            if **lang == c::Lang::C {
+                // println!("{} {}", fpath, count.blank);
+            }
+        }
+    }
 }

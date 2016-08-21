@@ -138,3 +138,37 @@ fn test_dumb_blank() {
 fn test_dumb_lines() {
     assert_eq!(DUMB_EXPECTED.lines, count(DUMB).lines);
 }
+
+const IPL: &'static str = "tests/data/dumb.c";
+const IPL_EXPECTED: Count = Count {
+    code: 26,
+    blank: 5,
+    comment: 43,
+    lines: 26 + 5 + 43,
+};
+
+
+#[test]
+fn test_ipl_count() {
+    assert_eq!(IPL_EXPECTED, count(IPL));
+}
+
+#[test]
+fn test_ipl_code() {
+    assert_eq!(IPL_EXPECTED.code, count(IPL).code);
+}
+
+#[test]
+fn test_ipl_comment() {
+    assert_eq!(IPL_EXPECTED.comment, count(IPL).comment);
+}
+
+#[test]
+fn test_ipl_blank() {
+    assert_eq!(IPL_EXPECTED.blank, count(IPL).blank);
+}
+
+#[test]
+fn test_ipl_lines() {
+    assert_eq!(IPL_EXPECTED.lines, count(IPL).lines);
+}
