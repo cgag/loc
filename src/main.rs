@@ -3,12 +3,18 @@ extern crate count;
 extern crate clap;
 extern crate walkdir;
 extern crate itertools;
+extern crate crossbeam;
+extern crate scoped_threadpool;
+
+use scoped_threadpool::Pool;
 
 use clap::{Arg, App, AppSettings};
 use walkdir::WalkDir;
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
+use std::sync::{Arc, Mutex};
+use std::thread;
 
 use count as c;
 
@@ -31,25 +37,33 @@ fn main() {
             .help("The file or directory to count lines in/of"))
         .get_matches();
 
+    let mut counts: Arc<Mutex<Vec<(c::Lang, String, c::Count)>>> = Arc::new(Mutex::new(Vec::new()));
+
+    let mut pool = Pool::new(1);
+
     let filepaths = matches.values_of("target").unwrap();
-    let mut counts: Vec<(c::Lang, String, c::Count)> = Vec::new();
-    let mut files_processed = 0;
     for filepath in filepaths {
         for entry in WalkDir::new(filepath) {
             let entry = entry.unwrap();
-            if entry.file_type().is_file() {
-                let path = entry.path().to_str().unwrap();
-                let lang = c::lang_from_ext(path);
-                if lang != c::Lang::Unrecognized {
-                    files_processed += 1;
-                    // println!("{}", path);
-                    let count = c::count(path);
-                    // println!("count: {:?}", count);
-                    counts.push((lang, String::from(path), count));
+            pool.scoped(|scope| {
+                if entry.file_type().is_file() {
+                    let path = entry.path().to_str().unwrap();
+                    let lang = c::lang_from_ext(path);
+                    if lang != c::Lang::Unrecognized {
+                        let counts = counts.clone();
+                        scope.execute(move || {
+                            let count = c::count(path);
+                            let mut data = counts.lock().unwrap();
+                            data.push((lang, String::from(path), count));
+                        });
+                    }
                 }
-            }
+            });
         }
     }
+
+    let counts = counts.clone();
+    let counts = (*counts.lock().unwrap()).clone();
 
     let mut lang_counts: HashMap<c::Lang, Vec<(String, c::Count)>> = HashMap::new();
     for (lang, filepath, count) in counts {

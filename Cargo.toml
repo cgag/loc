@@ -5,6 +5,7 @@ authors = ["Curtis Gagliardi <curtis@curtis.io>"]
 
 [dependencies]
 thread-scoped = "*"
+scoped_threadpool = "*"
 memmap        = "*"
 mmap          = "*"
 libc          = "*"
@@ -16,3 +17,4 @@ regex         = "*"
 ascii         = "*"
 walkdir       = "*"
 itertools     = "*"
+crossbeam     = "*"
