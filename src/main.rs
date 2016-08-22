@@ -68,14 +68,18 @@ fn main() {
     // }
     // }
 
+
+
     println!("-------------------------------------------------------------------------------");
-    println!(" {0: <14} {1: >14} {2: >14} {3: >14} {4: >14}",
+    println!(" {0: <12} {1: >12} {2: >12} {3: >12} {4: >12} {5: >12}",
              "Language",
              "Files",
-             "Code",
-             "Comments",
-             "Blanks");
+             "Lines",
+             "Blank",
+             "Comment",
+             "Code");
     println!("-------------------------------------------------------------------------------");
+
     for (lang, ref mut count_vec) in &mut lang_counts {
         let mut lang_total: c::Count = Default::default();
         let mut lang_files = 0;
@@ -84,12 +88,13 @@ fn main() {
             lang_files += 1;
         }
 
-        println!(" {0: <14} {1: >14} {2: >14} {3: >14} {4: >14}",
+        println!(" {0: <12} {1: >12} {2: >12} {3: >12} {4: >12} {5: >12}",
                  lang,
                  lang_files,
-                 lang_total.code,
+                 lang_total.lines,
+                 lang_total.blank,
                  lang_total.comment,
-                 lang_total.blank);
+                 lang_total.code);
     }
 
     let mut total_count: c::Count = Default::default();
@@ -100,12 +105,13 @@ fn main() {
     }
 
     println!("-------------------------------------------------------------------------------");
-    println!(" {0: <14} {1: >14} {2: >14} {3: >14} {4: >14}",
+    println!(" {0: <12} {1: >12} {2: >12} {3: >12} {4: >12} {5: >12}",
              "Total",
              10,
              20,
              30,
-             40);
+             40,
+             50);
     println!("-------------------------------------------------------------------------------");
     println!("files processed {}", files_processed);
 

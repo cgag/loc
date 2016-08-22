@@ -198,7 +198,13 @@ pub fn count(filepath: &str) -> Count {
 }
 
 pub fn count_mmap_unsafe_single(filepath: &str, single_start: &str) -> Count {
-    let fmmap = Mmap::open_path(filepath, Protection::Read).expect("mmap err");
+    let fmmap = match Mmap::open_path(filepath, Protection::Read) {
+        Ok(mmap) => mmap,
+        Err(e) => {
+            println!("mmap err for {}: {}", filepath, e);
+            return Count::default();
+        }
+    };
     let bytes: &[u8] = unsafe { fmmap.as_slice() };
 
     let mut lines = 0;
@@ -239,7 +245,13 @@ pub fn count_mmap_unsafe_multi(filepath: &str,
     let multiline_start = multi_start;
     let multiline_end = multi_end;
 
-    let fmmap = Mmap::open_path(filepath, Protection::Read).expect("mmap err");
+    let fmmap = match Mmap::open_path(filepath, Protection::Read) {
+        Ok(mmap) => mmap,
+        Err(e) => {
+            println!("mmap err for {}: {}", filepath, e);
+            return Count::default();
+        }
+    };
     let bytes: &[u8] = unsafe { fmmap.as_slice() };
 
     let mut lines = 0;
