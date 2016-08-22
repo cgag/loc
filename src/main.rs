@@ -14,7 +14,6 @@ use walkdir::WalkDir;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::sync::{Arc, Mutex};
-use std::thread;
 
 use count as c;
 
@@ -37,30 +36,35 @@ fn main() {
             .help("The file or directory to count lines in/of"))
         .get_matches();
 
-    let mut counts: Arc<Mutex<Vec<(c::Lang, String, c::Count)>>> = Arc::new(Mutex::new(Vec::new()));
 
-    let mut pool = Pool::new(1);
+    let mut pool = Pool::new(4);
 
+    let mut entries: Vec<walkdir::DirEntry> = Vec::new();
     let filepaths = matches.values_of("target").unwrap();
     for filepath in filepaths {
         for entry in WalkDir::new(filepath) {
-            let entry = entry.unwrap();
-            pool.scoped(|scope| {
+            entries.push(entry.unwrap());
+        }
+    }
+
+    let counts: Arc<Mutex<Vec<(c::Lang, String, c::Count)>>> = Arc::new(Mutex::new(Vec::new()));
+
+    pool.scoped(|scope| {
+        for entry in &entries {
+            let counts = counts.clone();
+            scope.execute(move || {
                 if entry.file_type().is_file() {
                     let path = entry.path().to_str().unwrap();
                     let lang = c::lang_from_ext(path);
                     if lang != c::Lang::Unrecognized {
-                        let counts = counts.clone();
-                        scope.execute(move || {
-                            let count = c::count(path);
-                            let mut data = counts.lock().unwrap();
-                            data.push((lang, String::from(path), count));
-                        });
+                        let mut data = counts.lock().unwrap();
+                        let count = c::count(path);
+                        data.push((lang, String::from(path), count));
                     }
                 }
             });
         }
-    }
+    });
 
     let counts = counts.clone();
     let counts = (*counts.lock().unwrap()).clone();
@@ -127,7 +131,7 @@ fn main() {
              40,
              50);
     println!("-------------------------------------------------------------------------------");
-    println!("files processed {}", files_processed);
+    // println!("files processed {}", files_processed);
 
     // for (ref lang, ref mut count_vec) in &mut lang_counts {
     //     for &(ref fpath, ref count) in count_vec.iter() {
