@@ -10,9 +10,11 @@ extern crate ascii;
 
 use std::path::Path;
 use std::cmp;
+use std::fmt;
 
 use memmap::{Mmap, Protection};
 use memchr::memchr;
+
 
 // Why is it called partialEq?
 #[derive(Debug, PartialEq, Default, Clone)]
@@ -61,6 +63,27 @@ pub enum Lang {
     Unrecognized,
 }
 
+impl fmt::Display for Lang {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let s = match *self {
+            Lang::C => "C",
+            Lang::CCppHeader => "C/C++ Header",
+            Lang::Rust => "Rust",
+            Lang::Ruby => "Ruby",
+            Lang::Haskell => "Haskell",
+            Lang::Perl => "Perl",
+            Lang::BourneShell => "Bourne Shell",
+            Lang::Make => "Make",
+            Lang::INI => "INI",
+            Lang::Assembly => "Assembly",
+            Lang::Yacc => "Yacc",
+            Lang::Awk => "Awk",
+            Lang::Unrecognized => "Unrecognized",
+        };
+        f.pad(s)
+    }
+}
+
 pub fn lang_from_ext(filepath: &str) -> Lang {
     let path = Path::new(filepath);
     let ext = match path.extension() {
@@ -70,7 +93,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
 
     match &*ext {
         "c" => Lang::C,
-        "h" => Lang::CCppHeader,
+        "h" | "hh" | "hpp" | "hxx" => Lang::CCppHeader,
         "rs" => Lang::Rust,
         "hs" => Lang::Haskell,
         "pl" => Lang::Perl,
@@ -233,17 +256,13 @@ pub fn count_mmap_unsafe_multi(filepath: &str,
 
         let trimmed = line.trim_left();
         if trimmed.is_empty() {
-            // println!("Blank: {}", line);
             blanks += 1;
             continue;
         };
 
-        if !in_comment {
-            if trimmed.starts_with(single_line_start) {
-                // println!("Comment: {}", line);
-                comments += 1;
-                continue;
-            }
+        if !in_comment && trimmed.starts_with(single_line_start) {
+            comments += 1;
+            continue;
         }
 
         if !(trimmed.contains(multiline_start) || trimmed.contains(multiline_end)) {
@@ -262,12 +281,9 @@ pub fn count_mmap_unsafe_multi(filepath: &str,
         let end_len = multiline_end.len();
 
         'outer: while pos < trimmed.len() {
-            // println!("in while loop");
             // TODO(cgag): must be a less stupid way to do this
             for i in pos..(pos + cmp::max(start_len, end_len) + 1) {
-                // println!("i: {}", i);
                 if !trimmed.is_char_boundary(i) {
-                    // println!("NOT ON CHAR BOUNDARY");
                     pos += 1;
                     continue 'outer;
                 }
@@ -275,15 +291,12 @@ pub fn count_mmap_unsafe_multi(filepath: &str,
 
             if pos + start_len <= trimmed.len() &&
                &trimmed[pos..pos + start_len] == multiline_start {
-                // println!("Found start {}", pos);
                 pos += start_len;
                 in_comment = true;
             } else if pos + end_len <= trimmed.len() && &trimmed[pos..pos + end_len] == multiline_end {
-                // println!("Found end: {}", trimmed);
                 pos += end_len;
                 in_comment = false;
             } else if !in_comment {
-                // println!("Found code: {}", trimmed);
                 found_code = true;
                 pos += 1;
             } else {
@@ -292,17 +305,12 @@ pub fn count_mmap_unsafe_multi(filepath: &str,
         }
 
         if found_code {
-            // println!("Code: {}", trimmed);
             code += 1;
         } else {
-            // println!("Comment: {}", trimmed);
             comments += 1;
         }
-        // }
     }
 
-    // TODO(cgag): try parsers, regex, operating on non-utf8, etc.
-    // Only escelate to utf8 if needed?  When is it needed?
     Count {
         code: code,
         comment: comments,

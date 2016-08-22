@@ -61,24 +61,35 @@ fn main() {
         };
     }
 
-    for (ref lang, ref mut count_vec) in &mut lang_counts {
-        count_vec.sort_by(|&(_, ref c1), &(_, ref c2)| c1.code.cmp(&c2.code).reverse());
-        // for &(ref fpath, ref count) in count_vec.iter() {
-        //     println!("fpath: {}, lang: {:?}, v: {:?}", fpath, lang, count);
-        // }
-    }
+    // for (ref lang, ref mut count_vec) in &mut lang_counts {
+    //     count_vec.sort_by(|&(_, ref c1), &(_, ref c2)| c1.code.cmp(&c2.code).reverse());
+    // for &(ref fpath, ref count) in count_vec.iter() {
+    //     println!("fpath: {}, lang: {:?}, v: {:?}", fpath, lang, count);
+    // }
+    // }
 
-    for (ref lang, ref mut count_vec) in &mut lang_counts {
+    println!("-------------------------------------------------------------------------------");
+    println!(" {0: <14} {1: >14} {2: >14} {3: >14} {4: >14}",
+             "Language",
+             "Files",
+             "Code",
+             "Comments",
+             "Blanks");
+    println!("-------------------------------------------------------------------------------");
+    for (lang, ref mut count_vec) in &mut lang_counts {
         let mut lang_total: c::Count = Default::default();
         let mut lang_files = 0;
         for &(_, ref count) in count_vec.iter() {
             lang_total.merge(count);
             lang_files += 1;
         }
-        println!("lang: {:?}, files: {}, c: {:?}",
+
+        println!(" {0: <14} {1: >14} {2: >14} {3: >14} {4: >14}",
                  lang,
                  lang_files,
-                 lang_total);
+                 lang_total.code,
+                 lang_total.comment,
+                 lang_total.blank);
     }
 
     let mut total_count: c::Count = Default::default();
@@ -88,14 +99,21 @@ fn main() {
         }
     }
 
-    println!("total count: {:?}", total_count);
+    println!("-------------------------------------------------------------------------------");
+    println!(" {0: <14} {1: >14} {2: >14} {3: >14} {4: >14}",
+             "Total",
+             10,
+             20,
+             30,
+             40);
+    println!("-------------------------------------------------------------------------------");
     println!("files processed {}", files_processed);
 
-    for (ref lang, ref mut count_vec) in &mut lang_counts {
-        for &(ref fpath, ref count) in count_vec.iter() {
-            if **lang == c::Lang::C {
-                // println!("{} {}", fpath, count.blank);
-            }
-        }
-    }
+    // for (ref lang, ref mut count_vec) in &mut lang_counts {
+    //     for &(ref fpath, ref count) in count_vec.iter() {
+    //         if **lang == c::Lang::C {
+    // println!("{} {}", fpath, count.blank);
+    // }
+    // }
+    // }
 }
