@@ -6,7 +6,6 @@ extern crate itertools;
 
 use clap::{Arg, App, AppSettings};
 use walkdir::WalkDir;
-// use itertools::Itertools;
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;

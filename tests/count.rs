@@ -139,7 +139,7 @@ fn test_dumb_lines() {
     assert_eq!(DUMB_EXPECTED.lines, count(DUMB).lines);
 }
 
-const IPL: &'static str = "tests/data/dumb.c";
+const IPL: &'static str = "tests/data/ipl_funcs.c";
 const IPL_EXPECTED: Count = Count {
     code: 26,
     blank: 5,
