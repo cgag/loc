@@ -219,7 +219,11 @@ pub fn count_mmap_unsafe_single(filepath: &str, single_start: &str) -> Count {
 
     let a = Ascii(bytes);
     for byte_line in a.lines() {
-        let line = unsafe { std::str::from_utf8_unchecked(byte_line) };
+        // let line = unsafe { std::str::from_utf8_unchecked(byte_line) };
+        let line = match std::str::from_utf8(byte_line) {
+            Ok(s) => s,
+            Err(_) => return Count::default(),
+        };
         lines += 1;
 
         let trimmed = line.trim_left();
@@ -268,7 +272,11 @@ pub fn count_mmap_unsafe_multi(filepath: &str,
 
     let a = Ascii(bytes);
     for byte_line in a.lines() {
-        let line = unsafe { std::str::from_utf8_unchecked(byte_line) };
+        // let line = unsafe { std::str::from_utf8_unchecked(byte_line) };
+        let line = match std::str::from_utf8(byte_line) {
+            Ok(s) => s,
+            Err(_) => return Count::default(),
+        };
         lines += 1;
 
         let trimmed = line.trim_left();
