@@ -63,9 +63,9 @@ pub enum Lang {
     Unrecognized,
 }
 
-impl fmt::Display for Lang {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = match *self {
+impl Lang {
+    pub fn to_s(&self) -> &str {
+        match *self {
             Lang::C => "C",
             Lang::CCppHeader => "C/C++ Header",
             Lang::Rust => "Rust",
@@ -79,8 +79,13 @@ impl fmt::Display for Lang {
             Lang::Yacc => "Yacc",
             Lang::Awk => "Awk",
             Lang::Unrecognized => "Unrecognized",
-        };
-        f.pad(s)
+        }
+    }
+}
+
+impl fmt::Display for Lang {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.pad(self.to_s())
     }
 }
 
