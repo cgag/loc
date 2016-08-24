@@ -32,8 +32,19 @@ fn main() {
         .get_matches();
 
     let filepaths = matches.values_of("target").unwrap();
+    // let mut counts = filepaths.flat_map(|p| {
+    //         WalkDir::new(p)
+    //             .into_iter()
+    //             .map(|entry| entry.unwrap())
+    //             .filter(|entry| entry.file_type().is_file())
+    //             .map(|file_entry| String::from(file_entry.path().to_str().unwrap()))
+    //             .map(|path| (c::lang_from_ext(&path), path))
+    //             .filter(|&(lang, _)| lang != c::Lang::Unrecognized)
+    //             .map(|(lang, path)| (lang, path.clone(), c::count(&path)))
+    //     })
+    //     .collect::<Vec<_>>();
+
     let mut counts: Vec<(c::Lang, String, c::Count)> = Vec::new();
-    let mut files_processed = 0;
     for filepath in filepaths {
         for entry in WalkDir::new(filepath) {
             let entry = entry.unwrap();
