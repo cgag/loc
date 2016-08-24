@@ -25,6 +25,11 @@ pub struct Count {
     pub lines: u32,
 }
 
+pub struct LangTotal {
+    pub files: u32,
+    pub count: Count,
+}
+
 impl Count {
     pub fn merge(&mut self, o: &Count) {
         self.code += o.code;

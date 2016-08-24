@@ -41,34 +41,38 @@ fn main() {
                 let path = entry.path().to_str().unwrap();
                 let lang = c::lang_from_ext(path);
                 if lang != c::Lang::Unrecognized {
-                    files_processed += 1;
-                    // println!("{}", path);
                     let count = c::count(path);
-                    // println!("count: {:?}", count);
                     counts.push((lang, String::from(path), count));
                 }
             }
         }
     }
 
-    let mut lang_counts: HashMap<c::Lang, Vec<(String, c::Count)>> = HashMap::new();
+    let mut lang_counts_by_file: HashMap<c::Lang, Vec<(String, c::Count)>> = HashMap::new();
     for (lang, filepath, count) in counts {
-        match lang_counts.entry(lang) {
-            Entry::Occupied(mut lang_counts) => lang_counts.get_mut().push((filepath, count)),
-            Entry::Vacant(lang_count) => {
-                lang_count.insert(vec![(filepath, count)]);
+        match lang_counts_by_file.entry(lang) {
+            Entry::Occupied(mut lang_counts_by_file) => {
+                lang_counts_by_file.get_mut().push((filepath, count))
+            }
+            Entry::Vacant(lang_counts_by_file) => {
+                lang_counts_by_file.insert(vec![(filepath, count)]);
             }
         };
     }
 
-    // for (ref lang, ref mut count_vec) in &mut lang_counts {
-    //     count_vec.sort_by(|&(_, ref c1), &(_, ref c2)| c1.code.cmp(&c2.code).reverse());
-    // for &(ref fpath, ref count) in count_vec.iter() {
-    //     println!("fpath: {}, lang: {:?}, v: {:?}", fpath, lang, count);
-    // }
-    // }
-
-
+    let mut lang_totals: HashMap<c::Lang, c::LangTotal> = HashMap::new();
+    for (lang, count_vec) in lang_counts_by_file {
+        // TODO(cgag): use a fold
+        let mut lang_total: c::Count = Default::default();
+        for &(_, ref count) in count_vec.iter() {
+            lang_total.merge(count);
+        }
+        lang_totals.insert(lang,
+                           c::LangTotal {
+                               files: count_vec.len() as u32,
+                               count: lang_total,
+                           });
+    }
 
     println!("-------------------------------------------------------------------------------");
     println!(" {0: <12} {1: >12} {2: >12} {3: >12} {4: >12} {5: >12}",
@@ -80,46 +84,38 @@ fn main() {
              "Code");
     println!("-------------------------------------------------------------------------------");
 
-    for (lang, ref mut count_vec) in &mut lang_counts {
-        let mut lang_total: c::Count = Default::default();
-        let mut lang_files = 0;
-        for &(_, ref count) in count_vec.iter() {
-            lang_total.merge(count);
-            lang_files += 1;
-        }
+    let mut totals_by_lang = lang_totals.iter().collect::<Vec<(&c::Lang, &c::LangTotal)>>();
+    totals_by_lang.sort_by(|&(lang1, total1), &(lang2, total2)| lang2.to_s().cmp(lang1.to_s()));
 
+    for &(lang, total) in &totals_by_lang {
         println!(" {0: <12} {1: >12} {2: >12} {3: >12} {4: >12} {5: >12}",
                  lang,
-                 lang_files,
-                 lang_total.lines,
-                 lang_total.blank,
-                 lang_total.comment,
-                 lang_total.code);
+                 total.files,
+                 total.count.lines,
+                 total.count.blank,
+                 total.count.comment,
+                 total.count.code);
     }
 
-    let mut total_count: c::Count = Default::default();
-    for count_vec in lang_counts.values() {
-        for &(_, ref count) in count_vec {
-            total_count.merge(count);
-        }
+    let mut totals = c::LangTotal {
+        files: 0,
+        count: Default::default(),
+    };
+    for &(_, ref total) in &totals_by_lang {
+        totals.files += total.files;
+        totals.count.code += total.count.code;
+        totals.count.blank += total.count.blank;
+        totals.count.comment += total.count.comment;
+        totals.count.lines += total.count.lines;
     }
 
     println!("-------------------------------------------------------------------------------");
     println!(" {0: <12} {1: >12} {2: >12} {3: >12} {4: >12} {5: >12}",
              "Total",
-             10,
-             20,
-             30,
-             40,
-             50);
+             totals.files,
+             totals.count.lines,
+             totals.count.blank,
+             totals.count.comment,
+             totals.count.code);
     println!("-------------------------------------------------------------------------------");
-    println!("files processed {}", files_processed);
-
-    // for (ref lang, ref mut count_vec) in &mut lang_counts {
-    //     for &(ref fpath, ref count) in count_vec.iter() {
-    //         if **lang == c::Lang::C {
-    // println!("{} {}", fpath, count.blank);
-    // }
-    // }
-    // }
 }
