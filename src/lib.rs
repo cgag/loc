@@ -65,6 +65,7 @@ pub enum Lang {
     Assembly,
     Yacc,
     Awk,
+    XML,
     Unrecognized,
 }
 
@@ -83,6 +84,7 @@ impl Lang {
             Lang::Assembly => "Assembly",
             Lang::Yacc => "Yacc",
             Lang::Awk => "Awk",
+            Lang::XML => "XMl",
             Lang::Unrecognized => "Unrecognized",
         }
     }
@@ -113,6 +115,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "s" | "asm" => Lang::Assembly,
         "y" => Lang::Yacc,
         "awk" => Lang::Awk,
+        "xml" => Lang::XML,
 
         // TODO(cgag): What's the correct extension? Any? Pragma?
         "sh" => Lang::BourneShell,
@@ -138,6 +141,8 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         // TODO(cgag): Well, some architectures use ;, @, |, etc.
         // Need a way to specify more than one possible comment char.
         Lang::Assembly => CT::Multi("#", "/*", "*/"),
+        // TODO(cgag): Welp, single is not always necessary
+        Lang::XML => CT::Multi("GIEBBBLLLlXKJJKJK", "<!--", "-->"),
         Lang::BourneShell | Lang::Ruby | Lang::Make | Lang::Awk => sh_style,
         // TODO(cgag): not 100% that yacc belongs here.
         Lang::C | Lang::CCppHeader | Lang::Rust | Lang::Yacc => c_style,
@@ -224,7 +229,6 @@ pub fn count_mmap_unsafe_single(filepath: &str, single_start: &str) -> Count {
 
     let a = Ascii(bytes);
     for byte_line in a.lines() {
-        // let line = unsafe { std::str::from_utf8_unchecked(byte_line) };
         let line = match std::str::from_utf8(byte_line) {
             Ok(s) => s,
             Err(_) => return Count::default(),
@@ -277,7 +281,6 @@ pub fn count_mmap_unsafe_multi(filepath: &str,
 
     let a = Ascii(bytes);
     for byte_line in a.lines() {
-        // let line = unsafe { std::str::from_utf8_unchecked(byte_line) };
         let line = match std::str::from_utf8(byte_line) {
             Ok(s) => s,
             Err(_) => return Count::default(),
@@ -304,12 +307,12 @@ pub fn count_mmap_unsafe_multi(filepath: &str,
             continue;
         }
 
-        let mut pos = 0;
-        let mut found_code = false;
 
         let start_len = multiline_start.len();
         let end_len = multiline_end.len();
 
+        let mut pos = 0;
+        let mut found_code = false;
         'outer: while pos < trimmed.len() {
             // TODO(cgag): must be a less stupid way to do this
             for i in pos..(pos + cmp::max(start_len, end_len) + 1) {

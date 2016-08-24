@@ -47,7 +47,13 @@ fn main() {
     let mut counts: Vec<(c::Lang, String, c::Count)> = Vec::new();
     for filepath in filepaths {
         for entry in WalkDir::new(filepath) {
-            let entry = entry.unwrap();
+            let entry = match entry {
+                Ok(e) => e,
+                Err(_) => {
+                    continue;
+                }
+            };
+
             if entry.file_type().is_file() {
                 let path = entry.path().to_str().unwrap();
                 let lang = c::lang_from_ext(path);
@@ -71,9 +77,16 @@ fn main() {
         };
     }
 
-    let mut lang_totals: HashMap<c::Lang, c::LangTotal> = HashMap::new();
-    for (lang, count_vec) in lang_counts_by_file {
-        // TODO(cgag): use a fold
+    for (lang, count_vec) in &lang_counts_by_file {
+        println!("Lang: {}", lang);
+        for &(ref path, ref c) in count_vec {
+            println!("path: {}, {}", path, c.code);
+        }
+    }
+
+    let mut lang_totals: HashMap<&c::Lang, c::LangTotal> = HashMap::new();
+    for (lang, count_vec) in &lang_counts_by_file {
+        // TODO(cgag): use a fold?
         let mut lang_total: c::Count = Default::default();
         for &(_, ref count) in count_vec.iter() {
             lang_total.merge(count);
@@ -83,6 +96,21 @@ fn main() {
                                files: count_vec.len() as u32,
                                count: lang_total,
                            });
+    }
+
+    let mut totals_by_lang = lang_totals.iter().collect::<Vec<(&&c::Lang, &c::LangTotal)>>();
+    totals_by_lang.sort_by(|&(lang1, _), &(lang2, _)| lang2.to_s().cmp(lang1.to_s()));
+
+    let mut totals = c::LangTotal {
+        files: 0,
+        count: Default::default(),
+    };
+    for &(_, ref total) in &totals_by_lang {
+        totals.files += total.files;
+        totals.count.code += total.count.code;
+        totals.count.blank += total.count.blank;
+        totals.count.comment += total.count.comment;
+        totals.count.lines += total.count.lines;
     }
 
     println!("-------------------------------------------------------------------------------");
@@ -95,9 +123,6 @@ fn main() {
              "Code");
     println!("-------------------------------------------------------------------------------");
 
-    let mut totals_by_lang = lang_totals.iter().collect::<Vec<(&c::Lang, &c::LangTotal)>>();
-    totals_by_lang.sort_by(|&(lang1, total1), &(lang2, total2)| lang2.to_s().cmp(lang1.to_s()));
-
     for &(lang, total) in &totals_by_lang {
         println!(" {0: <12} {1: >12} {2: >12} {3: >12} {4: >12} {5: >12}",
                  lang,
@@ -106,18 +131,6 @@ fn main() {
                  total.count.blank,
                  total.count.comment,
                  total.count.code);
-    }
-
-    let mut totals = c::LangTotal {
-        files: 0,
-        count: Default::default(),
-    };
-    for &(_, ref total) in &totals_by_lang {
-        totals.files += total.files;
-        totals.count.code += total.count.code;
-        totals.count.blank += total.count.blank;
-        totals.count.comment += total.count.comment;
-        totals.count.lines += total.count.lines;
     }
 
     println!("-------------------------------------------------------------------------------");
