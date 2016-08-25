@@ -307,7 +307,6 @@ pub fn count_mmap_unsafe_multi(filepath: &str,
             continue;
         }
 
-
         let start_len = multiline_start.len();
         let end_len = multiline_end.len();
 

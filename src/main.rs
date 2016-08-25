@@ -77,12 +77,12 @@ fn main() {
         };
     }
 
-    for (lang, count_vec) in &lang_counts_by_file {
-        println!("Lang: {}", lang);
-        for &(ref path, ref c) in count_vec {
-            println!("path: {}, {}", path, c.code);
-        }
-    }
+    // for (lang, count_vec) in &lang_counts_by_file {
+    //     println!("Lang: {}", lang);
+    //     for &(ref path, ref c) in count_vec {
+    //         println!("path: {}, {}", path, c.code);
+    //     }
+    // }
 
     let mut lang_totals: HashMap<&c::Lang, c::LangTotal> = HashMap::new();
     for (lang, count_vec) in &lang_counts_by_file {
