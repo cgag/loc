@@ -77,13 +77,6 @@ fn main() {
         };
     }
 
-    // for (lang, count_vec) in &lang_counts_by_file {
-    //     println!("Lang: {}", lang);
-    //     for &(ref path, ref c) in count_vec {
-    //         println!("path: {}, {}", path, c.code);
-    //     }
-    // }
-
     let mut lang_totals: HashMap<&c::Lang, c::LangTotal> = HashMap::new();
     for (lang, count_vec) in &lang_counts_by_file {
         // TODO(cgag): use a fold?
@@ -105,7 +98,7 @@ fn main() {
         files: 0,
         count: Default::default(),
     };
-    for &(_, ref total) in &totals_by_lang {
+    for &(_, total) in &totals_by_lang {
         totals.files += total.files;
         totals.count.code += total.count.code;
         totals.count.blank += total.count.blank;
