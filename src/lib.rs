@@ -274,22 +274,13 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         None => path.file_name().unwrap().to_str().unwrap().to_lowercase(),
     };
 
+    // NOTE(cgag): while we lifted most of this from tokei, we support a few
+    // more extensions in some places, can't just assume it's the same.
     match &*ext {
-        // "c" => C,
-        // "h" | "hh" | "hpp" | "hxx" => CCppHeader,
-        // "rs" => Rust,
-        // "hs" => Haskell,
-        // "pl" => Perl,
-        // "rb" => Ruby,
-        // "makefile" | "mk" => Make,
-        // "ini" => INI,
-        // "s" | "asm" => Assembly,
-        // "y" => Yacc,
-        // "awk" => Awk,
-        // "xml" => XML,
-        //
+        "ini" => INI,
+        "awk" => Awk,
         // // TODO(cgag): What's the correct extension? Any? Pragma?
-        // "sh" => BourneShell,
+        "sh" => BourneShell,
         "as" => ActionScript,
         "ada" | "adb" | "ads" | "pad" => Ada,
         // "asa" | "asp" => Asp,
@@ -335,7 +326,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         // "markdown" | "md" => Markdown,
         // "ml" | "mli" => OCaml,
         "mm" => ObjectiveCpp,
-        "makefile" => Makefile,
+        "makefile" | "mk" => Makefile,
         // "mustache" => Mustache,
         "nim" => Nim,
         // "nb" | "wl" => Wolfram,
@@ -368,6 +359,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "vim" => VimScript,
         "xml" => XML,
         "yaml" | "yml" => Yaml,
+        "y" => Yacc,
         "zsh" => Zsh,
 
         // Probably dumb to just default to C.
@@ -425,10 +417,10 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
             sh_style
         }
         // TODO(cgag): not 100% that yacc belongs here.
-        C | CCppHeader | Rust | Lang::Yacc | ActionScript | ColdFusionScript | Css | Cpp |
-        CSharp | Dart | DeviceTree | Go | Jai | Java | JavaScript | Jsx | Kotlin | Less |
-        LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift | TypeScript |
-        UnrealScript | Unrecognized => c_style,
+        C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CSharp |
+        Dart | DeviceTree | Go | Jai | Java | JavaScript | Jsx | Kotlin | Less | LinkerScript |
+        ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift | TypeScript | UnrealScript |
+        Unrecognized => c_style,
     };
 
     match ctuple {
