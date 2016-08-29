@@ -92,7 +92,7 @@ fn main() {
     }
 
     let mut totals_by_lang = lang_totals.iter().collect::<Vec<(&&c::Lang, &c::LangTotal)>>();
-    totals_by_lang.sort_by(|&(lang1, _), &(lang2, _)| lang2.to_s().cmp(lang1.to_s()));
+    totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.code.cmp(&c1.count.code));
 
     let mut totals = c::LangTotal {
         files: 0,
