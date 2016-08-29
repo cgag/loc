@@ -141,10 +141,10 @@ fn test_dumb_lines() {
 
 const IPL: &'static str = "tests/data/ipl_funcs.c";
 const IPL_EXPECTED: Count = Count {
-    code: 26,
-    blank: 5,
+    code: 25,
+    blank: 6,
     comment: 43,
-    lines: 26 + 5 + 43,
+    lines: 25 + 6 + 43,
 };
 
 
