@@ -73,26 +73,190 @@ pub enum Lang {
     Yacc,
     Awk,
     XML,
+
+    // Asp => Language::new_single(vec!["'", "REM"]),
+    // Autoconf => Language::new_single(vec!["#", "dnl"]),
+    // Clojure => Language::new_single(vec![";","#"]),
+    // FortranLegacy => Language::new_single(vec!["c","C","!","*"]),
+    // FortranModern => Language::new_single(vec!["!"]),
+    //
+    // AspNet => Language::new_multi(vec![("<!--", "-->"), ("<%--", "-->")]),
+    // ColdFusion => Language::new_multi(vec![("<!---", "--->")]),
+    // Coq => Language::new_func(),
+    // Handlebars => Language::new_multi(vec![("<!--", "-->"), ("{{!", "}}")])
+    //                        .set_quotes(vec![("\"", "\""), ("'", "'")]),
+    Idris,
+
+    // C
+    ActionScript,
+    ColdFusionScript,
+    Css,
+    Cpp,
+    CSharp,
+    Dart,
+    DeviceTree,
+    Go,
+    Jai,
+    Java,
+    JavaScript,
+    Jsx,
+    Kotlin,
+    Less,
+    LinkerScript,
+    ObjectiveC,
+    ObjectiveCpp,
+    Qcl,
+    Sass,
+    Scala,
+    Swift,
+    TypeScript,
+    UnrealScript,
+    // END known C
+    //
+    // Bash style
+    CShell,
+    Makefile,
+    Nim,
+    R,
+    Toml,
+    Yaml,
+    Zsh,
+    // END bash style
+    //
+    // HTML style
+    Html,
+    Polly,
+    RubyHtml,
+
+    CoffeeScript,
+    D,
+    Forth,
+
+    // Pascal,
+    // Php => "PHP",
+    // Php => SM("#","//""/*", "*/"),
+    Python,
+    Julia,
+    Lisp,
+    Lua,
+    Sql,
+    // END HTML
+    //
+    // Multi
+    // End multi
+    //
+    //  Single
+    Ada,
+    Batch,
+    Erlang,
+    Protobuf,
+    Tex,
+    VimScript,
+    //  End single
+    //
+    // Standard single + multi
+    // Php => Language::new(vec!["#","//"], vec![("/*", "*/")]),
+    //
+    //
+    // Isabelle => Language::new(
+    //     vec!["--"],
+    //     vec![   ("{*","*}"),
+    //             ("(*","*)"),
+    //             ("‹","›"),
+    //             ("\\<open>", "\\<close>"),
+    //         ]
+    // ),
+    // Json => Language::new_blank(),
+    // Markdown => Language::new_blank(),
+    // Text => Language::new_blank(),
+    //
+    // Oz => Language::new_pro(),
+    // Prolog => Language::new_pro(),
+    //
+    // Mustache => Language::new_multi(vec![("{{!", "}}")]),
+    // Razor => Language::new_multi(vec![("<!--", "-->"), ("@*", "*@")]),
+    //
+    // Sml => Language::new_func(),
+    // Wolfram => Language::new_func(),
+    // OCaml => Language::new_func(),
     Unrecognized,
 }
+use self::Lang::*;
 
 impl Lang {
     pub fn to_s(&self) -> &str {
         match *self {
-            Lang::C => "C",
-            Lang::CCppHeader => "C/C++ Header",
-            Lang::Rust => "Rust",
-            Lang::Ruby => "Ruby",
-            Lang::Haskell => "Haskell",
-            Lang::Perl => "Perl",
-            Lang::BourneShell => "Bourne Shell",
-            Lang::Make => "Make",
-            Lang::INI => "INI",
-            Lang::Assembly => "Assembly",
-            Lang::Yacc => "Yacc",
-            Lang::Awk => "Awk",
-            Lang::XML => "XMl",
-            Lang::Unrecognized => "Unrecognized",
+            C => "C",
+            CCppHeader => "C/C++ Header",
+            Rust => "Rust",
+            Ruby => "Ruby",
+            Haskell => "Haskell",
+            Perl => "Perl",
+            BourneShell => "Bourne Shell",
+            Make => "Make",
+            INI => "INI",
+            Assembly => "Assembly",
+            Yacc => "Yacc",
+            Awk => "Awk",
+            XML => "XMl",
+
+            CoffeeScript => "CoffeeScript",
+            D => "D",
+            Forth => "Forth",
+            // Pascal => "Pascal",
+            //
+            // Php => "PHP",
+            // Php => SM("#","//""/*", "*/"),
+            Python => "Python",
+            Julia => "Julia",
+            Lisp => "Lisp",
+            Lua => "Lua",
+            Sql => "SQL",
+
+            Ada => "Ada",
+            Batch => "Batch",
+            Erlang => "Erlang",
+            Protobuf => "Protobuf",
+            Tex => "Tex",
+            VimScript => "VimL",
+
+            Idris => "Idris",
+            ActionScript => "ActionScript",
+            ColdFusionScript => "ColdFusionScript",
+            Css => "Css",
+            Cpp => "Cpp",
+            CSharp => "CSharp",
+            Dart => "Dart",
+            DeviceTree => "DeviceTree",
+            Go => "Go",
+            Jai => "Jai",
+            Java => "Java",
+            JavaScript => "JavaScript",
+            Jsx => "Jsx",
+            Kotlin => "Kotlin",
+            Less => "Less",
+            LinkerScript => "LinkerScript",
+            ObjectiveC => "ObjectiveC",
+            ObjectiveCpp => "ObjectiveCpp",
+            Qcl => "Qcl",
+            Sass => "Sass",
+            Scala => "Scala",
+            Swift => "Swift",
+            TypeScript => "TypeScript",
+            UnrealScript => "UnrealScript",
+            CShell => "CShell",
+            Makefile => "Makefile",
+            Nim => "Nim",
+            R => "R",
+            Toml => "Toml",
+            Yaml => "Yaml",
+            Zsh => "Zsh",
+            Html => "Html",
+            Polly => "Polly",
+            RubyHtml => "RubyHtml",
+            // Php => "PHP",
+            // Php => SM("#","//""/*", "*/"),
+            Unrecognized => "Unrecognized",
         }
     }
 }
@@ -111,63 +275,172 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
     };
 
     match &*ext {
-        "c" => Lang::C,
-        "h" | "hh" | "hpp" | "hxx" => Lang::CCppHeader,
-        "rs" => Lang::Rust,
-        "hs" => Lang::Haskell,
-        "pl" => Lang::Perl,
-        "rb" => Lang::Ruby,
-        "makefile" | "mk" => Lang::Make,
-        "ini" => Lang::INI,
-        "s" | "asm" => Lang::Assembly,
-        "y" => Lang::Yacc,
-        "awk" => Lang::Awk,
-        "xml" => Lang::XML,
+        // "c" => C,
+        // "h" | "hh" | "hpp" | "hxx" => CCppHeader,
+        // "rs" => Rust,
+        // "hs" => Haskell,
+        // "pl" => Perl,
+        // "rb" => Ruby,
+        // "makefile" | "mk" => Make,
+        // "ini" => INI,
+        // "s" | "asm" => Assembly,
+        // "y" => Yacc,
+        // "awk" => Awk,
+        // "xml" => XML,
+        //
+        // // TODO(cgag): What's the correct extension? Any? Pragma?
+        // "sh" => BourneShell,
+        "as" => ActionScript,
+        "ada" | "adb" | "ads" | "pad" => Ada,
+        // "asa" | "asp" => Asp,
+        // "asax" | "ascx" | "asmx" | "aspx" | "master" | "sitemap" | "webinfo" => AspNet,
+        // "bash" | "sh" => Bash,
+        "bat" | "btm" | "cmd" => Batch,
+        "c" | "ec" | "pgc" => C,
+        "cc" | "cpp" | "cxx" | "c++" | "pcc" => Cpp,
+        "cfc" => ColdFusionScript,
+        // "cfm" => ColdFusion,
+        // "clj" => Clojure,
+        "coffee" => CoffeeScript,
+        "cs" => CSharp,
+        // "cshtml" => Razor,
+        "csh" => CShell,
+        "css" => Css,
+        "d" => D,
+        "dart" => Dart,
+        "dts" | "dtsi" => DeviceTree,
+        "el" | "lisp" | "lsp" => Lisp,
+        "erl" | "hrl" => Erlang,
+        "4th" | "forth" | "fr" | "frt" | "fth" | "f83" | "fb" | "fpm" | "e4" | "rx" | "ft" => Forth,
+        // "f" | "for" | "ftn" | "f77" | "pfo" => FortranLegacy,
+        // "f03" | "f08" | "f90" | "f95" => FortranModern,
+        "go" => Go,
+        // "hbs" | "handlebars" => Handlebars,
+        "h" | "hh" | "hpp" | "hxx" => CCppHeader,
+        "hs" => Haskell,
+        "html" => Html,
+        "idr" | "lidr" => Idris,
+        // "in" => Autoconf,
+        "jai" => Jai,
+        "java" => Java,
+        "jl" => Julia,
+        "js" => JavaScript,
+        // "json" => Json,
+        "jsx" => Jsx,
+        "kt" | "kts" => Kotlin,
+        "lds" => LinkerScript,
+        "less" => Less,
+        "lua" => Lua,
+        "m" => ObjectiveC,
+        // "markdown" | "md" => Markdown,
+        // "ml" | "mli" => OCaml,
+        "mm" => ObjectiveCpp,
+        "makefile" => Makefile,
+        // "mustache" => Mustache,
+        "nim" => Nim,
+        // "nb" | "wl" => Wolfram,
+        // "oz" => Oz,
+        // "p" | "pro" => Prolog,
+        // "pas" => Pascal,
+        // "php" => Php,
+        "pl" => Perl,
+        "qcl" => Qcl,
+        // "text" | "txt" => Text,
+        "polly" => Polly,
+        "proto" => Protobuf,
+        "py" => Python,
+        "r" => R,
+        "rake" | "rb" => Ruby,
+        "rhtml" => RubyHtml,
+        "rs" => Rust,
+        "s" | "asm" => Assembly,
+        "sass" | "scss" => Sass,
+        "sc" | "scala" => Scala,
+        // "sml" => Sml,
+        "sql" => Sql,
+        "swift" => Swift,
+        "tex" | "sty" => Tex,
+        "toml" => Toml,
+        "ts" => TypeScript,
+        // "thy" => Isabelle,
+        "uc" | "uci" | "upkg" => UnrealScript,
+        // "v" => Coq,
+        "vim" => VimScript,
+        "xml" => XML,
+        "yaml" | "yml" => Yaml,
+        "zsh" => Zsh,
 
-        // TODO(cgag): What's the correct extension? Any? Pragma?
-        "sh" => Lang::BourneShell,
         // Probably dumb to just default to C.
-        _ => Lang::Unrecognized,
+        _ => Unrecognized,
     }
 }
 
+enum ConfigTuple<'a> {
+    // Single only
+    SO(&'a str),
+    // MultiOnly
+    MO(&'a str, &'a str),
+    // Single + Multi
+    SM(&'a str, &'a str, &'a str),
+}
+use self::ConfigTuple::*;
 pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
-    enum CT<'a> {
-        SO(&'a str),
-        MO(&'a str, &'a str),
-        SM(&'a str, &'a str, &'a str),
-    }
-    // use self::ConfigTuple::*;
 
-    let c_style = CT::SM("//", "/*", "*/");
-    let sh_style = CT::SO("#");
+    let c_style = SM("//", "/*", "*/");
+    let sh_style = SO("#");
+    let html_style = MO("<!--", "-->");
 
     let ctuple = match *lang {
-        Lang::Haskell => CT::SM("--", "{-", "-}"),
-        Lang::Perl => CT::SM("#", "=pod", "=cut"),
-        Lang::INI => CT::SO(";"),
+        Haskell => SM("--", "{-", "-}"),
+        Idris => SM("--", "{-", "-}"),
+        // which one is right? = or =pod?
+        Lang::Perl => SM("#", "=pod", "=cut"),
+        // Perl => SM("#""=", "=cut"),
+        Lang::INI => SO(";"),
+
+        CoffeeScript => SM("#", "###", "###"),
+        D => SM("//", "/*", "*/"),
+        Forth => SM("\\", "(", ")"),
+        Python => SM("#", "'\''", "'\''"),
+        Julia => SM("#", "#=", "=#"),
+        Lisp => SM(";", "#|", "|#"),
+        Lua => SM("--", "--[[", "]]"),
+        Ruby => SM("#", "=begin", "=end"),
+        Sql => SM("--", "/*", "*/"),
+
+        Ada => SO("--"),
+        Batch => SO("REM"),
+        Erlang => SO("%"),
+        Protobuf => SO("//"),
+        Tex => SO("%"),
+        VimScript => SO("\""),
+
+        // Pascal?
         // TODO(cgag): Well, some architectures use ;, @, |, etc.
         // Need a way to specify more than one possible comment char.
-        Lang::Assembly => CT::SM("#", "/*", "*/"),
+        Assembly => SM("#", "/*", "*/"),
         // TODO(cgag): Welp, single is not always necessary
-        Lang::XML => CT::MO("<!--", "-->"),
-        Lang::BourneShell | Lang::Ruby | Lang::Make | Lang::Awk => sh_style,
+        Html | Polly | RubyHtml | XML => html_style,
+        BourneShell | Lang::Make | Lang::Awk | CShell | Makefile | Nim | R | Toml | Yaml | Zsh => {
+            sh_style
+        }
         // TODO(cgag): not 100% that yacc belongs here.
-        Lang::C | Lang::CCppHeader | Lang::Rust | Lang::Yacc => c_style,
-        // Default to C style
-        Lang::Unrecognized => c_style,
+        C | CCppHeader | Rust | Lang::Yacc | ActionScript | ColdFusionScript | Css | Cpp |
+        CSharp | Dart | DeviceTree | Go | Jai | Java | JavaScript | Jsx | Kotlin | Less |
+        LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift | TypeScript |
+        UnrealScript | Unrecognized => c_style,
     };
 
     match ctuple {
-        CT::SM(single, start, end) => {
+        SM(single, start, end) => {
             LineConfig::SingleMulti {
                 single_start: single,
                 multi_start: start,
                 multi_end: end,
             }
         }
-        CT::SO(single) => LineConfig::SingleOnly { single_start: single },
-        CT::MO(start, end) => {
+        SO(single) => LineConfig::SingleOnly { single_start: single },
+        MO(start, end) => {
             LineConfig::MultiOnly {
                 multi_start: start,
                 multi_end: end,
