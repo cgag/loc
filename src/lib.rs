@@ -497,8 +497,7 @@ pub fn count(filepath: &str) -> Count {
 pub fn count_single_only(filepath: &str, single_start: &str) -> Count {
     let fmmap = match Mmap::open_path(filepath, Protection::Read) {
         Ok(mmap) => mmap,
-        Err(e) => {
-            println!("mmap err for {}: {}", filepath, e);
+        Err(_) => {
             return Count::default();
         }
     };
@@ -543,8 +542,7 @@ pub fn count_multi_only(filepath: &str, multi_start: &str, multi_end: &str) -> C
 
     let fmmap = match Mmap::open_path(filepath, Protection::Read) {
         Ok(mmap) => mmap,
-        Err(e) => {
-            println!("mmap err for {}: {}", filepath, e);
+        Err(_) => {
             return Count::default();
         }
     };
@@ -638,8 +636,7 @@ pub fn count_single_multi(filepath: &str,
 
     let fmmap = match Mmap::open_path(filepath, Protection::Read) {
         Ok(mmap) => mmap,
-        Err(e) => {
-            println!("mmap err for {}: {}", filepath, e);
+        Err(_) => {
             return Count::default();
         }
     };
