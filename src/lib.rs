@@ -50,10 +50,11 @@ pub enum LineConfig<'a> {
     MultiOnly {
         multi_start: &'a str,
         multi_end: &'a str,
-    }, /* Everything {
-        *     singles: Vec<&'a str>,
-        *     multies: Vec<(&'a str, &'a str)>,
-        * }, */
+    },
+    Everything {
+        singles: Vec<&'a str>,
+        multies: Vec<(&'a str, &'a str)>,
+    },
 }
 
 // Do any languages actually use utf8 chars as comment chars?
@@ -132,7 +133,7 @@ pub enum Lang {
     Forth,
 
     // Pascal,
-    // Php => "PHP",
+    Php,
     // Php => SM("#","//""/*", "*/"),
     Python,
     Julia,
@@ -253,8 +254,8 @@ impl Lang {
             Html => "HTML",
             Polly => "Polly",
             RubyHtml => "RubyHtml",
-            // Php => "PHP",
-            // Php => SM("#","//""/*", "*/"),
+            Php => "PHP",
+
             Unrecognized => "Unrecognized",
         }
     }
@@ -332,7 +333,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         // "oz" => Oz,
         // "p" | "pro" => Prolog,
         // "pas" => Pascal,
-        // "php" => Php,
+        "php" => Php,
         "pl" => Perl,
         "qcl" => Qcl,
         // "text" | "txt" => Text,
@@ -373,6 +374,8 @@ enum ConfigTuple<'a> {
     MO(&'a str, &'a str),
     // Single + Multi
     SM(&'a str, &'a str, &'a str),
+    // Everything (multiple singles, multiple multiline)
+    EV(Vec<&'a str>, Vec<(&'a str, &'a str)>),
 }
 use self::ConfigTuple::*;
 pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
@@ -415,6 +418,9 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         BourneShell | Lang::Make | Lang::Awk | CShell | Makefile | Nim | R | Toml | Yaml | Zsh => {
             sh_style
         }
+
+        Php => EV(vec!["#", "//"], vec![("/*", "*/")]),
+
         // TODO(cgag): not 100% that yacc belongs here.
         C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CSharp |
         Dart | DeviceTree | Go | Jai | Java | JavaScript | Jsx | Kotlin | Less | LinkerScript |
@@ -435,6 +441,12 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
             LineConfig::MultiOnly {
                 multi_start: start,
                 multi_end: end,
+            }
+        }
+        EV(singles, multies) => {
+            LineConfig::Everything {
+                singles: singles,
+                multies: multies,
             }
         }
     }
@@ -489,6 +501,9 @@ pub fn count(filepath: &str) -> Count {
         }
         LineConfig::MultiOnly { multi_start: mstart, multi_end: mend } => {
             count_multi_only(filepath, mstart, mend)
+        }
+        LineConfig::Everything { singles: singles, multies: multies } => {
+            count_everything(filepath, singles, multies)
         }
     }
 }
@@ -621,6 +636,40 @@ pub fn count_multi_only(filepath: &str, multi_start: &str, multi_end: &str) -> C
         lines: lines,
     }
 }
+
+// TODO(cgag): prune down to just count everything, count_single, count_multi?
+pub fn count_everything<'a>(filepath: &str,
+                            singles: Vec<&'a str>,
+                            multies: Vec<(&'a str, &'a str)>)
+                            -> Count {
+
+
+    let mut single_iter = singles.iter();
+    // TODO(cgag): actually i think if we just had multiple multiline comments
+    // and no single line comments that this could indeed fail.  Need to potentially
+    // get first one from the multies.
+    let first = single_iter.next().expect("There should always be at least one?");
+    let mut total_count = count_single_only(filepath, first);
+
+    // skipped first already, at least I think so. Test.
+    // TODO(cgag): parallelize?
+    for single in single_iter {
+        let count = count_single_only(filepath, single);
+        total_count.comment += count.comment;
+        // subtract out comments that were counted as code in previous counts
+        total_count.code -= count.comment;
+    }
+
+    for (multi_start, multi_end) in multies {
+        let count = count_multi_only(filepath, multi_start, multi_end);
+        total_count.comment += count.comment;
+        // subtract out comments that were counted as code in previous counts
+        total_count.code -= count.comment;
+    }
+
+    total_count
+}
+
 
 
 pub fn count_single_multi(filepath: &str,
