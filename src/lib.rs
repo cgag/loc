@@ -15,7 +15,6 @@ use std::fmt;
 use memmap::{Mmap, Protection};
 use memchr::memchr;
 
-
 // Why is it called partialEq?
 #[derive(Debug, PartialEq, Default, Clone)]
 pub struct Count {
@@ -223,9 +222,9 @@ impl Lang {
             Idris => "Idris",
             ActionScript => "ActionScript",
             ColdFusionScript => "ColdFusionScript",
-            Css => "Css",
-            Cpp => "Cpp",
-            CSharp => "CSharp",
+            Css => "CSS",
+            Cpp => "C++",
+            CSharp => "C#",
             Dart => "Dart",
             DeviceTree => "DeviceTree",
             Go => "Go",
@@ -251,7 +250,7 @@ impl Lang {
             Toml => "Toml",
             Yaml => "Yaml",
             Zsh => "Zsh",
-            Html => "Html",
+            Html => "HTML",
             Polly => "Polly",
             RubyHtml => "RubyHtml",
             // Php => "PHP",
@@ -630,10 +629,6 @@ pub fn count_single_multi(filepath: &str,
                           multi_end: &str)
                           -> Count {
 
-    let single_line_start = single_start;
-    let multiline_start = multi_start;
-    let multiline_end = multi_end;
-
     let fmmap = match Mmap::open_path(filepath, Protection::Read) {
         Ok(mmap) => mmap,
         Err(_) => {
@@ -663,12 +658,15 @@ pub fn count_single_multi(filepath: &str,
             continue;
         };
 
-        if !in_comment && trimmed.starts_with(single_line_start) {
+        if !in_comment && trimmed.starts_with(single_start) {
             comments += 1;
             continue;
         }
 
-        if !(trimmed.contains(multiline_start) || trimmed.contains(multiline_end)) {
+        // TODO(cgag) Maybe instead do something with memchar, searching for the start chars
+        // of the commetns?  Do the while loop if it contains either the first char of start or the
+        // first char of end?
+        if !(trimmed.contains(multi_start) || trimmed.contains(multi_end)) {
             if in_comment {
                 comments += 1;
             } else {
@@ -677,13 +675,15 @@ pub fn count_single_multi(filepath: &str,
             continue;
         }
 
-        let start_len = multiline_start.len();
-        let end_len = multiline_end.len();
+        let start_len = multi_start.len();
+        let end_len = multi_end.len();
 
         let mut pos = 0;
         let mut found_code = false;
         'outer: while pos < trimmed.len() {
-            // TODO(cgag): must be a less stupid way to do this
+            // TODO(cgag): must be a less stupid way to do this.  At the
+            // very least don't recalculate max over and over.  LLVM probably
+            // optimizes this but it seems dumb to depend on it?
             for i in pos..(pos + cmp::max(start_len, end_len) + 1) {
                 if !trimmed.is_char_boundary(i) {
                     pos += 1;
@@ -691,11 +691,10 @@ pub fn count_single_multi(filepath: &str,
                 }
             }
 
-            if pos + start_len <= trimmed.len() &&
-               &trimmed[pos..pos + start_len] == multiline_start {
+            if pos + start_len <= trimmed.len() && &trimmed[pos..pos + start_len] == multi_start {
                 pos += start_len;
                 in_comment = true;
-            } else if pos + end_len <= trimmed.len() && &trimmed[pos..pos + end_len] == multiline_end {
+            } else if pos + end_len <= trimmed.len() && &trimmed[pos..pos + end_len] == multi_end {
                 pos += end_len;
                 in_comment = false;
             } else if !in_comment {
