@@ -385,12 +385,11 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
     let html_style = MO("<!--", "-->");
 
     let ctuple = match *lang {
-        Haskell => SM("--", "{-", "-}"),
-        Idris => SM("--", "{-", "-}"),
+        Haskell | Idris => SM("--", "{-", "-}"),
         // which one is right? = or =pod?
-        Lang::Perl => SM("#", "=pod", "=cut"),
+        Perl => SM("#", "=pod", "=cut"),
         // Perl => SM("#""=", "=cut"),
-        Lang::INI => SO(";"),
+        INI => SO(";"),
 
         CoffeeScript => SM("#", "###", "###"),
         D => SM("//", "/*", "*/"),
@@ -495,16 +494,14 @@ pub fn count(filepath: &str) -> Count {
     let lang = lang_from_ext(filepath);
     let config = counter_config_for_lang(&lang);
     match config {
-        LineConfig::SingleOnly { single_start: single } => count_single_only(filepath, single),
-        LineConfig::SingleMulti { single_start: single, multi_start, multi_end } => {
-            count_single_multi(filepath, single, multi_start, multi_end)
+        LineConfig::SingleOnly { single_start } => count_single_only(filepath, single_start),
+        LineConfig::SingleMulti { single_start, multi_start, multi_end } => {
+            count_single_multi(filepath, single_start, multi_start, multi_end)
         }
-        LineConfig::MultiOnly { multi_start: mstart, multi_end: mend } => {
-            count_multi_only(filepath, mstart, mend)
+        LineConfig::MultiOnly { multi_start, multi_end } => {
+            count_multi_only(filepath, multi_start, multi_end)
         }
-        LineConfig::Everything { singles: singles, multies: multies } => {
-            count_everything(filepath, singles, multies)
-        }
+        LineConfig::Everything { singles, multies } => count_everything(filepath, singles, multies),
     }
 }
 
@@ -584,7 +581,7 @@ pub fn count_multi_only(filepath: &str, multi_start: &str, multi_end: &str) -> C
         };
 
 
-        if !(trimmed.contains(multiline_start) || trimmed.contains(multiline_end)) {
+        if !trimmed.contains(multiline_start) && !trimmed.contains(multiline_end) {
             if in_comment {
                 comments += 1;
             } else {
