@@ -12,3 +12,5 @@ test.c
 lines.c
 
 cloc-out
+
+perf.data
