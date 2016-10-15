@@ -16,3 +16,7 @@ regex         = "*"
 ascii         = "*"
 walkdir       = "*"
 itertools     = "*"
+
+
+[profile.release]
+lto = true

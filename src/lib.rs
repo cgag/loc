@@ -83,8 +83,7 @@ pub enum Lang {
     // AspNet => Language::new_multi(vec![("<!--", "-->"), ("<%--", "-->")]),
     // ColdFusion => Language::new_multi(vec![("<!---", "--->")]),
     // Coq => Language::new_func(),
-    // Handlebars => Language::new_multi(vec![("<!--", "-->"), ("{{!", "}}")])
-    //                        .set_quotes(vec![("\"", "\""), ("'", "'")]),
+    Handlebars,
     Idris,
 
     // C
@@ -256,6 +255,8 @@ impl Lang {
             RubyHtml => "RubyHtml",
             Php => "PHP",
 
+            Handlebars => "Handlebars",
+
             Unrecognized => "Unrecognized",
         }
     }
@@ -306,7 +307,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         // "f" | "for" | "ftn" | "f77" | "pfo" => FortranLegacy,
         // "f03" | "f08" | "f90" | "f95" => FortranModern,
         "go" => Go,
-        // "hbs" | "handlebars" => Handlebars,
+        "hbs" | "handlebars" => Handlebars,
         "h" | "hh" | "hpp" | "hxx" => CCppHeader,
         "hs" => Haskell,
         "html" => Html,
@@ -401,11 +402,12 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Ruby => SM("#", "=begin", "=end"),
         Sql => SM("--", "/*", "*/"),
 
+        Handlebars => EV(vec![""], vec![("<!--", "-->"), ("{{!", "}}")]),
+
         Ada => SO("--"),
         Batch => SO("REM"),
-        Erlang => SO("%"),
+        Erlang | Tex => SO("%"),
         Protobuf => SO("//"),
-        Tex => SO("%"),
         VimScript => SO("\""),
 
         // Pascal?
@@ -414,9 +416,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Assembly => SM("#", "/*", "*/"),
         // TODO(cgag): Welp, single is not always necessary
         Html | Polly | RubyHtml | XML => html_style,
-        BourneShell | Lang::Make | Lang::Awk | CShell | Makefile | Nim | R | Toml | Yaml | Zsh => {
-            sh_style
-        }
+        BourneShell | Make | Awk | CShell | Makefile | Nim | R | Toml | Yaml | Zsh => sh_style,
 
         Php => EV(vec!["#", "//"], vec![("/*", "*/")]),
 
@@ -580,7 +580,6 @@ pub fn count_multi_only(filepath: &str, multi_start: &str, multi_end: &str) -> C
             continue;
         };
 
-
         if !trimmed.contains(multiline_start) && !trimmed.contains(multiline_end) {
             if in_comment {
                 comments += 1;
@@ -737,10 +736,10 @@ pub fn count_single_multi(filepath: &str,
                 }
             }
 
-            if pos + start_len <= trimmed.len() && &trimmed[pos..pos + start_len] == multi_start {
+            if pos + start_len <= trimmed.len() && &trimmed[pos..(pos + start_len)] == multi_start {
                 pos += start_len;
                 in_comment = true;
-            } else if pos + end_len <= trimmed.len() && &trimmed[pos..pos + end_len] == multi_end {
+            } else if pos + end_len <= trimmed.len() && &trimmed[pos..(pos + end_len)] == multi_end {
                 pos += end_len;
                 in_comment = false;
             } else if !in_comment {
