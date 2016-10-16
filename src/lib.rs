@@ -1,8 +1,5 @@
 pub mod lines;
 
-#[macro_use]
-extern crate nom;
-
 extern crate regex;
 extern crate memmap;
 extern crate memchr;
@@ -74,19 +71,17 @@ pub enum Lang {
     Awk,
     XML,
 
-    // Asp => Language::new_single(vec!["'", "REM"]),
-    // Autoconf => Language::new_single(vec!["#", "dnl"]),
-    // Clojure => Language::new_single(vec![";","#"]),
-    // FortranLegacy => Language::new_single(vec!["c","C","!","*"]),
-    // FortranModern => Language::new_single(vec!["!"]),
-    //
-    // AspNet => Language::new_multi(vec![("<!--", "-->"), ("<%--", "-->")]),
-    // ColdFusion => Language::new_multi(vec![("<!---", "--->")]),
-    // Coq => Language::new_func(),
+    Asp,
+    AspNet,
+    ColdFusion,
+    Autoconf,
+    Clojure,
+    FortranLegacy,
+    FortranModern,
     Handlebars,
     Idris,
 
-    // C
+    // C style
     ActionScript,
     ColdFusionScript,
     Css,
@@ -112,6 +107,7 @@ pub enum Lang {
     UnrealScript,
     // END known C
     //
+    //
     // Bash style
     CShell,
     Makefile,
@@ -133,7 +129,6 @@ pub enum Lang {
 
     // Pascal,
     Php,
-    // Php => SM("#","//""/*", "*/"),
     Python,
     Julia,
     Lisp,
@@ -154,7 +149,6 @@ pub enum Lang {
     //  End single
     //
     // Standard single + multi
-    // Php => Language::new(vec!["#","//"], vec![("/*", "*/")]),
     //
     //
     // Isabelle => Language::new(
@@ -165,19 +159,23 @@ pub enum Lang {
     //             ("\\<open>", "\\<close>"),
     //         ]
     // ),
-    // Json => Language::new_blank(),
-    // Markdown => Language::new_blank(),
-    // Text => Language::new_blank(),
     //
+    Text,
+    Json,
+    Markdown,
+    IntelHex,
+    Hex,
+    ReStructuredText,
     // Oz => Language::new_pro(),
     // Prolog => Language::new_pro(),
     //
     // Mustache => Language::new_multi(vec![("{{!", "}}")]),
     // Razor => Language::new_multi(vec![("<!--", "-->"), ("@*", "*@")]),
     //
-    // Sml => Language::new_func(),
-    // Wolfram => Language::new_func(),
-    // OCaml => Language::new_func(),
+    Coq,
+    Sml,
+    Wolfram,
+    OCaml,
     Unrecognized,
 }
 use self::Lang::*;
@@ -204,8 +202,6 @@ impl Lang {
             Forth => "Forth",
             // Pascal => "Pascal",
             //
-            // Php => "PHP",
-            // Php => SM("#","//""/*", "*/"),
             Python => "Python",
             Julia => "Julia",
             Lisp => "Lisp",
@@ -255,7 +251,27 @@ impl Lang {
             RubyHtml => "RubyHtml",
             Php => "PHP",
 
+            Asp => "ASP",
+            AspNet => "ASP.Net", // => Language::new_multi(vec![("<!--", "-->"), ("<%--", "-->")]),
+            ColdFusion => "ColdFusion", // => Language::new_multi(vec![("<!---", "--->")]),
+            Autoconf => "Autoconf",
+            Clojure => "Clojure",
+            FortranLegacy => "FORTRAN Legacy", // => Language::new_single(vec!["c","C","!","*"]),
+            FortranModern => "FORTRAN Modern", // => Language::new_single(vec!["!"]),
+
+            Coq => "Coq",
+            Sml => "SML",
+            Wolfram => "Wolfram",
+            OCaml => "Wolfram",
+
             Handlebars => "Handlebars",
+
+            Text => "Plain Text",
+            Json => "JSON",
+            Markdown => "Markdown",
+            IntelHex => "Intex Hex",
+            Hex => "Hex",
+            ReStructuredText => "reStructuredText",
 
             Unrecognized => "Unrecognized",
         }
@@ -270,32 +286,34 @@ impl fmt::Display for Lang {
 
 pub fn lang_from_ext(filepath: &str) -> Lang {
     let path = Path::new(filepath);
-    let ext = match path.extension() {
-        Some(os_str) => os_str.to_str().unwrap().to_lowercase(),
-        None => path.file_name().unwrap().to_str().unwrap().to_lowercase(),
+    let file_name_lower = path.file_name()
+        .expect("no filename?")
+        .to_str()
+        .expect("to_str")
+        .to_lowercase();
+
+    let ext = if file_name_lower.contains("makefile") {
+        String::from("makefile")
+    } else {
+        match path.extension() {
+            Some(os_str) => os_str.to_str().unwrap().to_lowercase(),
+            None => file_name_lower,
+        }
     };
 
     // NOTE(cgag): while we lifted most of this from tokei, we support a few
     // more extensions in some places, can't just assume it's the same.
     match &*ext {
-        "ini" => INI,
-        "awk" => Awk,
-        // // TODO(cgag): What's the correct extension? Any? Pragma?
-        "sh" => BourneShell,
-        "as" => ActionScript,
+        "4th" | "forth" | "fr" | "frt" | "fth" | "f83" | "fb" | "fpm" | "e4" | "rx" | "ft" => Forth,
         "ada" | "adb" | "ads" | "pad" => Ada,
-        // "asa" | "asp" => Asp,
-        // "asax" | "ascx" | "asmx" | "aspx" | "master" | "sitemap" | "webinfo" => AspNet,
-        // "bash" | "sh" => Bash,
+        "as" => ActionScript,
+        "awk" => Awk,
         "bat" | "btm" | "cmd" => Batch,
         "c" | "ec" | "pgc" => C,
         "cc" | "cpp" | "cxx" | "c++" | "pcc" => Cpp,
         "cfc" => ColdFusionScript,
-        // "cfm" => ColdFusion,
-        // "clj" => Clojure,
         "coffee" => CoffeeScript,
         "cs" => CSharp,
-        // "cshtml" => Razor,
         "csh" => CShell,
         "css" => Css,
         "d" => D,
@@ -303,41 +321,54 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "dts" | "dtsi" => DeviceTree,
         "el" | "lisp" | "lsp" => Lisp,
         "erl" | "hrl" => Erlang,
-        "4th" | "forth" | "fr" | "frt" | "fth" | "f83" | "fb" | "fpm" | "e4" | "rx" | "ft" => Forth,
-        // "f" | "for" | "ftn" | "f77" | "pfo" => FortranLegacy,
-        // "f03" | "f08" | "f90" | "f95" => FortranModern,
         "go" => Go,
-        "hbs" | "handlebars" => Handlebars,
         "h" | "hh" | "hpp" | "hxx" => CCppHeader,
+        "hbs" | "handlebars" => Handlebars,
         "hs" => Haskell,
         "html" => Html,
         "idr" | "lidr" => Idris,
-        // "in" => Autoconf,
+        "ini" => INI,
         "jai" => Jai,
         "java" => Java,
         "jl" => Julia,
         "js" => JavaScript,
-        // "json" => Json,
         "jsx" => Jsx,
         "kt" | "kts" => Kotlin,
         "lds" => LinkerScript,
         "less" => Less,
         "lua" => Lua,
         "m" => ObjectiveC,
-        // "markdown" | "md" => Markdown,
-        // "ml" | "mli" => OCaml,
-        "mm" => ObjectiveCpp,
+        "ml" | "mli" => OCaml,
+        "nb" | "wl" => Wolfram,
+        "sh" => BourneShell,
+        "asa" | "asp" => Asp,
+        "asax" | "ascx" | "asmx" | "aspx" | "master" | "sitemap" | "webinfo" => AspNet,
+        "in" => Autoconf,
+        "clj" => Clojure,
+
+        // "bash" | "sh" => Bash,
+        // "cfm" => ColdFusion,
+        // "cshtml" => Razor,
+        "f" | "for" | "ftn" | "f77" | "pfo" => FortranLegacy,
+        "f03" | "f08" | "f90" | "f95" => FortranModern,
+        // // TODO(cgag): What's the correct extension? Any? Pragma?
         "makefile" | "mk" => Makefile,
-        // "mustache" => Mustache,
+        "mm" => ObjectiveCpp,
         "nim" => Nim,
-        // "nb" | "wl" => Wolfram,
-        // "oz" => Oz,
-        // "p" | "pro" => Prolog,
-        // "pas" => Pascal,
         "php" => Php,
         "pl" => Perl,
         "qcl" => Qcl,
-        // "text" | "txt" => Text,
+        // "mustache" => Mustache,
+        // "oz" => Oz,
+        // "p" | "pro" => Prolog,
+        // "pas" => Pascal,
+        "hex" => Hex,
+        "ihex" => IntelHex,
+        "json" => Json,
+        "markdown" | "md" => Markdown,
+        "rst" => ReStructuredText,
+        "text" | "txt" => Text,
+
         "polly" => Polly,
         "proto" => Protobuf,
         "py" => Python,
@@ -348,7 +379,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "s" | "asm" => Assembly,
         "sass" | "scss" => Sass,
         "sc" | "scala" => Scala,
-        // "sml" => Sml,
+        "sml" => Sml,
         "sql" => Sql,
         "swift" => Swift,
         "tex" | "sty" => Tex,
@@ -356,7 +387,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "ts" => TypeScript,
         // "thy" => Isabelle,
         "uc" | "uci" | "upkg" => UnrealScript,
-        // "v" => Coq,
+        "v" => Coq,
         "vim" => VimScript,
         "xml" => XML,
         "yaml" | "yml" => Yaml,
@@ -378,47 +409,62 @@ enum ConfigTuple<'a> {
     // Everything (multiple singles, multiple multiline)
     EV(Vec<&'a str>, Vec<(&'a str, &'a str)>),
 }
+
+const UNLIKELY: &'static str = "SLkJJJJJ<!*$(!*&)(*@^#$K8K!(*76(*&(38j8";
+
 use self::ConfigTuple::*;
 pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
 
     let c_style = SM("//", "/*", "*/");
-    let sh_style = SO("#");
     let html_style = MO("<!--", "-->");
+    let ml_style = MO("(*", "*)");
+    // TODO(cgag): Find a less dumb way to do this.
+    let no_comments = SO(UNLIKELY);
+    let sh_style = SO("#");
 
     let ctuple = match *lang {
-        Haskell | Idris => SM("--", "{-", "-}"),
-        // which one is right? = or =pod?
-        Perl => SM("#", "=pod", "=cut"),
-        // Perl => SM("#""=", "=cut"),
-        INI => SO(";"),
-
-        CoffeeScript => SM("#", "###", "###"),
-        D => SM("//", "/*", "*/"),
-        Forth => SM("\\", "(", ")"),
-        Python => SM("#", "'\''", "'\''"),
-        Julia => SM("#", "#=", "=#"),
-        Lisp => SM(";", "#|", "|#"),
-        Lua => SM("--", "--[[", "]]"),
-        Ruby => SM("#", "=begin", "=end"),
-        Sql => SM("--", "/*", "*/"),
-
-        Handlebars => EV(vec![""], vec![("<!--", "-->"), ("{{!", "}}")]),
-
         Ada => SO("--"),
         Batch => SO("REM"),
         Erlang | Tex => SO("%"),
+        FortranModern => SO("!"),
+        Haskell | Idris => SM("--", "{-", "-}"),
+        INI => SO(";"),
         Protobuf => SO("//"),
         VimScript => SO("\""),
+
+        // which one is right? = or =pod?
+        // Perl => SM("#""=", "=cut"),
+        Assembly => SM("#", "/*", "*/"),
+        CoffeeScript => SM("#", "###", "###"),
+        D => SM("//", "/*", "*/"),
+        Forth => SM("\\", "(", ")"),
+        Julia => SM("#", "#=", "=#"),
+        Lisp => SM(";", "#|", "|#"),
+        Lua => SM("--", "--[[", "]]"),
+        Perl => SM("#", "=pod", "=cut"),
+        Python => SM("#", "'\''", "'\''"),
+        Ruby => SM("#", "=begin", "=end"),
+        Sql => SM("--", "/*", "*/"),
+
+        Asp => EV(vec!["'", "REM"], vec![]),
+        AspNet => EV(vec![UNLIKELY], vec![("<!--", "-->"), ("<%--", "-->")]),
+        ColdFusion => MO("<!---", "--->"),
+        Autoconf => EV(vec!["#", "dnl"], vec![]),
+        Clojure => EV(vec![";", "#"], vec![]),
+        FortranLegacy => EV(vec!["c", "C", "!", "*"], vec![]),
+        Handlebars => EV(vec![UNLIKELY], vec![("<!--", "-->"), ("{{!", "}}")]),
+        Php => EV(vec!["#", "//"], vec![("/*", "*/")]),
 
         // Pascal?
         // TODO(cgag): Well, some architectures use ;, @, |, etc.
         // Need a way to specify more than one possible comment char.
-        Assembly => SM("#", "/*", "*/"),
-        // TODO(cgag): Welp, single is not always necessary
-        Html | Polly | RubyHtml | XML => html_style,
-        BourneShell | Make | Awk | CShell | Makefile | Nim | R | Toml | Yaml | Zsh => sh_style,
+        Text | Markdown | Json | IntelHex | Hex | ReStructuredText => no_comments,
 
-        Php => EV(vec!["#", "//"], vec![("/*", "*/")]),
+        Coq | Sml | Wolfram | OCaml => ml_style,
+
+        Html | Polly | RubyHtml | XML => html_style,
+
+        BourneShell | Make | Awk | CShell | Makefile | Nim | R | Toml | Yaml | Zsh => sh_style,
 
         // TODO(cgag): not 100% that yacc belongs here.
         C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CSharp |
@@ -494,18 +540,18 @@ pub fn count(filepath: &str) -> Count {
     let lang = lang_from_ext(filepath);
     let config = counter_config_for_lang(&lang);
     match config {
-        LineConfig::SingleOnly { single_start } => count_single_only(filepath, single_start),
+        LineConfig::SingleOnly { single_start } => count_single(filepath, single_start),
         LineConfig::SingleMulti { single_start, multi_start, multi_end } => {
             count_single_multi(filepath, single_start, multi_start, multi_end)
         }
         LineConfig::MultiOnly { multi_start, multi_end } => {
-            count_multi_only(filepath, multi_start, multi_end)
+            count_multi(filepath, multi_start, multi_end)
         }
         LineConfig::Everything { singles, multies } => count_everything(filepath, singles, multies),
     }
 }
 
-pub fn count_single_only(filepath: &str, single_start: &str) -> Count {
+pub fn count_single(filepath: &str, single_start: &str) -> Count {
     let fmmap = match Mmap::open_path(filepath, Protection::Read) {
         Ok(mmap) => mmap,
         Err(_) => {
@@ -514,10 +560,7 @@ pub fn count_single_only(filepath: &str, single_start: &str) -> Count {
     };
     let bytes: &[u8] = unsafe { fmmap.as_slice() };
 
-    let mut lines = 0;
-    let mut code = 0;
-    let mut comments = 0;
-    let mut blanks = 0;
+    let mut c = Count::default();
 
     let a = Ascii(bytes);
     for byte_line in a.lines() {
@@ -525,27 +568,22 @@ pub fn count_single_only(filepath: &str, single_start: &str) -> Count {
             Ok(s) => s,
             Err(_) => return Count::default(),
         };
-        lines += 1;
+        c.lines += 1;
 
         let trimmed = line.trim_left();
         if trimmed.is_empty() {
-            blanks += 1;
+            c.blank += 1;
         } else if trimmed.starts_with(single_start) {
-            comments += 1;
+            c.comment += 1;
         } else {
-            code += 1;
+            c.code += 1;
         }
     }
 
-    Count {
-        code: code,
-        comment: comments,
-        blank: blanks,
-        lines: lines,
-    }
+    c
 }
 
-pub fn count_multi_only(filepath: &str, multi_start: &str, multi_end: &str) -> Count {
+pub fn count_multi(filepath: &str, multi_start: &str, multi_end: &str) -> Count {
     // this is a duplicate of count_single_multi without the check for single comment.
     // Basically removes one branch.  Probably pointless: benchmark.
     let multiline_start = multi_start;
@@ -559,10 +597,7 @@ pub fn count_multi_only(filepath: &str, multi_start: &str, multi_end: &str) -> C
     };
     let bytes: &[u8] = unsafe { fmmap.as_slice() };
 
-    let mut lines = 0;
-    let mut code = 0;
-    let mut comments = 0;
-    let mut blanks = 0;
+    let mut c = Count::default();
 
     let mut in_comment = false;
 
@@ -572,19 +607,19 @@ pub fn count_multi_only(filepath: &str, multi_start: &str, multi_end: &str) -> C
             Ok(s) => s,
             Err(_) => return Count::default(),
         };
-        lines += 1;
+        c.lines += 1;
 
         let trimmed = line.trim_left();
         if trimmed.is_empty() {
-            blanks += 1;
+            c.blank += 1;
             continue;
         };
 
         if !trimmed.contains(multiline_start) && !trimmed.contains(multiline_end) {
             if in_comment {
-                comments += 1;
+                c.comment += 1;
             } else {
-                code += 1;
+                c.code += 1;
             }
             continue;
         }
@@ -619,18 +654,13 @@ pub fn count_multi_only(filepath: &str, multi_start: &str, multi_end: &str) -> C
         }
 
         if found_code {
-            code += 1;
+            c.code += 1;
         } else {
-            comments += 1;
+            c.comment += 1;
         }
     }
 
-    Count {
-        code: code,
-        comment: comments,
-        blank: blanks,
-        lines: lines,
-    }
+    c
 }
 
 // TODO(cgag): prune down to just count everything, count_single, count_multi?
@@ -639,25 +669,24 @@ pub fn count_everything<'a>(filepath: &str,
                             multies: Vec<(&'a str, &'a str)>)
                             -> Count {
 
-
     let mut single_iter = singles.iter();
     // TODO(cgag): actually i think if we just had multiple multiline comments
     // and no single line comments that this could indeed fail.  Need to potentially
     // get first one from the multies.
     let first = single_iter.next().expect("There should always be at least one?");
-    let mut total_count = count_single_only(filepath, first);
+    let mut total_count = count_single(filepath, first);
 
     // skipped first already, at least I think so. Test.
     // TODO(cgag): parallelize?
     for single in single_iter {
-        let count = count_single_only(filepath, single);
+        let count = count_single(filepath, single);
         total_count.comment += count.comment;
         // subtract out comments that were counted as code in previous counts
         total_count.code -= count.comment;
     }
 
     for (multi_start, multi_end) in multies {
-        let count = count_multi_only(filepath, multi_start, multi_end);
+        let count = count_multi(filepath, multi_start, multi_end);
         total_count.comment += count.comment;
         // subtract out comments that were counted as code in previous counts
         total_count.code -= count.comment;
@@ -682,10 +711,7 @@ pub fn count_single_multi(filepath: &str,
     };
     let bytes: &[u8] = unsafe { fmmap.as_slice() };
 
-    let mut lines = 0;
-    let mut code = 0;
-    let mut comments = 0;
-    let mut blanks = 0;
+    let mut c = Count::default();
 
     let mut in_comment = false;
 
@@ -695,16 +721,16 @@ pub fn count_single_multi(filepath: &str,
             Ok(s) => s,
             Err(_) => return Count::default(),
         };
-        lines += 1;
+        c.lines += 1;
 
         let trimmed = line.trim_left();
         if trimmed.is_empty() {
-            blanks += 1;
+            c.blank += 1;
             continue;
         };
 
         if !in_comment && trimmed.starts_with(single_start) {
-            comments += 1;
+            c.comment += 1;
             continue;
         }
 
@@ -713,9 +739,9 @@ pub fn count_single_multi(filepath: &str,
         // first char of end?
         if !(trimmed.contains(multi_start) || trimmed.contains(multi_end)) {
             if in_comment {
-                comments += 1;
+                c.comment += 1;
             } else {
-                code += 1;
+                c.code += 1;
             }
             continue;
         }
@@ -751,16 +777,11 @@ pub fn count_single_multi(filepath: &str,
         }
 
         if found_code {
-            code += 1;
+            c.code += 1;
         } else {
-            comments += 1;
+            c.comment += 1;
         }
     }
 
-    Count {
-        code: code,
-        comment: comments,
-        blank: blanks,
-        lines: lines,
-    }
+    c
 }
