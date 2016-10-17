@@ -1,7 +1,14 @@
 [package]
 name = "loc"
 version = "0.1.0"
+description = "Count lines of code (cloc) fast."
 authors = ["Curtis Gagliardi <curtis@curtis.io>"]
+
+repository = "https://github.com/cgag/loc"
+homepage = "https://github.com/cgag/loc"
+documentation = "https://github.com/cgag/loc"
+
+license="Apache-2.0"
 
 [dependencies]
 ascii         = "*"
@@ -17,7 +24,6 @@ regex         = "*"
 thread-scoped = "*"
 walkdir       = "*"
 num_cpus      = "*"
-
 
 [profile.release]
 lto = true
