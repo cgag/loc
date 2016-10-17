@@ -4,18 +4,19 @@ version = "0.1.0"
 authors = ["Curtis Gagliardi <curtis@curtis.io>"]
 
 [dependencies]
-thread-scoped = "*"
+ascii         = "*"
+clap          = "*"
+deque         = "*"
+errno         = "*"
+itertools     = "*"
+libc          = "*"
+memchr        = "*"
 memmap        = "*"
 mmap          = "*"
-libc          = "*"
-errno         = "*"
-memchr        = "*"
-clap          = "*"
-nom           = "*"
 regex         = "*"
-ascii         = "*"
+thread-scoped = "*"
 walkdir       = "*"
-itertools     = "*"
+num_cpus      = "*"
 
 
 [profile.release]
