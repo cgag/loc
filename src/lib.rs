@@ -252,17 +252,17 @@ impl Lang {
             Php => "PHP",
 
             Asp => "ASP",
-            AspNet => "ASP.Net", // => Language::new_multi(vec![("<!--", "-->"), ("<%--", "-->")]),
-            ColdFusion => "ColdFusion", // => Language::new_multi(vec![("<!---", "--->")]),
+            AspNet => "ASP.Net",
+            ColdFusion => "ColdFusion",
             Autoconf => "Autoconf",
             Clojure => "Clojure",
-            FortranLegacy => "FORTRAN Legacy", // => Language::new_single(vec!["c","C","!","*"]),
-            FortranModern => "FORTRAN Modern", // => Language::new_single(vec!["!"]),
+            FortranLegacy => "FORTRAN Legacy",
+            FortranModern => "FORTRAN Modern",
 
             Coq => "Coq",
             Sml => "SML",
             Wolfram => "Wolfram",
-            OCaml => "Wolfram",
+            OCaml => "OCaml",
 
             Handlebars => "Handlebars",
 
