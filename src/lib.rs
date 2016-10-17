@@ -55,6 +55,9 @@ pub enum LineConfig<'a> {
 }
 
 // Do any languages actually use utf8 chars as comment chars?
+// We can probably do something with the encoding crate where we decode
+// as ascii, and then use unsafe_from_utf8. If decoding fails,
+// we catch it and just use the safe from_utf8 as we're doing now.
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Copy, Clone)]
 pub enum Lang {
     C,
@@ -432,8 +435,6 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Protobuf => SO("//"),
         VimScript => SO("\""),
 
-        // which one is right? = or =pod?
-        // Perl => SM("#""=", "=cut"),
         Assembly => SM("#", "/*", "*/"),
         CoffeeScript => SM("#", "###", "###"),
         D => SM("//", "/*", "*/"),
@@ -441,6 +442,8 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Julia => SM("#", "#=", "=#"),
         Lisp => SM(";", "#|", "|#"),
         Lua => SM("--", "--[[", "]]"),
+        // which one is right? = or =pod?
+        // Perl => SM("#""=", "=cut"),
         Perl => SM("#", "=pod", "=cut"),
         Python => SM("#", "'\''", "'\''"),
         Ruby => SM("#", "=begin", "=end"),
@@ -466,7 +469,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
 
         BourneShell | Make | Awk | CShell | Makefile | Nim | R | Toml | Yaml | Zsh => sh_style,
 
-        // TODO(cgag): not 100% that yacc belongs here.
+        // TODO(cgag): not 100% sure that yacc belongs here.
         C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CSharp |
         Dart | DeviceTree | Go | Jai | Java | JavaScript | Jsx | Kotlin | Less | LinkerScript |
         ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift | TypeScript | UnrealScript |
@@ -512,7 +515,6 @@ impl<'a> Ascii<'a> {
     }
 }
 
-// Appears to work, now we just neeed
 impl<'a> Iterator for AsciiLines<'a> {
     type Item = &'a [u8];
 
@@ -676,8 +678,6 @@ pub fn count_everything<'a>(filepath: &str,
     let first = single_iter.next().expect("There should always be at least one?");
     let mut total_count = count_single(filepath, first);
 
-    // skipped first already, at least I think so. Test.
-    // TODO(cgag): parallelize?
     for single in single_iter {
         let count = count_single(filepath, single);
         total_count.comment += count.comment;
@@ -734,9 +734,6 @@ pub fn count_single_multi(filepath: &str,
             continue;
         }
 
-        // TODO(cgag) Maybe instead do something with memchar, searching for the start chars
-        // of the commetns?  Do the while loop if it contains either the first char of start or the
-        // first char of end?
         if !(trimmed.contains(multi_start) || trimmed.contains(multi_end)) {
             if in_comment {
                 c.comment += 1;

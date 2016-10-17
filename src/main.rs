@@ -26,6 +26,7 @@ struct Worker {
     chan: Stealer<Work>,
 }
 
+// TODO(cgag): name this (lang, path, count) tuple concept and make it a struct
 impl Worker {
     fn run(self) -> Vec<(c::Lang, String, c::Count)> {
         let mut v: Vec<(c::Lang, String, c::Count)> = vec![];
