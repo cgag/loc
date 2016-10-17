@@ -1,4 +1,4 @@
-extern crate count;
+extern crate loc;
 
 extern crate clap;
 extern crate deque;
@@ -15,7 +15,7 @@ use std::thread;
 
 use deque::{Stealer, Stolen};
 
-use count as c;
+use loc as c;
 
 enum Work {
     File(String),
