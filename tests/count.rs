@@ -1,6 +1,6 @@
-extern crate count;
+extern crate loc;
 
-use count::*;
+use loc::*;
 
 const PLASMA: &'static str = "tests/data/plasma.c";
 const PLASMA_EXPECTED: Count = Count {

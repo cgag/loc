@@ -500,22 +500,23 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
     }
 }
 
-struct AsciiLines<'a> {
+struct ByteLinesState<'a> {
     buf: &'a [u8],
     pos: usize,
 }
 
-struct Ascii<'a>(&'a [u8]);
-impl<'a> Ascii<'a> {
-    fn lines(&self) -> AsciiLines {
-        AsciiLines {
+struct ByteLines<'a>(&'a [u8]);
+
+impl<'a> ByteLines<'a> {
+    fn lines(&self) -> ByteLinesState {
+        ByteLinesState {
             buf: self.0,
             pos: 0,
         }
     }
 }
 
-impl<'a> Iterator for AsciiLines<'a> {
+impl<'a> Iterator for ByteLinesState<'a> {
     type Item = &'a [u8];
 
     fn next(&mut self) -> Option<&'a [u8]> {
@@ -564,7 +565,7 @@ pub fn count_single(filepath: &str, single_start: &str) -> Count {
 
     let mut c = Count::default();
 
-    let a = Ascii(bytes);
+    let a = ByteLines(bytes);
     for byte_line in a.lines() {
         let line = match std::str::from_utf8(byte_line) {
             Ok(s) => s,
@@ -600,10 +601,9 @@ pub fn count_multi(filepath: &str, multi_start: &str, multi_end: &str) -> Count 
     let bytes: &[u8] = unsafe { fmmap.as_slice() };
 
     let mut c = Count::default();
-
     let mut in_comment = false;
 
-    let a = Ascii(bytes);
+    let a = ByteLines(bytes);
     for byte_line in a.lines() {
         let line = match std::str::from_utf8(byte_line) {
             Ok(s) => s,
@@ -712,11 +712,11 @@ pub fn count_single_multi(filepath: &str,
     let bytes: &[u8] = unsafe { fmmap.as_slice() };
 
     let mut c = Count::default();
-
     let mut in_comment = false;
 
-    let a = Ascii(bytes);
+    let a = ByteLines(bytes);
     for byte_line in a.lines() {
+        // for line in s.lines() {
         let line = match std::str::from_utf8(byte_line) {
             Ok(s) => s,
             Err(_) => return Count::default(),

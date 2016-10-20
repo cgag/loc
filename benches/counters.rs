@@ -1,10 +1,10 @@
 #![feature(test)]
 extern crate test;
-extern crate count;
+extern crate loc;
 
 use test::Bencher;
 
-use count::*;
+use loc::*;
 
 #[bench]
 fn test_count_c_reader(b: &mut Bencher) {
