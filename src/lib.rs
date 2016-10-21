@@ -10,7 +10,7 @@ use std::cmp;
 use std::fmt;
 
 use memmap::{Mmap, Protection};
-use memchr::memchr;
+use memchr::{memchr, memchr2, memchr3};
 
 // Why is it called partialEq?
 #[derive(Debug, PartialEq, Default, Clone)]
@@ -713,24 +713,21 @@ pub fn count_single_multi(filepath: &str,
     let mut in_comment = false;
 
     for byte_line in ByteLines(bytes).lines() {
-        let line = match std::str::from_utf8(byte_line) {
-            Ok(s) => s,
-            Err(_) => return Count::default(),
-        };
         c.lines += 1;
 
-        let trimmed = line.trim_left();
-        if trimmed.is_empty() {
+        let trimmed = trim_left(byte_line);
+        // trimmed.is_empty(0
+        if trimmed.len() == 0 {
             c.blank += 1;
             continue;
         };
 
-        if !in_comment && trimmed.starts_with(single_start) {
+        if !in_comment && starts_with(&trimmed, single_start) {
             c.comment += 1;
             continue;
         }
 
-        if !(trimmed.contains(multi_start) || trimmed.contains(multi_end)) {
+        if !(contains(&trimmed, multi_start) || contains(&trimmed, multi_end)) {
             if in_comment {
                 c.comment += 1;
             } else {
@@ -742,23 +739,17 @@ pub fn count_single_multi(filepath: &str,
         let start_len = multi_start.len();
         let end_len = multi_end.len();
 
+        let multi_start_bytes = multi_start.as_bytes();
+        let multi_end_bytes = multi_end.as_bytes();
+
         let mut pos = 0;
         let mut found_code = false;
         'outer: while pos < trimmed.len() {
-            // TODO(cgag): must be a less stupid way to do this.  At the
-            // very least don't recalculate max over and over.  LLVM probably
-            // optimizes this but it seems dumb to depend on it?
-            for i in pos..(pos + cmp::max(start_len, end_len) + 1) {
-                if !trimmed.is_char_boundary(i) {
-                    pos += 1;
-                    continue 'outer;
-                }
-            }
-
-            if pos + start_len <= trimmed.len() && &trimmed[pos..(pos + start_len)] == multi_start {
+            if pos + start_len <= trimmed.len() &&
+               &trimmed[pos..(pos + start_len)] == multi_start_bytes {
                 pos += start_len;
                 in_comment = true;
-            } else if pos + end_len <= trimmed.len() && &trimmed[pos..(pos + end_len)] == multi_end {
+            } else if pos + end_len <= trimmed.len() && &trimmed[pos..(pos + end_len)] == multi_end_bytes {
                 pos += end_len;
                 in_comment = false;
             } else if !in_comment {
@@ -777,4 +768,72 @@ pub fn count_single_multi(filepath: &str,
     }
 
     c
+}
+
+// TODO(cgag): tests for these byte based functions
+pub fn is_whitespace(byte: u8) -> bool {
+    match byte {
+        b'\n' | b' ' | b'\t' | b'\r' | b'\x0B' | b'\x0C' => true,
+        _ => false,
+    }
+}
+
+pub fn starts_with(haystack: &[u8], needle: &str) -> bool {
+    // println!("haystack: {:?}, len: {}", haystack, haystack.len());
+    // println!("needle: {:?}", needle);
+    let needle_bytes = needle.as_bytes();
+    if needle_bytes.len() > haystack.len() {
+        return false;
+    }
+    &haystack[0..needle_bytes.len()] == needle_bytes
+}
+
+pub fn trim_left(s: &[u8]) -> Vec<u8> {
+    let x = s.to_owned();
+    x.into_iter().skip_while(|&b| is_whitespace(b)).collect()
+}
+
+pub fn contains(haystack: &[u8], needle: &str) -> bool {
+    // match memchr(b'\n', &self.buf[self.pos..self.buf.len()]) {
+    let n = needle.as_bytes();
+    match n.len() {
+        0 => false,
+        1 => memchr(n[0], haystack).is_some(),
+        2 => memchr2(n[0], n[1], haystack).is_some(),
+        3 => memchr3(n[0], n[1], n[2], haystack).is_some(),
+        _ => {
+            // TODO(cgag): do some fallback on bytes
+            // println!("WARNING: contains is only implemented for needles of len 3 or less, \
+            //           returning false");
+            false
+        }
+    }
+}
+
+mod tests {
+    use super::{contains, starts_with, trim_left};
+
+    #[test]
+    fn test_contains() {
+        assert_eq!(("ell", true), ("ell", contains("hello".as_bytes(), "ell")));
+        // assert_eq!(("hello", true),
+        //            ("hello", contains("hello".as_bytes(), "hello")));
+        assert_eq!(("i", false), ("i", contains("hello".as_bytes(), "i")));
+    }
+
+    #[test]
+    fn test_starts_with() {
+        assert_eq!(("h", true), ("h", starts_with("hello".as_bytes(), "h")));
+        assert_eq!(("he", true), ("he", starts_with("hello".as_bytes(), "he")));
+        assert_eq!(("hello", true),
+                   ("hello", starts_with("hello".as_bytes(), "hello")));
+        assert_eq!(("X", false), ("X", starts_with("hello".as_bytes(), "X")));
+    }
+
+    #[test]
+    fn test_trim_left() {
+        assert_eq!(true, starts_with(&trim_left("     X".as_bytes()), "X"));
+        // assert_eq!(false, starts_with(&trim_left("     X".as_bytes()), " "));
+    }
+
 }
