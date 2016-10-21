@@ -565,8 +565,7 @@ pub fn count_single(filepath: &str, single_start: &str) -> Count {
 
     let mut c = Count::default();
 
-    let a = ByteLines(bytes);
-    for byte_line in a.lines() {
+    for byte_line in ByteLines(bytes).lines() {
         let line = match std::str::from_utf8(byte_line) {
             Ok(s) => s,
             Err(_) => return Count::default(),
@@ -603,8 +602,7 @@ pub fn count_multi(filepath: &str, multi_start: &str, multi_end: &str) -> Count 
     let mut c = Count::default();
     let mut in_comment = false;
 
-    let a = ByteLines(bytes);
-    for byte_line in a.lines() {
+    for byte_line in ByteLines(bytes).lines() {
         let line = match std::str::from_utf8(byte_line) {
             Ok(s) => s,
             Err(_) => return Count::default(),
@@ -714,9 +712,7 @@ pub fn count_single_multi(filepath: &str,
     let mut c = Count::default();
     let mut in_comment = false;
 
-    let a = ByteLines(bytes);
-    for byte_line in a.lines() {
-        // for line in s.lines() {
+    for byte_line in ByteLines(bytes).lines() {
         let line = match std::str::from_utf8(byte_line) {
             Ok(s) => s,
             Err(_) => return Count::default(),
