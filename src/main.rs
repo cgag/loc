@@ -5,6 +5,7 @@ extern crate deque;
 extern crate itertools;
 extern crate num_cpus;
 extern crate walkdir;
+extern crate regex;
 
 use clap::{Arg, App, AppSettings};
 use walkdir::WalkDir;
@@ -14,6 +15,7 @@ use std::collections::hash_map::Entry;
 use std::thread;
 
 use deque::{Stealer, Stolen};
+use regex::Regex;
 
 use loc as c;
 
@@ -56,13 +58,12 @@ fn main() {
         .author("Curtis Gagliardi <curtis@curtis.io>")
         .about("counts things quickly hopefully")
         // TODO(cgag): actually implement filtering
-        // .arg(Arg::with_name("exclude")
-        //     .required(false)
-        //     .long("exclude")
-        //     .value_name("FILES/DIRS")
-        //     .takes_value(true)
-        //     .value_delimiter(",")
-        //     .help("comma separated list of files/directories to ignore"))
+        .arg(Arg::with_name("exclude")
+            .required(false)
+            .long("exclude")
+            .value_name("REGEX")
+            .takes_value(true)
+            .help("comma separated list of files/directories to ignore"))
         .arg(Arg::with_name("files")
              .required(false)
              .long("files")
@@ -82,6 +83,19 @@ fn main() {
     let filepaths = matches.values_of("target").unwrap();
     let sort = matches.value_of("sort").unwrap_or("language");
     let by_file = matches.is_present("files");
+    let exclude_regex = match matches.value_of("exclude") {
+        Some(rx_str) => {
+            match Regex::new(rx_str) {
+                Ok(r) => Some(r),
+                Err(e) => {
+                    println!("e: {}", e);
+                    std::process::exit(1);
+                }
+            }
+        }
+        None => None,
+    };
+
 
     let threads = num_cpus::get();
     let mut workers = vec![];
@@ -92,17 +106,22 @@ fn main() {
     }
 
     for filepath in filepaths {
-        for entry in WalkDir::new(filepath) {
-            let entry = match entry {
-                Ok(e) => e,
-                Err(_) => {
-                    continue;
+        if exclude_regex.is_some() {
+            let ref r = &exclude_regex.clone().unwrap();
+            for entry in WalkDir::new(filepath).into_iter().filter_map(|e| e.ok()) {
+                if entry.file_type().is_file() {
+                    let path = entry.path().to_str().unwrap();
+                    if !r.is_match(path) {
+                        workq.push(Work::File(String::from(path)));
+                    }
                 }
-            };
-
-            if entry.file_type().is_file() {
-                let path = entry.path().to_str().unwrap();
-                workq.push(Work::File(String::from(path)));
+            }
+        } else {
+            for entry in WalkDir::new(filepath).into_iter().filter_map(|e| e.ok()) {
+                if entry.file_type().is_file() {
+                    let path = entry.path().to_str().unwrap();
+                    workq.push(Work::File(String::from(path)));
+                }
             }
         }
     }
