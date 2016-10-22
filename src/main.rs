@@ -28,10 +28,17 @@ struct Worker {
     chan: Stealer<Work>,
 }
 
+#[derive(Clone)]
+struct FileCount {
+    path: String,
+    lang: c::Lang,
+    count: c::Count,
+}
+
 // TODO(cgag): name this (lang, path, count) tuple concept and make it a struct
 impl Worker {
-    fn run(self) -> Vec<(c::Lang, String, c::Count)> {
-        let mut v: Vec<(c::Lang, String, c::Count)> = vec![];
+    fn run(self) -> Vec<FileCount> {
+        let mut v: Vec<FileCount> = vec![];
         loop {
             match self.chan.steal() {
                 // What causes these?
@@ -41,7 +48,11 @@ impl Worker {
                     let lang = c::lang_from_ext(&path);
                     if lang != c::Lang::Unrecognized {
                         let count = c::count(&path);
-                        v.push((lang, String::from(path), count));
+                        v.push(FileCount {
+                            lang: lang,
+                            path: String::from(path),
+                            count: count,
+                        });
                     }
                 }
             };
@@ -130,26 +141,29 @@ fn main() {
         workq.push(Work::Quit);
     }
 
-    let mut counts: Vec<(c::Lang, String, c::Count)> = Vec::new();
+    let mut counts: Vec<FileCount> = Vec::new();
     for worker in workers {
         counts.extend(worker.join().unwrap().iter().cloned())
     }
 
     let mut lang_counts_by_file: HashMap<c::Lang, Vec<(String, c::Count)>> = HashMap::new();
-    for (lang, filepath, count) in counts {
+    for FileCount { lang, path, count } in counts {
         match lang_counts_by_file.entry(lang) {
             Entry::Occupied(mut lang_counts_by_file) => {
-                lang_counts_by_file.get_mut().push((filepath, count))
+                lang_counts_by_file.get_mut().push((path, count))
             }
             Entry::Vacant(lang_counts_by_file) => {
-                lang_counts_by_file.insert(vec![(filepath, count)]);
+                lang_counts_by_file.insert(vec![(path, count)]);
             }
         };
     }
 
+    // TODO(cgag): string repeat function?
     let linesep = "---------------------------------------------------------------------------------";
 
     if by_file {
+        // TODO(cgag): Need sorting for by_file as well.
+
         println!("{}", linesep);
         println!(" {0: <18} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
                  "Language",
@@ -167,7 +181,6 @@ fn main() {
             }
             println!("{}", linesep);
             println!(" {0: <18} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
-                     // lang,
                      lang,
                      count_vec.len(),
                      total.lines,
@@ -177,6 +190,7 @@ fn main() {
             println!("{}", lang);
             println!("{}", linesep);
             for (path, count) in count_vec {
+                // TODO(cgag): grab last-n-chars fn from hostblock
                 let mut path_tail = String::from(path);
                 if path_tail.len() > 25 {
                     path_tail = path_tail.chars().skip(path_tail.len() - 25).collect::<String>();
@@ -227,7 +241,7 @@ fn main() {
 
         let mut totals = c::LangTotal {
             files: 0,
-            count: Default::default(),
+            count: c::Count::default(),
         };
         for &(_, total) in &totals_by_lang {
             totals.files += total.files;
@@ -236,7 +250,6 @@ fn main() {
             totals.count.comment += total.count.comment;
             totals.count.lines += total.count.lines;
         }
-
 
         println!("{}", linesep);
         println!(" {0: <18} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",

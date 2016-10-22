@@ -741,10 +741,11 @@ pub fn count_single_multi(filepath: &str,
 
         let start_len = multi_start.len();
         let end_len = multi_end.len();
+        let trimmed_len = trimmed.len();
 
         let mut pos = 0;
         let mut found_code = false;
-        'outer: while pos < trimmed.len() {
+        'outer: while pos < trimmed_len {
             // TODO(cgag): must be a less stupid way to do this.  At the
             // very least don't recalculate max over and over.  LLVM probably
             // optimizes this but it seems dumb to depend on it?
@@ -755,10 +756,10 @@ pub fn count_single_multi(filepath: &str,
                 }
             }
 
-            if pos + start_len <= trimmed.len() && &trimmed[pos..(pos + start_len)] == multi_start {
+            if pos + start_len <= trimmed_len && &trimmed[pos..(pos + start_len)] == multi_start {
                 pos += start_len;
                 in_comment = true;
-            } else if pos + end_len <= trimmed.len() && &trimmed[pos..(pos + end_len)] == multi_end {
+            } else if pos + end_len <= trimmed_len && &trimmed[pos..(pos + end_len)] == multi_end {
                 pos += end_len;
                 in_comment = false;
             } else if !in_comment {
