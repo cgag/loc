@@ -17,7 +17,7 @@ use std::thread;
 use deque::{Stealer, Stolen};
 use regex::Regex;
 
-use loc as c;
+use loc::*;
 
 enum Work {
     File(String),
@@ -31,11 +31,10 @@ struct Worker {
 #[derive(Clone)]
 struct FileCount {
     path: String,
-    lang: c::Lang,
-    count: c::Count,
+    lang: Lang,
+    count: Count,
 }
 
-// TODO(cgag): name this (lang, path, count) tuple concept and make it a struct
 impl Worker {
     fn run(self) -> Vec<FileCount> {
         let mut v: Vec<FileCount> = vec![];
@@ -45,9 +44,9 @@ impl Worker {
                 Stolen::Empty | Stolen::Abort => continue,
                 Stolen::Data(Work::Quit) => break,
                 Stolen::Data(Work::File(path)) => {
-                    let lang = c::lang_from_ext(&path);
-                    if lang != c::Lang::Unrecognized {
-                        let count = c::count(&path);
+                    let lang = lang_from_ext(&path);
+                    if lang != Lang::Unrecognized {
+                        let count = count(&path);
                         v.push(FileCount {
                             lang: lang,
                             path: String::from(path),
@@ -118,7 +117,7 @@ fn main() {
 
     for filepath in filepaths {
         if exclude_regex.is_some() {
-            let ref r = &exclude_regex.clone().unwrap();
+            let r = &&exclude_regex.clone().unwrap();
             for entry in WalkDir::new(filepath).into_iter().filter_map(|e| e.ok()) {
                 if entry.file_type().is_file() {
                     let path = entry.path().to_str().unwrap();
@@ -141,29 +140,26 @@ fn main() {
         workq.push(Work::Quit);
     }
 
-    let mut counts: Vec<FileCount> = Vec::new();
+    let mut filecounts: Vec<FileCount> = Vec::new();
     for worker in workers {
-        counts.extend(worker.join().unwrap().iter().cloned())
+        filecounts.extend(worker.join().unwrap().iter().cloned())
     }
 
-    let mut lang_counts_by_file: HashMap<c::Lang, Vec<(String, c::Count)>> = HashMap::new();
-    for FileCount { lang, path, count } in counts {
-        match lang_counts_by_file.entry(lang) {
-            Entry::Occupied(mut lang_counts_by_file) => {
-                lang_counts_by_file.get_mut().push((path, count))
-            }
-            Entry::Vacant(lang_counts_by_file) => {
-                lang_counts_by_file.insert(vec![(path, count)]);
+    let mut by_lang: HashMap<Lang, Vec<FileCount>> = HashMap::new();
+    for fc in filecounts {
+        match by_lang.entry(fc.lang) {
+            Entry::Occupied(mut by_lang) => by_lang.get_mut().push(fc),
+            Entry::Vacant(by_lang) => {
+                by_lang.insert(vec![fc]);
             }
         };
     }
 
     // TODO(cgag): string repeat function?
-    let linesep = "---------------------------------------------------------------------------------";
+    let linesep = str_repeat("-", 81);
 
     if by_file {
         // TODO(cgag): Need sorting for by_file as well.
-        //
         println!("{}", linesep);
         println!(" {0: <18} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
                  "Language",
@@ -174,52 +170,48 @@ fn main() {
                  "Code");
         println!("{}", linesep);
 
-        for (lang, count_vec) in lang_counts_by_file {
-            let mut total = c::Count::default();
-            for &(_, ref count) in &count_vec {
-                total.merge(count);
+        for (lang, filecounts) in by_lang {
+            let mut total = Count::default();
+            for fc in &filecounts {
+                total.merge(&fc.count);
             }
+
             println!("{}", linesep);
             println!(" {0: <18} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
                      lang,
-                     count_vec.len(),
+                     filecounts.len(),
                      total.lines,
                      total.blank,
                      total.comment,
                      total.code);
-            println!("{}", lang);
+
             println!("{}", linesep);
-            for (path, count) in count_vec {
-                // TODO(cgag): grab last-n-chars fn from hostblock
-                let mut path_tail = String::from(path);
-                if path_tail.len() > 25 {
-                    path_tail = path_tail.chars().skip(path_tail.len() - 25).collect::<String>();
-                }
+            for fc in filecounts {
                 println!("|{0: <25} {1: >12} {2: >12} {3: >12} {4: >12}",
-                         path_tail,
-                         count.lines,
-                         count.blank,
-                         count.comment,
-                         count.code);
+                         last_n_chars(&fc.path, 25),
+                         fc.count.lines,
+                         fc.count.blank,
+                         fc.count.comment,
+                         fc.count.code);
             }
         }
     } else {
-        let mut lang_totals: HashMap<&c::Lang, c::LangTotal> = HashMap::new();
-        for (lang, count_vec) in &lang_counts_by_file {
-            let mut lang_total: c::Count = Default::default();
-            for &(_, ref count) in count_vec {
-                lang_total.merge(count);
+        let mut lang_totals: HashMap<&Lang, LangTotal> = HashMap::new();
+        for (lang, filecounts) in &by_lang {
+            let mut lang_total = Count::default();
+            for fc in filecounts {
+                lang_total.merge(&fc.count);
             }
             lang_totals.insert(lang,
-                               c::LangTotal {
-                                   files: count_vec.len() as u32,
+                               LangTotal {
+                                   files: filecounts.len() as u32,
                                    count: lang_total,
                                });
         }
 
-        let mut totals_by_lang = lang_totals.iter().collect::<Vec<(&&c::Lang, &c::LangTotal)>>();
+        let mut totals_by_lang = lang_totals.iter().collect::<Vec<(&&Lang, &LangTotal)>>();
         match sort {
-            "language" => totals_by_lang.sort_by(|&(l1, _), &(l2, _)| l1.to_s().cmp(&l2.to_s())),
+            "language" => totals_by_lang.sort_by(|&(l1, _), &(l2, _)| l1.to_s().cmp(l2.to_s())),
             "files" => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.files.cmp(&c1.files)),
             "code" => {
                 totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.code.cmp(&c1.count.code))
@@ -235,13 +227,13 @@ fn main() {
             }
             _ => {
                 println!("invalid sort option {}, sorting by language", sort);
-                totals_by_lang.sort_by(|&(l1, _), &(l2, _)| l1.to_s().cmp(&l2.to_s()))
+                totals_by_lang.sort_by(|&(l1, _), &(l2, _)| l1.to_s().cmp(l2.to_s()))
             }
         }
 
-        let mut totals = c::LangTotal {
+        let mut totals = LangTotal {
             files: 0,
-            count: c::Count::default(),
+            count: Count::default(),
         };
         for &(_, total) in &totals_by_lang {
             totals.files += total.files;
@@ -281,4 +273,15 @@ fn main() {
                  totals.count.code);
         println!("{}", linesep);
     }
+}
+
+fn last_n_chars(s: &str, n: usize) -> String {
+    if s.len() <= n {
+        return String::from(s);
+    }
+    s.chars().skip(s.len() - n).collect::<String>()
+}
+
+fn str_repeat(s: &str, n: usize) -> String {
+    std::iter::repeat(s).take(n).collect::<Vec<_>>().join("")
 }
