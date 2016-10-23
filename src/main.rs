@@ -99,7 +99,7 @@ fn main() {
             match Regex::new(rx_str) {
                 Ok(r) => Some(r),
                 Err(e) => {
-                    println!("e: {}", e);
+                    println!("Error processing regex: {}", e);
                     std::process::exit(1);
                 }
             }
@@ -163,7 +163,7 @@ fn main() {
 
     if by_file {
         // TODO(cgag): Need sorting for by_file as well.
-
+        //
         println!("{}", linesep);
         println!(" {0: <18} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
                  "Language",
