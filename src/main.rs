@@ -231,17 +231,6 @@ fn main() {
             }
         }
 
-        let mut totals = LangTotal {
-            files: 0,
-            count: Count::default(),
-        };
-        for &(_, total) in &totals_by_lang {
-            totals.files += total.files;
-            totals.count.code += total.count.code;
-            totals.count.blank += total.count.blank;
-            totals.count.comment += total.count.comment;
-            totals.count.lines += total.count.lines;
-        }
 
         println!("{}", linesep);
         println!(" {0: <18} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
@@ -261,6 +250,18 @@ fn main() {
                      total.count.blank,
                      total.count.comment,
                      total.count.code);
+        }
+
+        let mut totals = LangTotal {
+            files: 0,
+            count: Count::default(),
+        };
+        for &(_, total) in &totals_by_lang {
+            totals.files += total.files;
+            totals.count.code += total.count.code;
+            totals.count.blank += total.count.blank;
+            totals.count.comment += total.count.comment;
+            totals.count.lines += total.count.lines;
         }
 
         println!("{}", linesep);
