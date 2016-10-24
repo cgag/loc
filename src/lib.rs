@@ -354,7 +354,6 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         // "cshtml" => Razor,
         "f" | "for" | "ftn" | "f77" | "pfo" => FortranLegacy,
         "f03" | "f08" | "f90" | "f95" => FortranModern,
-        // // TODO(cgag): What's the correct extension? Any? Pragma?
         "makefile" | "mk" => Makefile,
         "mm" => ObjectiveCpp,
         "nim" => Nim,
@@ -412,10 +411,10 @@ enum ConfigTuple<'a> {
     // Everything (multiple singles, multiple multiline)
     EV(Vec<&'a str>, Vec<(&'a str, &'a str)>),
 }
+use self::ConfigTuple::*;
 
 const UNLIKELY: &'static str = "SLkJJJJJ<!*$(!*&)(*@^#$K8K!(*76(*&(38j8";
 
-use self::ConfigTuple::*;
 pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
 
     let c_style = SM("//", "/*", "*/");
@@ -435,6 +434,8 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Protobuf => SO("//"),
         VimScript => SO("\""),
 
+        // TODO(cgag): Well, some architectures use ;, @, |, etc.  Figure out something
+        // better?
         Assembly => SM("#", "/*", "*/"),
         CoffeeScript => SM("#", "###", "###"),
         D => SM("//", "/*", "*/"),
@@ -459,8 +460,6 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Php => EV(vec!["#", "//"], vec![("/*", "*/")]),
 
         // Pascal?
-        // TODO(cgag): Well, some architectures use ;, @, |, etc.
-        // Need a way to specify more than one possible comment char.
         Text | Markdown | Json | IntelHex | Hex | ReStructuredText => no_comments,
 
         Coq | Sml | Wolfram | OCaml => ml_style,
