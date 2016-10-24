@@ -1,6 +1,11 @@
 `loc` is a for counting lines of code. It's a rust implementation of [cloc](http://cloc.sourceforge.net/).  It's more 100x faster than cloc. There's another rust line counting tool called [tokei](https://github.com/Aaronepower/tokei). loc is ~5-10x faster than tokei, though a bit less featureful.
 
-I can count my 400k file `src` directory (thanks node) in just under 7 seconds with loc, in a 1m14s with tokei, and it's completely untenable with cloc.
+I can count my 400k file `src` directory (thanks node) in just under 7 seconds with loc, in a 1m14s with tokei, and I'm not even willing to try with cloc.
+
+Counting just the dragonflybsd codebase (~9 million lines):
+  loc: 1.09 seconds
+  tokei: 5.3 seconds
+  cloc: 1 minute, 50 seconds
 
 ### Installation
 
