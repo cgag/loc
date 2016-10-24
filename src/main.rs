@@ -283,6 +283,7 @@ fn last_n_chars(s: &str, n: usize) -> String {
     s.chars().skip(s.len() - n).collect::<String>()
 }
 
+
 fn str_repeat(s: &str, n: usize) -> String {
     std::iter::repeat(s).take(n).collect::<Vec<_>>().join("")
 }
