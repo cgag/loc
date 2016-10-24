@@ -116,6 +116,7 @@ fn main() {
     }
 
     for filepath in filepaths {
+        // TODO(cgag): cleanup?
         if exclude_regex.is_some() {
             let r = &&exclude_regex.clone().unwrap();
             for entry in WalkDir::new(filepath).into_iter().filter_map(|e| e.ok()) {
@@ -155,7 +156,6 @@ fn main() {
         };
     }
 
-    // TODO(cgag): string repeat function?
     let linesep = str_repeat("-", 81);
 
     if by_file {
