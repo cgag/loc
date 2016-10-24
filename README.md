@@ -10,6 +10,7 @@ Counting just the dragonflybsd codebase (~9 million lines):
 ### Installation
 
 I've added a binary for your average non-musl linux system to the releases page. For anyone familiar with Rust there's `cargo install loc`.
+If you want to install Rust/Cargo, this is probably the easiest way: [https://www.rustup.rs/](https://www.rustup.rs/).
 
 ### Supported Languages
 
