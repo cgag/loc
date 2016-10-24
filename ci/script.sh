@@ -27,7 +27,7 @@ run_test_suite() {
     fi
 
     cargo build --target $TARGET --verbose
-    cargo run --target $TARGET
+    cargo run --target $TARGET .
     cargo test --target $TARGET
 
     # sanity check the file type
