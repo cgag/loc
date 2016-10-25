@@ -19,39 +19,39 @@ env:
 matrix:
   include:
     # Nightly channel
-    - os: linux
-      rust: nightly
-      env: TARGET=aarch64-unknown-linux-gnu
-      dist: trusty
-      sudo: required
-      addons:
-        apt:
-          packages: *aarch64_unknown_linux_gnu
-    - os: linux
-      rust: nightly
-      env: TARGET=armv7-unknown-linux-gnueabihf
-      sudo: required
-      addons:
-        apt:
-          # Use the same packages the stable version uses
-          packages: *armv7_unknown_linux_gnueabihf
-    - os: osx
-      rust: nightly
-      env: TARGET=i686-apple-darwin
+    # - os: linux
+    #   rust: nightly
+    #   env: TARGET=aarch64-unknown-linux-gnu
+    #   dist: trusty
+    #   sudo: required
+    #   addons:
+    #     apt:
+    #       packages: *aarch64_unknown_linux_gnu
+    # - os: linux
+    #   rust: nightly
+    #   env: TARGET=armv7-unknown-linux-gnueabihf
+    #   sudo: required
+    #   addons:
+    #     apt:
+    #       # Use the same packages the stable version uses
+    #       packages: *armv7_unknown_linux_gnueabihf
+    # - os: osx
+    #   rust: nightly
+    #   env: TARGET=i686-apple-darwin
     - os: linux
       rust: nightly
       env: TARGET=i686-unknown-linux-gnu
       addons:
         apt:
           packages: *i686_unknown_linux_gnu
-    - os: linux
-      rust: nightly
-      env: TARGET=i686-unknown-linux-musl
-      dist: trusty
-      sudo: required
-      addons:
-        apt:
-          packages: *musl_packages
+    # - os: linux
+    #   rust: nightly
+    #   env: TARGET=i686-unknown-linux-musl
+    #   dist: trusty
+    #   sudo: required
+    #   addons:
+    #     apt:
+    #       packages: *musl_packages
     - os: osx
       rust: nightly
       env: TARGET=x86_64-apple-darwin
@@ -67,12 +67,10 @@ matrix:
         apt:
           packages: *musl_packages
   allow_failures:
-    # TODO You might need to allow failures for some target on some channel for some reason. Below
-    # there's one (commented out) example of how to do that. Just change the OS, channel and TARGET
-    # as needed.
-    # - os: linux
-    #   rust: stable
-    #   env: TARGET=x86_64-unknown-linux-gnu
+    # TODO(cgag): fix this build, we should absolutely work with musl
+    - os: linux
+      rust: nightly
+      env: TARGET=x86_64-unknown-linux-musl
 
 before_install:
   - export PATH="$PATH:$HOME/.cargo/bin"
