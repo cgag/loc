@@ -136,6 +136,7 @@ pub enum Lang {
     Sml,
     Sql,
     Swift,
+    Tcl,
     Tex,
     Text,
     Toml,
@@ -231,6 +232,7 @@ impl Lang {
             Sml => "SML",
             Sql => "SQL",
             Swift => "Swift",
+            Tcl => "Tcl",
             Tex => "TeX",
             Text => "Plain Text",
             Toml => "Toml",
@@ -350,6 +352,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "sml" => Sml,
         "sql" => Sql,
         "swift" => Swift,
+        "tcl" => Tcl,
         "tex" | "sty" => Tex,
         "toml" => Toml,
         "ts" => TypeScript,
@@ -441,7 +444,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
 
         Html | Polly | RubyHtml | XML => html_style,
 
-        BourneShell | Make | Awk | CShell | Makefile | Nim | R | Toml | Yaml | Zsh => sh_style,
+        BourneShell | Make | Awk | CShell | Makefile | Nim | R | Tcl | Toml | Yaml | Zsh => sh_style,
 
         // TODO(cgag): not 100% sure that yacc belongs here.
         C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CSharp |
