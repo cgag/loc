@@ -81,6 +81,8 @@ pub enum Lang {
     Coq,
     Cpp,
     Css,
+    CUDA,
+    CUDAHeader,
     D,
     Dart,
     DeviceTree,
@@ -178,6 +180,8 @@ impl Lang {
             Coq => "Coq",
             Cpp => "C++",
             Css => "CSS",
+            CUDA => "CUDA",
+            CUDAHeader => "CUDA Header",
             D => "D",
             Dart => "Dart",
             DeviceTree => "DeviceTree",
@@ -291,6 +295,8 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "cs" => CSharp,
         "csh" => CShell,
         "css" => Css,
+        "cu" => CUDA,
+        "cuh" => CUDAHeader,
         "d" => D,
         "dart" => Dart,
         "dts" | "dtsi" => DeviceTree,
@@ -450,8 +456,8 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         BourneShell | Make | Awk | CShell | Makefile | Nim | R | Tcl | Toml | Yaml | Zsh => sh_style,
 
         // TODO(cgag): not 100% sure that yacc belongs here.
-        C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CSharp |
-        Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx | Kotlin | Less |
+        C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA | CUDAHeader |
+        CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx | Kotlin | Less |
         LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift | TypeScript |
         UnrealScript => c_style,
 
