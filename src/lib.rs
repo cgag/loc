@@ -62,6 +62,7 @@ pub enum LineConfig<'a> {
 pub enum Lang {
     ActionScript,
     Ada,
+    Agda,
     Asp,
     AspNet,
     Assembly,
@@ -158,6 +159,7 @@ impl Lang {
         match *self {
             ActionScript => "ActionScript",
             Ada => "Ada",
+            Agda => "Agda",
             Asp => "ASP",
             AspNet => "ASP.NET",
             Assembly => "Assembly",
@@ -278,6 +280,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
     match &*ext {
         "4th" | "forth" | "fr" | "frt" | "fth" | "f83" | "fb" | "fpm" | "e4" | "rx" | "ft" => Forth,
         "ada" | "adb" | "ads" | "pad" => Ada,
+        "agda" => Agda,
         "as" => ActionScript,
         "awk" => Awk,
         "bat" | "btm" | "cmd" => Batch,
@@ -399,7 +402,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Batch => SO("REM"),
         Erlang | Tex => SO("%"),
         FortranModern => SO("!"),
-        Haskell | Idris => SM("--", "{-", "-}"),
+        Haskell | Idris | Agda => SM("--", "{-", "-}"),
         INI => SO(";"),
         Protobuf => SO("//"),
         VimScript => SO("\""),
