@@ -87,6 +87,7 @@ pub enum Lang {
     Forth,
     FortranLegacy,
     FortranModern,
+    Glsl,
     Go,
     Handlebars,
     Haskell,
@@ -181,6 +182,7 @@ impl Lang {
             Forth => "Forth",
             FortranLegacy => "FORTRAN Legacy",
             FortranModern => "FORTRAN Modern",
+            Glsl => "GLSL",
             Go => "Go",
             Handlebars => "Handlebars",
             Haskell => "Haskell",
@@ -289,6 +291,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "dts" | "dtsi" => DeviceTree,
         "el" | "lisp" | "lsp" => Lisp,
         "erl" | "hrl" => Erlang,
+        "vert" | "tesc" | "tese" | "geom" | "frag" | "comp" => Glsl,
         "go" => Go,
         "h" | "hh" | "hpp" | "hxx" => CCppHeader,
         "hbs" | "handlebars" => Handlebars,
@@ -444,7 +447,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
 
         // TODO(cgag): not 100% sure that yacc belongs here.
         C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CSharp |
-        Dart | DeviceTree | Go | Jai | Java | JavaScript | Jsx | Kotlin | Less | LinkerScript |
+        Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx | Kotlin | Less | LinkerScript |
         ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift | TypeScript | UnrealScript |
         Unrecognized => c_style,
     };
