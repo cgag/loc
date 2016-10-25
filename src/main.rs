@@ -91,7 +91,7 @@ fn main() {
         .get_matches();
 
     let filepaths = matches.values_of("target").unwrap();
-    let sort = matches.value_of("sort").unwrap_or("language");
+    let sort = matches.value_of("sort").unwrap_or("code");
     let by_file = matches.is_present("files");
     let exclude_regex = match matches.value_of("exclude") {
         Some(rx_str) => {
@@ -226,8 +226,8 @@ fn main() {
                 totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.lines.cmp(&c1.count.lines))
             }
             _ => {
-                println!("invalid sort option {}, sorting by language", sort);
-                totals_by_lang.sort_by(|&(l1, _), &(l2, _)| l1.to_s().cmp(l2.to_s()))
+                println!("invalid sort option {}, sorting by code", sort);
+                totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.code.cmp(&c1.count.code))
             }
         }
 
