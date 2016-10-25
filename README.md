@@ -12,6 +12,22 @@ Counting just the dragonflybsd codebase (~9 million lines):
 There are binaries available on the releases page, thanks to the wonderful rust-everywhere project and travisci. For anyone familiar with Rust there's `cargo install loc`.
 If you want to install Rust/Cargo, this is probably the easiest way: [https://www.rustup.rs/](https://www.rustup.rs/).
 
+### Known Issues
+Fortran has a rule that comments must start with the first character of a line. I only check if it's the first non-whitespace character of a line. I don't know
+how often this is a problem in real code.  I would think not often.
+
+Comments inside string literals: You can get incorrect counts if your code has something like this:
+
+```
+x = "/* I haven't slept \ 
+for 10 days \
+because that would be too long \
+*/";
+```
+
+loc counts the first line and last lines correctly as code, but the middle
+lines will be incorrectly counted as comments.
+
 ### Supported Languages
 
 ```
