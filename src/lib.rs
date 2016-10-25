@@ -317,7 +317,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "asa" | "asp" => Asp,
         "asax" | "ascx" | "asmx" | "aspx" | "master" | "sitemap" | "webinfo" => AspNet,
         "in" => Autoconf,
-        "clj" => Clojure,
+        "clj" | "cljs" | "cljc" => Clojure,
 
         "f" | "for" | "ftn" | "f77" | "pfo" => FortranLegacy,
         "f03" | "f08" | "f90" | "f95" => FortranModern,
