@@ -38,12 +38,12 @@ matrix:
     # - os: osx
     #   rust: nightly
     #   env: TARGET=i686-apple-darwin
-    - os: linux
-      rust: nightly
-      env: TARGET=i686-unknown-linux-gnu
-      addons:
-        apt:
-          packages: *i686_unknown_linux_gnu
+    # - os: linux
+    #   rust: nightly
+    #   env: TARGET=i686-unknown-linux-gnu
+    #   addons:
+    #     apt:
+    #       packages: *i686_unknown_linux_gnu
     # - os: linux
     #   rust: nightly
     #   env: TARGET=i686-unknown-linux-musl
