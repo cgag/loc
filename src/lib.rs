@@ -314,8 +314,6 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "in" => Autoconf,
         "clj" => Clojure,
 
-        // "bash" | "sh" => Bash,
-        // "cfm" => ColdFusion,
         "f" | "for" | "ftn" | "f77" | "pfo" => FortranLegacy,
         "f03" | "f08" | "f90" | "f95" => FortranModern,
         "makefile" | "mk" => Makefile,
@@ -412,7 +410,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         // which one is right? = or =pod?
         // Perl => SM("#""=", "=cut"),
         Perl => SM("#", "=pod", "=cut"),
-        Python => SM("#", "'\''", "'\''"),
+        Python => SM("#", "'''", "'''"),
         Ruby => SM("#", "=begin", "=end"),
         Sql => SM("--", "/*", "*/"),
 
@@ -445,8 +443,11 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         // TODO(cgag): not 100% sure that yacc belongs here.
         C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CSharp |
         Dart | DeviceTree | Go | Jai | Java | JavaScript | Jsx | Kotlin | Less | LinkerScript |
-        ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift | TypeScript | UnrealScript |
-        Unrecognized => c_style,
+        ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift | TypeScript | UnrealScript => {
+            c_style
+        }
+
+        Unrecognized => unreachable!(),
     };
 
     match ctuple {
@@ -611,13 +612,15 @@ pub fn count_multi(filepath: &str, multi_start: &str, multi_end: &str) -> Count 
                 }
             }
 
-            if pos + start_len <= trimmed.len() &&
-               &trimmed[pos..pos + start_len] == multiline_start {
+            if !in_comment && pos + start_len <= trimmed.len() &&
+               &trimmed[pos..(pos + start_len)] == multi_start {
                 pos += start_len;
                 in_comment = true;
-            } else if pos + end_len <= trimmed.len() && &trimmed[pos..pos + end_len] == multiline_end {
+            } else if in_comment && pos + end_len <= trimmed.len() &&
+               &trimmed[pos..(pos + end_len)] == multi_end {
                 pos += end_len;
                 in_comment = false;
+                // TODO(cgag): should we bother handling whitespace here?
             } else if !in_comment {
                 found_code = true;
                 pos += 1;
@@ -665,8 +668,6 @@ pub fn count_everything<'a>(filepath: &str,
 
     total_count
 }
-
-
 
 pub fn count_single_multi(filepath: &str,
                           single_start: &str,
@@ -729,12 +730,15 @@ pub fn count_single_multi(filepath: &str,
                 }
             }
 
-            if pos + start_len <= trimmed_len && &trimmed[pos..(pos + start_len)] == multi_start {
+            if !in_comment && pos + start_len <= trimmed_len &&
+               &trimmed[pos..(pos + start_len)] == multi_start {
                 pos += start_len;
                 in_comment = true;
-            } else if pos + end_len <= trimmed_len && &trimmed[pos..(pos + end_len)] == multi_end {
+            } else if in_comment && pos + end_len <= trimmed_len &&
+               &trimmed[pos..(pos + end_len)] == multi_end {
                 pos += end_len;
                 in_comment = false;
+                // TODO(cgag): should we bother handling whitespace here?
             } else if !in_comment {
                 found_code = true;
                 pos += 1;
