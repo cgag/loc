@@ -35,6 +35,7 @@ struct FileCount {
     count: Count,
 }
 
+// This concurrency pattern ripped directly from ripgrep
 impl Worker {
     fn run(self) -> Vec<FileCount> {
         let mut v: Vec<FileCount> = vec![];
