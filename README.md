@@ -119,3 +119,7 @@ Yacc
 Yaml
 Zsh
 ```
+
+## Attributions
+
+This project contains code from [Tokei](https://github.com/Aaronepower/tokei) by [Aaronepower](https://github.com/Aaronepower) and [ripgrep](https://github.com/BurntSushi/ripgrep) by [BurntSushi](https://github.com/BurntSushi).
