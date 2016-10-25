@@ -51,6 +51,7 @@ ColdFusionScript
 Coq
 Cpp
 Css
+CUDA
 D
 Dart
 DeviceTree
