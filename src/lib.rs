@@ -241,7 +241,7 @@ impl Lang {
             XML => "XML",
             Yacc => "Yacc",
             Yaml => "YAML",
-            Zsh => "Zsh",
+            Zsh => "Z Shell",
 
             Unrecognized => "Unrecognized",
         }
