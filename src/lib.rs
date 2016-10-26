@@ -134,6 +134,7 @@ pub enum Lang {
     Ruby,
     RubyHtml,
     Rust,
+    SaltStack,
     Sass,
     Scala,
     Sml,
@@ -233,6 +234,7 @@ impl Lang {
             Ruby => "Ruby",
             RubyHtml => "RubyHtml",
             Rust => "Rust",
+            SaltStack => "SaltStack",
             Sass => "Sass",
             Scala => "Scala",
             Sml => "SML",
@@ -358,6 +360,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "s" | "asm" => Assembly,
         "sass" | "scss" => Sass,
         "sc" | "scala" => Scala,
+        "sls" => SaltStack,
         "sml" => Sml,
         "sql" => Sql,
         "swift" => Swift,
@@ -453,13 +456,14 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
 
         Html | Polly | RubyHtml | XML => html_style,
 
-        BourneShell | Make | Awk | CShell | Makefile | Nim | R | Tcl | Toml | Yaml | Zsh => sh_style,
+        BourneShell | Make | Awk | CShell | Makefile | Nim | R | SaltStack | Tcl | Toml |
+        Yaml | Zsh => sh_style,
 
         // TODO(cgag): not 100% sure that yacc belongs here.
-        C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA | CUDAHeader |
-        CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx | Kotlin | Less |
-        LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift | TypeScript |
-        UnrealScript => c_style,
+        C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA |
+        CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx |
+        Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift |
+        TypeScript | UnrealScript => c_style,
 
         Unrecognized => unreachable!(),
     };
