@@ -45,7 +45,6 @@ Awk
 Batch
 BourneShell
 C
-CCppHeader
 CSharp
 CShell
 Clojure
