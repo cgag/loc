@@ -34,96 +34,98 @@ lines will be incorrectly counted as comments.
 
 ### Supported Languages
 
-```
-ActionScript
-Ada
-Asp
-AspNet
-Assembly
-Autoconf
-Awk
-Batch
-BourneShell
-C
-CCppHeader
-CSharp
-CShell
-Clojure
-CoffeeScript
-ColdFusion
-ColdFusionScript
-Coq
-Cpp
-Css
-CUDA
-D
-Dart
-DeviceTree
-Erlang
-Forth
-FortranLegacy
-FortranModern
-GLSL
-Go
-Handlebars
-Haskell
-Hex
-Html
-INI
-Idris
-IntelHex
-Isabelle
-Jai
-Java
-JavaScript
-Json
-Jsx
-Julia
-Kotlin
-Less
-LinkerScript
-Lisp
-Lua
-Make
-Makefile
-Markdown
-Mustache
-Nim
-OCaml
-ObjectiveC
-ObjectiveCpp
-Oz
-Pascal
-Perl
-Php
-Polly
-Prolog
-Protobuf
-Python
-Qcl
-R
-Razor
-ReStructuredText
-Ruby
-RubyHtml
-Rust
-Sass
-Scala
-Sml
-Sql
-Swift
-Tex
-Text
-Toml
-TypeScript
-UnrealScript
-VimScript
-Wolfram
-XML
-Yacc
-Yaml
-Zsh
-```
+- ActionScript
+- Ada
+- Agda
+- ASP
+- ASP.NET
+- Assembly
+- Autoconf
+- Awk
+- Batch
+- Bourne Shell
+- C
+- C Shell
+- C/C++ Header
+- C#
+- C++
+- Clojure
+- CoffeeScript
+- ColdFusion
+- ColdFusionScript
+- Coq
+- CSS
+- CUDA
+- CUDA Header
+- D
+- Dart
+- DeviceTree
+- Erlang
+- Forth
+- FORTRAN Legacy
+- FORTRAN Modern
+- GLSL
+- Go
+- Handlebars
+- Haskell
+- Hex
+- HTML
+- Idris
+- INI
+- Intel Hex
+- Isabelle
+- Jai
+- Java
+- JavaScript
+- JSON
+- Jsx
+- Julia
+- Kotlin
+- Less
+- LinkerScript
+- Lisp
+- Lua
+- Make
+- Makefile
+- Markdown
+- Mustache
+- Nim
+- Objective-C
+- Objective-C++
+- OCaml
+- Oz
+- Pascal
+- Perl
+- PHP
+- Plain Text
+- Polly
+- Prolog
+- Protobuf
+- Python
+- Qcl
+- R
+- Razor
+- reStructuredText
+- Ruby
+- RubyHtml
+- Rust
+- SaltStack
+- Sass
+- Scala
+- SML
+- SQL
+- Swift
+- Tcl
+- TeX
+- Toml
+- TypeScript
+- UnrealScript
+- VimL
+- Wolfram
+- XML
+- Yacc
+- YAML
+- Z Shell
 
 ## Attributions
 
