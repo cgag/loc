@@ -81,6 +81,7 @@ lines will be incorrectly counted as comments.
 - Jsx
 - Julia
 - Kotlin
+- Lean
 - Less
 - LinkerScript
 - Lisp
