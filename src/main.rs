@@ -157,12 +157,12 @@ fn main() {
         };
     }
 
-    let linesep = str_repeat("-", 81);
+    let linesep = str_repeat("-", 80);
 
     if by_file {
         // TODO(cgag): Need sorting for by_file as well.
         println!("{}", linesep);
-        println!(" {0: <18} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
+        println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
                  "Language",
                  "Files",
                  "Lines",
@@ -171,14 +171,16 @@ fn main() {
                  "Code");
         println!("{}", linesep);
 
-        for (lang, filecounts) in by_lang {
+        // TODO(cgag): do the summing first, so we can do additional sorting
+        // by totals.
+        for (lang, mut filecounts) in by_lang {
             let mut total = Count::default();
             for fc in &filecounts {
                 total.merge(&fc.count);
             }
 
             println!("{}", linesep);
-            println!(" {0: <18} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
+            println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
                      lang,
                      filecounts.len(),
                      total.lines,
@@ -234,7 +236,7 @@ fn main() {
 
 
         println!("{}", linesep);
-        println!(" {0: <18} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
+        println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
                  "Language",
                  "Files",
                  "Lines",
@@ -244,7 +246,7 @@ fn main() {
         println!("{}", linesep);
 
         for &(lang, total) in &totals_by_lang {
-            println!(" {0: <18} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
+            println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
                      lang,
                      total.files,
                      total.count.lines,
@@ -266,7 +268,7 @@ fn main() {
         }
 
         println!("{}", linesep);
-        println!(" {0: <18} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
+        println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
                  "Total",
                  totals.files,
                  totals.count.lines,
