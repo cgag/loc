@@ -9,8 +9,12 @@ Counting just the dragonflybsd codebase (~9 million lines):
 
 ### Installation
 
-There are binaries available on the releases page, thanks to the wonderful rust-everywhere project and travisci. For anyone familiar with Rust there's `cargo install loc`.
+There are binaries available on the [releases page](https://github.com/cgag/loc/releases), thanks to the wonderful rust-everywhere project and travisci. For anyone familiar with Rust there's `cargo install loc`.
 If you want to install Rust/Cargo, this is probably the easiest way: [https://www.rustup.rs/](https://www.rustup.rs/).
+
+#### Windows
+
+You can run `loc` on Windows 10 Anniversary Update build 14393 or later using the [Windows Subsystem for Linux](https://msdn.microsoft.com/de-de/commandline/wsl/install_guide?f=255&MSPPError=-2147217396). Simply download the Linux distribution from the [releases page](https://github.com/cgag/loc/releases), and run it in `bash` using a WSL-compatible path (e.g. `/mnt/c/Users/Foo/Repo/` instead of `C:\Users\Foo\Repo`).
 
 ### Known Issues
 Fortran has a rule that comments must start with the first character of a line. I only check if it's the first non-whitespace character of a line. I don't know
@@ -30,92 +34,100 @@ lines will be incorrectly counted as comments.
 
 ### Supported Languages
 
-```
-ActionScript
-Ada
-Asp
-AspNet
-Assembly
-Autoconf
-Awk
-Batch
-BourneShell
-C
-CCppHeader
-CSharp
-CShell
-Clojure
-CoffeeScript
-ColdFusion
-ColdFusionScript
-Coq
-Cpp
-Css
-D
-Dart
-DeviceTree
-Erlang
-Forth
-FortranLegacy
-FortranModern
-GLSL
-Go
-Handlebars
-Haskell
-Hex
-Html
-INI
-Idris
-IntelHex
-Isabelle
-Jai
-Java
-JavaScript
-Json
-Jsx
-Julia
-Kotlin
-Less
-LinkerScript
-Lisp
-Lua
-Make
-Makefile
-Markdown
-Mustache
-Nim
-OCaml
-ObjectiveC
-ObjectiveCpp
-Oz
-Pascal
-Perl
-Php
-Polly
-Prolog
-Protobuf
-Python
-Qcl
-R
-Razor
-ReStructuredText
-Ruby
-RubyHtml
-Rust
-Sass
-Scala
-Sml
-Sql
-Swift
-Tex
-Text
-Toml
-TypeScript
-UnrealScript
-VimScript
-Wolfram
-XML
-Yacc
-Yaml
-Zsh
-```
+- ActionScript
+- Ada
+- Agda
+- ASP
+- ASP.NET
+- Assembly
+- Autoconf
+- Awk
+- Batch
+- Bourne Shell
+- C
+- C Shell
+- C/C++ Header
+- C#
+- C++
+- Clojure
+- CoffeeScript
+- ColdFusion
+- ColdFusionScript
+- Coq
+- CSS
+- CUDA
+- CUDA Header
+- D
+- Dart
+- DeviceTree
+- Erlang
+- Forth
+- FORTRAN Legacy
+- FORTRAN Modern
+- GLSL
+- Go
+- Handlebars
+- Haskell
+- Hex
+- HTML
+- Idris
+- INI
+- Intel Hex
+- Isabelle
+- Jai
+- Java
+- JavaScript
+- JSON
+- Jsx
+- Julia
+- Kotlin
+- Lean
+- Less
+- LinkerScript
+- Lisp
+- Lua
+- Make
+- Makefile
+- Markdown
+- Mustache
+- Nim
+- Objective-C
+- Objective-C++
+- OCaml
+- Oz
+- Pascal
+- Perl
+- PHP
+- Plain Text
+- Polly
+- Prolog
+- Protobuf
+- Python
+- Qcl
+- R
+- Razor
+- reStructuredText
+- Ruby
+- RubyHtml
+- Rust
+- SaltStack
+- Sass
+- Scala
+- SML
+- SQL
+- Swift
+- Tcl
+- TeX
+- Toml
+- TypeScript
+- UnrealScript
+- VimL
+- Wolfram
+- XML
+- Yacc
+- YAML
+- Z Shell
+
+## Attributions
+
+This project contains code from [Tokei](https://github.com/Aaronepower/tokei) by [Aaronepower](https://github.com/Aaronepower) and [ripgrep](https://github.com/BurntSushi/ripgrep) by [BurntSushi](https://github.com/BurntSushi).

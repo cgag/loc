@@ -62,6 +62,7 @@ pub enum LineConfig<'a> {
 pub enum Lang {
     ActionScript,
     Ada,
+    Agda,
     Asp,
     AspNet,
     Assembly,
@@ -80,6 +81,8 @@ pub enum Lang {
     Coq,
     Cpp,
     Css,
+    CUDA,
+    CUDAHeader,
     D,
     Dart,
     DeviceTree,
@@ -106,6 +109,7 @@ pub enum Lang {
     Kotlin,
     Less,
     LinkerScript,
+    Lean,
     Lisp,
     Lua,
     Make,
@@ -131,6 +135,7 @@ pub enum Lang {
     Ruby,
     RubyHtml,
     Rust,
+    SaltStack,
     Sass,
     Scala,
     Sml,
@@ -158,6 +163,7 @@ impl Lang {
         match *self {
             ActionScript => "ActionScript",
             Ada => "Ada",
+            Agda => "Agda",
             Asp => "ASP",
             AspNet => "ASP.NET",
             Assembly => "Assembly",
@@ -176,6 +182,8 @@ impl Lang {
             Coq => "Coq",
             Cpp => "C++",
             Css => "CSS",
+            CUDA => "CUDA",
+            CUDAHeader => "CUDA Header",
             D => "D",
             Dart => "Dart",
             DeviceTree => "DeviceTree",
@@ -202,6 +210,7 @@ impl Lang {
             Kotlin => "Kotlin",
             Less => "Less",
             LinkerScript => "LinkerScript",
+            Lean => "Lean",
             Lisp => "Lisp",
             Lua => "Lua",
             Make => "Make",
@@ -227,6 +236,7 @@ impl Lang {
             Ruby => "Ruby",
             RubyHtml => "RubyHtml",
             Rust => "Rust",
+            SaltStack => "SaltStack",
             Sass => "Sass",
             Scala => "Scala",
             Sml => "SML",
@@ -278,6 +288,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
     match &*ext {
         "4th" | "forth" | "fr" | "frt" | "fth" | "f83" | "fb" | "fpm" | "e4" | "rx" | "ft" => Forth,
         "ada" | "adb" | "ads" | "pad" => Ada,
+        "agda" => Agda,
         "as" => ActionScript,
         "awk" => Awk,
         "bat" | "btm" | "cmd" => Batch,
@@ -288,6 +299,8 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "cs" => CSharp,
         "csh" => CShell,
         "css" => Css,
+        "cu" => CUDA,
+        "cuh" => CUDAHeader,
         "d" => D,
         "dart" => Dart,
         "dts" | "dtsi" => DeviceTree,
@@ -308,6 +321,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "jsx" => Jsx,
         "kt" | "kts" => Kotlin,
         "lds" => LinkerScript,
+        "lean" | "hlean" => Lean,
         "less" => Less,
         "lua" => Lua,
         "m" => ObjectiveC,
@@ -349,6 +363,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "s" | "asm" => Assembly,
         "sass" | "scss" => Sass,
         "sc" | "scala" => Scala,
+        "sls" => SaltStack,
         "sml" => Sml,
         "sql" => Sql,
         "swift" => Swift,
@@ -399,7 +414,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Batch => SO("REM"),
         Erlang | Tex => SO("%"),
         FortranModern => SO("!"),
-        Haskell | Idris => SM("--", "{-", "-}"),
+        Haskell | Idris | Agda => SM("--", "{-", "-}"),
         INI => SO(";"),
         Protobuf => SO("//"),
         VimScript => SO("\""),
@@ -412,6 +427,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Forth => SM("\\", "(", ")"),
         Julia => SM("#", "#=", "=#"),
         Lisp => SM(";", "#|", "|#"),
+        Lean => SM("--", "/-", "-/"),
         Lua => SM("--", "--[[", "]]"),
         // which one is right? = or =pod?
         // Perl => SM("#""=", "=cut"),
@@ -444,13 +460,14 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
 
         Html | Polly | RubyHtml | XML => html_style,
 
-        BourneShell | Make | Awk | CShell | Makefile | Nim | R | Tcl | Toml | Yaml | Zsh => sh_style,
+        BourneShell | Make | Awk | CShell | Makefile | Nim | R | SaltStack | Tcl | Toml |
+        Yaml | Zsh => sh_style,
 
         // TODO(cgag): not 100% sure that yacc belongs here.
-        C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CSharp |
-        Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx | Kotlin | Less |
-        LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift | TypeScript |
-        UnrealScript => c_style,
+        C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA |
+        CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx |
+        Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift |
+        TypeScript | UnrealScript => c_style,
 
         Unrecognized => unreachable!(),
     };
