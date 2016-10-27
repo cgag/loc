@@ -88,6 +88,7 @@ fn main() {
             .help("Column to sort by"))
         .arg(Arg::with_name("target")
             .required(true)
+            .multiple(true)
             .help("File or directory to count"))
         .get_matches();
 
