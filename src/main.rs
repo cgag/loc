@@ -188,6 +188,16 @@ fn main() {
                      total.comment,
                      total.code);
 
+            match sort {
+                "code" => filecounts.sort_by(|fc1, fc2| fc2.count.code.cmp(&fc1.count.code)),
+                "comment" => {
+                    filecounts.sort_by(|fc1, fc2| fc2.count.comment.cmp(&fc1.count.comment))
+                }
+                "blank" => filecounts.sort_by(|fc1, fc2| fc2.count.blank.cmp(&fc1.count.blank)),
+                "lines" => filecounts.sort_by(|fc1, fc2| fc2.count.lines.cmp(&fc1.count.lines)),
+                // No sorting by language or files here. Need to do it at a higher level.
+                _ => (),
+            }
             println!("{}", linesep);
             for fc in filecounts {
                 println!("|{0: <25} {1: >12} {2: >12} {3: >12} {4: >12}",
