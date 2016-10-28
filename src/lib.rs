@@ -3,7 +3,6 @@ pub mod lines;
 extern crate regex;
 extern crate memmap;
 extern crate memchr;
-extern crate ascii;
 
 use std::path::Path;
 use std::cmp;
