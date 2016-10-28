@@ -75,6 +75,12 @@ fn main() {
             .value_name("REGEX")
             .takes_value(true)
             .help("comma separated list of files/directories to ignore"))
+        .arg(Arg::with_name("include")
+            .required(false)
+            .long("include")
+            .value_name("REGEX")
+            .takes_value(true)
+            .help("comma separated list of files/directories to include"))
         .arg(Arg::with_name("files")
              .required(false)
              .long("files")
@@ -92,7 +98,7 @@ fn main() {
             .help("File or directory to count"))
         .get_matches();
 
-    let filepaths = matches.values_of("target").unwrap();
+    let targets = matches.values_of("target").unwrap();
     let sort = matches.value_of("sort").unwrap_or("code");
     let by_file = matches.is_present("files");
     let exclude_regex = match matches.value_of("exclude") {
@@ -100,14 +106,25 @@ fn main() {
             match Regex::new(rx_str) {
                 Ok(r) => Some(r),
                 Err(e) => {
-                    println!("Error processing regex: {}", e);
+                    println!("Error processing exclude regex: {}", e);
                     std::process::exit(1);
                 }
             }
         }
         None => None,
     };
-
+    let include_regex = match matches.value_of("include") {
+        Some(rx_str) => {
+            match Regex::new(rx_str) {
+                Ok(r) => Some(r),
+                Err(e) => {
+                    println!("Error processing include regex: {}", e);
+                    std::process::exit(1);
+                }
+            }
+        }
+        None => None,
+    };
 
     let threads = num_cpus::get();
     let mut workers = vec![];
@@ -117,26 +134,44 @@ fn main() {
         workers.push(thread::spawn(|| worker.run()));
     }
 
-    for filepath in filepaths {
-        // TODO(cgag): cleanup?
-        if exclude_regex.is_some() {
-            let r = &&exclude_regex.clone().unwrap();
-            for entry in WalkDir::new(filepath).into_iter().filter_map(|e| e.ok()) {
-                if entry.file_type().is_file() {
-                    let path = entry.path().to_str().unwrap();
-                    if !r.is_match(path) {
-                        workq.push(Work::File(String::from(path)));
+    for target in targets {
+        let files = WalkDir::new(target)
+            .into_iter()
+            .filter_map(|entry| entry.ok())
+            .filter(|entry| entry.file_type().is_file())
+            .map(|entry| String::from(entry.path().to_str().unwrap()));
+
+        // TODO(cgag) only as many clones as targets, but how could we avoid them?
+        match (include_regex.clone(), exclude_regex.clone()) {
+            (None, None) => {
+                for path in files {
+                    workq.push(Work::File(path));
+                }
+            }
+            (Some(include), None) => {
+                for path in files {
+                    if include.is_match(&path) {
+                        workq.push(Work::File(path));
                     }
                 }
             }
-        } else {
-            for entry in WalkDir::new(filepath).into_iter().filter_map(|e| e.ok()) {
-                if entry.file_type().is_file() {
-                    let path = entry.path().to_str().unwrap();
-                    workq.push(Work::File(String::from(path)));
+            (None, Some(exclude)) => {
+                for path in files {
+                    if !exclude.is_match(&path) {
+                        workq.push(Work::File(path));
+                    }
+                }
+            }
+            (Some(include), Some(exclude)) => {
+                for path in files {
+                    if include.is_match(&path) && !exclude.is_match(&path) {
+                        workq.push(Work::File(path));
+                    }
                 }
             }
         }
+
+        // TODO(cgag): cleanup?
     }
 
     for _ in 0..workers.len() {
