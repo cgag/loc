@@ -1,5 +1,6 @@
 extern crate loc;
 
+#[macro_use]
 extern crate clap;
 extern crate deque;
 extern crate itertools;
@@ -93,12 +94,11 @@ fn main() {
             .takes_value(true)
             .help("Column to sort by"))
         .arg(Arg::with_name("target")
-            .required(true)
             .multiple(true)
             .help("File or directory to count"))
         .get_matches();
 
-    let targets = matches.values_of("target").unwrap();
+    let targets = values_t!(matches.values_of("target"), String).unwrap_or(vec![String::from(".")]);
     let sort = matches.value_of("sort").unwrap_or("code");
     let by_file = matches.is_present("files");
     let exclude_regex = match matches.value_of("exclude") {
