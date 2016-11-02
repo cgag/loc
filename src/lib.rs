@@ -20,11 +20,6 @@ pub struct Count {
     pub lines: u32,
 }
 
-pub struct LangTotal {
-    pub files: u32,
-    pub count: Count,
-}
-
 impl Count {
     pub fn merge(&mut self, o: &Count) {
         self.code += o.code;
@@ -32,6 +27,11 @@ impl Count {
         self.blank += o.blank;
         self.lines += o.lines;
     }
+}
+
+pub struct LangTotal {
+    pub files: u32,
+    pub count: Count,
 }
 
 pub enum LineConfig<'a> {
@@ -414,7 +414,6 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Batch => SO("REM"),
         Erlang | Tex => SO("%"),
         FortranModern => SO("!"),
-        Haskell | Idris | Agda => SM("--", "{-", "-}"),
         INI => SO(";"),
         Protobuf => SO("//"),
         VimScript => SO("\""),
@@ -436,6 +435,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Python => SM("#", "'''", "'''"),
         Ruby => SM("#", "=begin", "=end"),
         Sql => SM("--", "/*", "*/"),
+        Haskell | Idris | Agda => SM("--", "{-", "-}"),
 
         ColdFusion => MO("<!---", "--->"),
         Mustache => MO("{{!", "}}"),
@@ -540,54 +540,21 @@ pub fn count(filepath: &str) -> Count {
     let lang = lang_from_ext(filepath);
     let config = counter_config_for_lang(&lang);
     match config {
-        LineConfig::SingleOnly { single_start } => count_single(filepath, single_start),
+        LineConfig::SingleOnly { single_start } => count_normal(filepath, Some(single_start), None),
         LineConfig::SingleMulti { single_start, multi_start, multi_end } => {
-            count_single_multi(filepath, single_start, multi_start, multi_end)
+            count_normal(filepath, Some(single_start), Some((multi_start, multi_end)))
         }
         LineConfig::MultiOnly { multi_start, multi_end } => {
-            count_multi(filepath, multi_start, multi_end)
+            count_normal(filepath, None, Some((multi_start, multi_end)))
         }
         LineConfig::Everything { singles, multies } => count_everything(filepath, singles, multies),
     }
 }
 
-pub fn count_single(filepath: &str, single_start: &str) -> Count {
-    let fmmap = match Mmap::open_path(filepath, Protection::Read) {
-        Ok(mmap) => mmap,
-        Err(_) => {
-            return Count::default();
-        }
-    };
-    let bytes: &[u8] = unsafe { fmmap.as_slice() };
-
-    let mut c = Count::default();
-
-    for byte_line in ByteLines(bytes).lines() {
-        let line = match std::str::from_utf8(byte_line) {
-            Ok(s) => s,
-            Err(_) => return Count::default(),
-        };
-        c.lines += 1;
-
-        let trimmed = line.trim_left();
-        if trimmed.is_empty() {
-            c.blank += 1;
-        } else if trimmed.starts_with(single_start) {
-            c.comment += 1;
-        } else {
-            c.code += 1;
-        }
-    }
-
-    c
-}
-
-// TODO(cgag): don't forget to update this when fixing the lua bug
-pub fn count_multi(filepath: &str, multi_start: &str, multi_end: &str) -> Count {
-    // this is a duplicate of count_single_multi without the check for single comment.
-    // Basically removes one branch.  Probably pointless: benchmark.
-    let multiline_start = multi_start;
-    let multiline_end = multi_end;
+pub fn count_normal(filepath: &str,
+                    single_start: Option<&str>,
+                    multi: Option<(&str, &str)>)
+                    -> Count {
 
     let fmmap = match Mmap::open_path(filepath, Protection::Read) {
         Ok(mmap) => mmap,
@@ -613,93 +580,23 @@ pub fn count_multi(filepath: &str, multi_start: &str, multi_end: &str) -> Count 
             continue;
         };
 
-        if !trimmed.contains(multiline_start) && !trimmed.contains(multiline_end) {
-            if in_comment {
-                c.comment += 1;
-            } else {
-                c.code += 1;
-            }
-            continue;
-        }
-
-        let start_len = multiline_start.len();
-        let end_len = multiline_end.len();
-
-        let mut pos = 0;
-        let mut found_code = false;
-        'outer: while pos < trimmed.len() {
-            // TODO(cgag): must be a less stupid way to do this
-            for i in pos..pos + min(max(start_len, end_len) + 1, trimmed.len() - pos) {
-                if !trimmed.is_char_boundary(i) {
-                    pos += 1;
-                    continue 'outer;
+        // TODO(cgag): this is pretty gross
+        if let Some(single_start) = single_start {
+            if !in_comment && trimmed.starts_with(single_start) {
+                if let Some((multi_start, _)) = multi {
+                    if !trimmed.starts_with(multi_start) {
+                        c.comment += 1;
+                        continue;
+                    }
                 }
             }
-
-            if !in_comment && pos + start_len <= trimmed.len() &&
-               &trimmed[pos..(pos + start_len)] == multi_start {
-                pos += start_len;
-                in_comment = true;
-            } else if in_comment && pos + end_len <= trimmed.len() &&
-                      &trimmed[pos..(pos + end_len)] == multi_end {
-                pos += end_len;
-                in_comment = false;
-                // TODO(cgag): should we bother handling whitespace here?
-            } else if !in_comment {
-                found_code = true;
-                pos += 1;
-            } else {
-                pos += 1;
-            }
         }
 
-        if found_code {
-            c.code += 1;
-        } else {
-            c.comment += 1;
-        }
-    }
-
-    c
-}
-
-pub fn count_single_multi(filepath: &str,
-                          single_start: &str,
-                          multi_start: &str,
-                          multi_end: &str)
-                          -> Count {
-
-    let fmmap = match Mmap::open_path(filepath, Protection::Read) {
-        Ok(mmap) => mmap,
-        Err(_) => {
-            return Count::default();
-        }
-    };
-    let bytes: &[u8] = unsafe { fmmap.as_slice() };
-
-    let mut c = Count::default();
-    let mut in_comment = false;
-
-    for byte_line in ByteLines(bytes).lines() {
-        let line = match std::str::from_utf8(byte_line) {
-            Ok(s) => s,
-            Err(_) => return Count::default(),
+        // TODO(cgag): how to invert if-let?
+        let (multi_start, multi_end) = match multi {
+            None => continue,
+            Some(multi) => multi,
         };
-        c.lines += 1;
-
-        let trimmed = line.trim_left();
-        if trimmed.is_empty() {
-            c.blank += 1;
-            continue;
-        };
-
-        // TODO(cgag): Could be more efficient by only doing this third check when
-        // multi_start starts with the same chars as single_start, such as with lua (--, --[, ]]).
-        // Not sure it's necessary
-        if !in_comment && trimmed.starts_with(single_start) && !trimmed.starts_with(multi_start) {
-            c.comment += 1;
-            continue;
-        }
 
         if !(trimmed.contains(multi_start) || trimmed.contains(multi_end)) {
             if in_comment {
@@ -765,17 +662,17 @@ pub fn count_everything<'a>(filepath: &str,
     // and no single line comments that this could indeed fail.  Need to potentially
     // get first one from the multies.
     let first = single_iter.next().expect("There should always be at least one?");
-    let mut total_count = count_single(filepath, first);
+    let mut total_count = count_normal(filepath, Some(first), None);
 
     for single in single_iter {
-        let count = count_single(filepath, single);
+        let count = count_normal(filepath, Some(single), None);
         total_count.comment += count.comment;
         // subtract out comments that were counted as code in previous counts
         total_count.code -= count.comment;
     }
 
     for (multi_start, multi_end) in multies {
-        let count = count_multi(filepath, multi_start, multi_end);
+        let count = count_normal(filepath, None, Some((multi_start, multi_end)));
         total_count.comment += count.comment;
         // subtract out comments that were counted as code in previous counts
         total_count.code -= count.comment;
