@@ -663,36 +663,6 @@ pub fn count_multi(filepath: &str, multi_start: &str, multi_end: &str) -> Count 
     c
 }
 
-// TODO(cgag): prune down to just count everything, count_single, count_multi?
-pub fn count_everything<'a>(filepath: &str,
-                            singles: Vec<&'a str>,
-                            multies: Vec<(&'a str, &'a str)>)
-                            -> Count {
-
-    let mut single_iter = singles.iter();
-    // TODO(cgag): actually i think if we just had multiple multiline comments
-    // and no single line comments that this could indeed fail.  Need to potentially
-    // get first one from the multies.
-    let first = single_iter.next().expect("There should always be at least one?");
-    let mut total_count = count_single(filepath, first);
-
-    for single in single_iter {
-        let count = count_single(filepath, single);
-        total_count.comment += count.comment;
-        // subtract out comments that were counted as code in previous counts
-        total_count.code -= count.comment;
-    }
-
-    for (multi_start, multi_end) in multies {
-        let count = count_multi(filepath, multi_start, multi_end);
-        total_count.comment += count.comment;
-        // subtract out comments that were counted as code in previous counts
-        total_count.code -= count.comment;
-    }
-
-    total_count
-}
-
 pub fn count_single_multi(filepath: &str,
                           single_start: &str,
                           multi_start: &str,
@@ -716,7 +686,6 @@ pub fn count_single_multi(filepath: &str,
             Err(_) => return Count::default(),
         };
         c.lines += 1;
-
 
         let trimmed = line.trim_left();
         if trimmed.is_empty() {
@@ -783,4 +752,34 @@ pub fn count_single_multi(filepath: &str,
     }
 
     c
+}
+
+// TODO(cgag): prune down to just count everything, count_single, count_multi?
+pub fn count_everything<'a>(filepath: &str,
+                            singles: Vec<&'a str>,
+                            multies: Vec<(&'a str, &'a str)>)
+                            -> Count {
+
+    let mut single_iter = singles.iter();
+    // TODO(cgag): actually i think if we just had multiple multiline comments
+    // and no single line comments that this could indeed fail.  Need to potentially
+    // get first one from the multies.
+    let first = single_iter.next().expect("There should always be at least one?");
+    let mut total_count = count_single(filepath, first);
+
+    for single in single_iter {
+        let count = count_single(filepath, single);
+        total_count.comment += count.comment;
+        // subtract out comments that were counted as code in previous counts
+        total_count.code -= count.comment;
+    }
+
+    for (multi_start, multi_end) in multies {
+        let count = count_multi(filepath, multi_start, multi_end);
+        total_count.comment += count.comment;
+        // subtract out comments that were counted as code in previous counts
+        total_count.code -= count.comment;
+    }
+
+    total_count
 }
