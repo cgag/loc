@@ -5,7 +5,7 @@ extern crate memmap;
 extern crate memchr;
 
 use std::path::Path;
-use std::cmp;
+use std::cmp::{min, max};
 use std::fmt;
 
 use memmap::{Mmap, Protection};
@@ -40,9 +40,7 @@ pub enum LineConfig<'a> {
         multi_start: &'a str,
         multi_end: &'a str,
     },
-    SingleOnly {
-        single_start: &'a str,
-    },
+    SingleOnly { single_start: &'a str },
     MultiOnly {
         multi_start: &'a str,
         multi_end: &'a str,
@@ -584,6 +582,7 @@ pub fn count_single(filepath: &str, single_start: &str) -> Count {
     c
 }
 
+// TODO(cgag): don't forget to update this when fixing the lua bug
 pub fn count_multi(filepath: &str, multi_start: &str, multi_end: &str) -> Count {
     // this is a duplicate of count_single_multi without the check for single comment.
     // Basically removes one branch.  Probably pointless: benchmark.
@@ -630,7 +629,7 @@ pub fn count_multi(filepath: &str, multi_start: &str, multi_end: &str) -> Count 
         let mut found_code = false;
         'outer: while pos < trimmed.len() {
             // TODO(cgag): must be a less stupid way to do this
-            for i in pos..(pos + cmp::max(start_len, end_len) + 1) {
+            for i in pos..pos + min(max(start_len, end_len) + 1, trimmed.len() - pos) {
                 if !trimmed.is_char_boundary(i) {
                     pos += 1;
                     continue 'outer;
@@ -642,7 +641,7 @@ pub fn count_multi(filepath: &str, multi_start: &str, multi_end: &str) -> Count 
                 pos += start_len;
                 in_comment = true;
             } else if in_comment && pos + end_len <= trimmed.len() &&
-               &trimmed[pos..(pos + end_len)] == multi_end {
+                      &trimmed[pos..(pos + end_len)] == multi_end {
                 pos += end_len;
                 in_comment = false;
                 // TODO(cgag): should we bother handling whitespace here?
@@ -718,13 +717,17 @@ pub fn count_single_multi(filepath: &str,
         };
         c.lines += 1;
 
+
         let trimmed = line.trim_left();
         if trimmed.is_empty() {
             c.blank += 1;
             continue;
         };
 
-        if !in_comment && trimmed.starts_with(single_start) {
+        // TODO(cgag): Could be more efficient by only doing this third check when
+        // multi_start starts with the same chars as single_start, such as with lua (--, --[, ]]).
+        // Not sure it's necessary
+        if !in_comment && trimmed.starts_with(single_start) && !trimmed.starts_with(multi_start) {
             c.comment += 1;
             continue;
         }
@@ -748,7 +751,7 @@ pub fn count_single_multi(filepath: &str,
             // TODO(cgag): must be a less stupid way to do this.  At the
             // very least don't recalculate max over and over.  LLVM probably
             // optimizes this but it seems dumb to depend on it?
-            for i in pos..(pos + cmp::max(start_len, end_len) + 1) {
+            for i in pos..pos + min(max(start_len, end_len) + 1, trimmed.len() - pos) {
                 if !trimmed.is_char_boundary(i) {
                     pos += 1;
                     continue 'outer;
@@ -760,7 +763,7 @@ pub fn count_single_multi(filepath: &str,
                 pos += start_len;
                 in_comment = true;
             } else if in_comment && pos + end_len <= trimmed_len &&
-               &trimmed[pos..(pos + end_len)] == multi_end {
+                      &trimmed[pos..(pos + end_len)] == multi_end {
                 pos += end_len;
                 in_comment = false;
                 // TODO(cgag): should we bother handling whitespace here?

@@ -11,6 +11,7 @@ const PLASMA_EXPECTED: Count = Count {
 };
 
 
+
 #[test]
 fn test_plasma_count() {
     assert_eq!(PLASMA_EXPECTED, count(PLASMA));
@@ -171,4 +172,38 @@ fn test_ipl_blank() {
 #[test]
 fn test_ipl_lines() {
     assert_eq!(IPL_EXPECTED.lines, count(IPL).lines);
+}
+
+// TODO(cgag): find or make a better testing tool? Or add some simple macros?
+const LUA: &'static str = "tests/data/lua.lua";
+const LUA_EXPECTED: Count = Count {
+    code: 7,
+    blank: 1,
+    comment: 8,
+    lines: 7 + 8 + 1,
+};
+
+#[test]
+fn test_lua_count() {
+    assert_eq!(LUA_EXPECTED, count(LUA));
+}
+
+#[test]
+fn test_lua_code() {
+    assert_eq!(LUA_EXPECTED.code, count(LUA).code);
+}
+
+#[test]
+fn test_lua_comment() {
+    assert_eq!(LUA_EXPECTED.comment, count(LUA).comment);
+}
+
+#[test]
+fn test_lua_blank() {
+    assert_eq!(LUA_EXPECTED.blank, count(LUA).blank);
+}
+
+#[test]
+fn test_lua_lines() {
+    assert_eq!(LUA_EXPECTED.lines, count(LUA).lines);
 }
