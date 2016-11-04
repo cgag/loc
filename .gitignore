@@ -14,3 +14,4 @@ lines.c
 cloc-out
 
 perf.data
+perf.old.data
