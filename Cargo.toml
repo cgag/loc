@@ -1,6 +1,6 @@
 [package]
 name = "loc"
-version = "0.3.3"
+version = "0.3.4"
 description = "Count lines of code (cloc) fast."
 authors = ["Curtis Gagliardi <curtis@curtis.io>"]
 

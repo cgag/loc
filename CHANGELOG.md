@@ -1,3 +1,14 @@
+## 0.3.4 (2016-11-04)
+- Default to searching `.` if no target is specified (suggested by chris-morgan)
+- F# support by red75prime
+- Fixed counting bug for Lua and other languages where the multi-line start pattern has the single-line
+  start pattern as a prefix (Lua single line comments start with `--`, multi with `--[[`)
+  - Issue raised by jswrenn, great catch.
+- Added tests for Lua, OCaml, Ruby, Ada.  Added a macro so the test file is much shorter despite
+  the added tests.  I still feel there's probably a better way.
+- Merged count_single, count_multi, count_single_multi into a single function.  The function
+  is a bit more complicated, the code is also now much shorter.
+
 ## 0.3.3
 - support for including only files that match a regex (can be combined with exclude) (suggested by alekratz)
 - output is now 80 characters instead of 81 (gross) (issue raised by chneukirchen)
