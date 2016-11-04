@@ -35,15 +35,9 @@ pub struct LangTotal {
 }
 
 pub enum LineConfig<'a> {
-    SingleMulti {
-        single_start: &'a str,
-        multi_start: &'a str,
-        multi_end: &'a str,
-    },
-    SingleOnly { single_start: &'a str },
-    MultiOnly {
-        multi_start: &'a str,
-        multi_end: &'a str,
+    Normal {
+        single: Option<&'a str>,
+        multi: Option<(&'a str, &'a str)>,
     },
     Everything {
         singles: Vec<&'a str>,
@@ -386,12 +380,8 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
 }
 
 enum ConfigTuple<'a> {
-    // Single only
-    SO(&'a str),
-    // MultiOnly
-    MO(&'a str, &'a str),
-    // Single + Multi
-    SM(&'a str, &'a str, &'a str),
+    // Normal (terrible name), anything without multiple syntaxes
+    N(Option<&'a str>, Option<(&'a str, &'a str)>),
     // Everything (multiple singles, multiple multiline)
     EV(Vec<&'a str>, Vec<(&'a str, &'a str)>),
 }
@@ -401,44 +391,43 @@ const UNLIKELY: &'static str = "SLkJJJJJ<!*$(!*&)(*@^#$K8K!(*76(*&(38j8";
 
 pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
 
-    let c_style = SM("//", "/*", "*/");
-    let html_style = MO("<!--", "-->");
-    let ml_style = MO("(*", "*)");
-    // TODO(cgag): Find a less dumb way to do this.
-    let no_comments = SO(UNLIKELY);
-    let sh_style = SO("#");
-    let prolog_style = SM("%", "/*", "*/");
+    let c_style = N(Some("//"), Some(("/*", "*/")));
+    let html_style = N(None, Some(("<!--", "-->")));
+    let ml_style = N(None, Some(("(*", "*)")));
+    let no_comments = N(Some(UNLIKELY), None);
+    let prolog_style = N(Some("%"), Some(("/*", "*/")));
+    let sh_style = N(Some("#"), None);
 
     let ctuple = match *lang {
-        Ada => SO("--"),
-        Batch => SO("REM"),
-        Erlang | Tex => SO("%"),
-        FortranModern => SO("!"),
-        INI => SO(";"),
-        Protobuf => SO("//"),
-        VimScript => SO("\""),
+        Ada => N(Some("--"), None),
+        Batch => N(Some("REM"), None),
+        Erlang | Tex => N(Some("%"), None),
+        FortranModern => N(Some("!"), None),
+        INI => N(Some(";"), None),
+        Protobuf => N(Some("//"), None),
+        VimScript => N(Some("\""), None),
 
         // TODO(cgag): Well, some architectures use ;, @, |, etc.  Figure out something
         // better?
-        Assembly => SM("#", "/*", "*/"),
-        CoffeeScript => SM("#", "###", "###"),
-        D => SM("//", "/*", "*/"),
-        Forth => SM("\\", "(", ")"),
-        FSharp => SM("//", "(*", "*)"),
-        Julia => SM("#", "#=", "=#"),
-        Lisp => SM(";", "#|", "|#"),
-        Lean => SM("--", "/-", "-/"),
-        Lua => SM("--", "--[[", "]]"),
+        Assembly => N(Some("#"), Some(("/*", "*/"))),
+        CoffeeScript => N(Some("#"), Some(("###", "###"))),
+        D => N(Some("//"), Some(("/*", "*/"))),
+        Forth => N(Some("\\"), Some(("(", ")"))),
+        FSharp => N(Some("//"), Some(("(*", "*)"))),
+        Julia => N(Some("#"), Some(("#=", "=#"))),
+        Lisp => N(Some(";"), Some(("#|", "|#"))),
+        Lean => N(Some("--"), Some(("/-", "-/"))),
+        Lua => N(Some("--"), Some(("--[[", "]]"))),
         // which one is right? = or =pod?
         // Perl => SM("#""=", "=cut"),
-        Perl => SM("#", "=pod", "=cut"),
-        Python => SM("#", "'''", "'''"),
-        Ruby => SM("#", "=begin", "=end"),
-        Sql => SM("--", "/*", "*/"),
-        Haskell | Idris | Agda => SM("--", "{-", "-}"),
+        Perl => N(Some("#"), Some(("=pod", "=cut"))),
+        Python => N(Some("#"), Some(("'''", "'''"))),
+        Ruby => N(Some("#"), Some(("=begin", "=end"))),
+        Sql => N(Some("--"), Some(("/*", "*/"))),
+        Haskell | Idris | Agda => N(Some("--"), Some(("{-", "-}"))),
 
-        ColdFusion => MO("<!---", "--->"),
-        Mustache => MO("{{!", "}}"),
+        ColdFusion => N(None, Some(("<!---", "--->"))),
+        Mustache => N(None, Some(("{{!", "}}"))),
 
         Asp => EV(vec!["'", "REM"], vec![]),
         AspNet => EV(vec![UNLIKELY], vec![("<!--", "-->"), ("<%--", "-->")]),
@@ -474,18 +463,10 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
     };
 
     match ctuple {
-        SM(single, start, end) => {
-            LineConfig::SingleMulti {
-                single_start: single,
-                multi_start: start,
-                multi_end: end,
-            }
-        }
-        SO(single) => LineConfig::SingleOnly { single_start: single },
-        MO(start, end) => {
-            LineConfig::MultiOnly {
-                multi_start: start,
-                multi_end: end,
+        N(single, multi) => {
+            LineConfig::Normal {
+                single: single,
+                multi: multi,
             }
         }
         EV(singles, multies) => {
@@ -540,13 +521,7 @@ pub fn count(filepath: &str) -> Count {
     let lang = lang_from_ext(filepath);
     let config = counter_config_for_lang(&lang);
     match config {
-        LineConfig::SingleOnly { single_start } => count_normal(filepath, Some(single_start), None),
-        LineConfig::SingleMulti { single_start, multi_start, multi_end } => {
-            count_normal(filepath, Some(single_start), Some((multi_start, multi_end)))
-        }
-        LineConfig::MultiOnly { multi_start, multi_end } => {
-            count_normal(filepath, None, Some((multi_start, multi_end)))
-        }
+        LineConfig::Normal { single, multi } => count_normal(filepath, single, multi),
         LineConfig::Everything { singles, multies } => count_everything(filepath, singles, multies),
     }
 }
@@ -588,13 +563,19 @@ pub fn count_normal(filepath: &str,
                         c.comment += 1;
                         continue;
                     }
+                } else {
+                    c.comment += 1;
+                    continue;
                 }
             }
         }
 
         // TODO(cgag): how to invert if-let?
         let (multi_start, multi_end) = match multi {
-            None => continue,
+            None => {
+                c.code += 1;
+                continue;
+            }
             Some(multi) => multi,
         };
 
