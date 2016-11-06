@@ -119,6 +119,7 @@ pub enum Lang {
     Polly,
     Prolog,
     Protobuf,
+    Pyret,
     Python,
     Qcl,
     R,
@@ -221,6 +222,7 @@ impl Lang {
             Polly => "Polly",
             Prolog => "Prolog",
             Protobuf => "Protobuf",
+            Pyret => "Pyret",
             Python => "Python",
             Qcl => "Qcl",
             R => "R",
@@ -349,6 +351,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
 
         "polly" => Polly,
         "proto" => Protobuf,
+        "arr" => Pyret,
         "py" => Python,
         "r" => R,
         "rake" | "rb" => Ruby,
@@ -421,6 +424,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         // which one is right? = or =pod?
         // Perl => SM("#""=", "=cut"),
         Perl => N(Some("#"), Some(("=pod", "=cut"))),
+        Pyret => N(Some("#"), Some(("#|", "|#"))),
         Python => N(Some("#"), Some(("'''", "'''"))),
         Ruby => N(Some("#"), Some(("=begin", "=end"))),
         Sql => N(Some("--"), Some(("/*", "*/"))),
