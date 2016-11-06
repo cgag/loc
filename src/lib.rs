@@ -132,6 +132,7 @@ pub enum Lang {
     Scala,
     Sml,
     Sql,
+    Stylus,
     Swift,
     Tcl,
     Tex,
@@ -234,6 +235,7 @@ impl Lang {
             Scala => "Scala",
             Sml => "SML",
             Sql => "SQL",
+            Stylus => "Stylus",
             Swift => "Swift",
             Tcl => "Tcl",
             Tex => "TeX",
@@ -360,6 +362,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "sls" => SaltStack,
         "sml" => Sml,
         "sql" => Sql,
+        "styl" => Stylus,
         "swift" => Swift,
         "tcl" => Tcl,
         "tex" | "sty" => Tex,
@@ -457,7 +460,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA |
         CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx |
         Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift |
-        TypeScript | UnrealScript => c_style,
+        TypeScript | UnrealScript | Stylus => c_style,
 
         Unrecognized => unreachable!(),
     };
