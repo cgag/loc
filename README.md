@@ -106,6 +106,7 @@ lines will be incorrectly counted as comments.
 - Polly
 - Prolog
 - Protobuf
+- Pyret
 - Python
 - Qcl
 - R
