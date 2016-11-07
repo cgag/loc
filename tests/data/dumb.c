@@ -1,5 +1,5 @@
 /* comment
  * comment
  */ code /*
- comment *//* */
+ comment */   /* */
  code2

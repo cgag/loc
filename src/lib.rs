@@ -613,8 +613,8 @@ pub fn count_normal(filepath: &str,
                       &trimmed[pos..(pos + end_len)] == multi_end {
                 pos += end_len;
                 in_comment = false;
-                // TODO(cgag): should we bother handling whitespace here?
-            } else if !in_comment {
+            } else if !in_comment &&
+                      !&trimmed[pos..pos + 1].chars().next().unwrap().is_whitespace() {
                 found_code = true;
                 pos += 1;
             } else {
