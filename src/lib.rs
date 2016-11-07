@@ -119,6 +119,7 @@ pub enum Lang {
     Polly,
     Prolog,
     Protobuf,
+    Pyret,
     Python,
     Qcl,
     R,
@@ -132,6 +133,7 @@ pub enum Lang {
     Scala,
     Sml,
     Sql,
+    Stylus,
     Swift,
     Tcl,
     Tex,
@@ -221,6 +223,7 @@ impl Lang {
             Polly => "Polly",
             Prolog => "Prolog",
             Protobuf => "Protobuf",
+            Pyret => "Pyret",
             Python => "Python",
             Qcl => "Qcl",
             R => "R",
@@ -234,6 +237,7 @@ impl Lang {
             Scala => "Scala",
             Sml => "SML",
             Sql => "SQL",
+            Stylus => "Stylus",
             Swift => "Swift",
             Tcl => "Tcl",
             Tex => "TeX",
@@ -349,6 +353,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
 
         "polly" => Polly,
         "proto" => Protobuf,
+        "arr" => Pyret,
         "py" => Python,
         "r" => R,
         "rake" | "rb" => Ruby,
@@ -360,6 +365,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "sls" => SaltStack,
         "sml" => Sml,
         "sql" => Sql,
+        "styl" => Stylus,
         "swift" => Swift,
         "tcl" => Tcl,
         "tex" | "sty" => Tex,
@@ -421,6 +427,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         // which one is right? = or =pod?
         // Perl => SM("#""=", "=cut"),
         Perl => N(Some("#"), Some(("=pod", "=cut"))),
+        Pyret => N(Some("#"), Some(("#|", "|#"))),
         Python => N(Some("#"), Some(("'''", "'''"))),
         Ruby => N(Some("#"), Some(("=begin", "=end"))),
         Sql => N(Some("--"), Some(("/*", "*/"))),
@@ -457,7 +464,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA |
         CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx |
         Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift |
-        TypeScript | UnrealScript => c_style,
+        TypeScript | UnrealScript | Stylus => c_style,
 
         Unrecognized => unreachable!(),
     };
