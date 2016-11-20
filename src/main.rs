@@ -176,7 +176,6 @@ fn main() {
     let linesep = str_repeat("-", 80);
 
     if by_file {
-        // TODO(cgag): Need sorting for by_file as well.
         println!("{}", linesep);
         println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
                  "Language",
@@ -214,6 +213,7 @@ fn main() {
                 // No sorting by language or files here. Need to do it at a higher level.
                 _ => (),
             }
+
             println!("{}", linesep);
             for fc in filecounts {
                 println!("|{0: <25} {1: >12} {2: >12} {3: >12} {4: >12}",
@@ -260,7 +260,22 @@ fn main() {
             }
         }
 
+        print_totals_by_lang(&linesep, &totals_by_lang);
+    }
 
+    fn last_n_chars(s: &str, n: usize) -> String {
+        if s.len() <= n {
+            return String::from(s);
+        }
+        s.chars().skip(s.len() - n).collect::<String>()
+    }
+
+
+    fn str_repeat(s: &str, n: usize) -> String {
+        std::iter::repeat(s).take(n).collect::<Vec<_>>().join("")
+    }
+
+    fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) {
         println!("{}", linesep);
         println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
                  "Language",
@@ -271,7 +286,7 @@ fn main() {
                  "Code");
         println!("{}", linesep);
 
-        for &(lang, total) in &totals_by_lang {
+        for &(lang, total) in totals_by_lang {
             println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
                      lang,
                      total.files,
@@ -285,7 +300,7 @@ fn main() {
             files: 0,
             count: Count::default(),
         };
-        for &(_, total) in &totals_by_lang {
+        for &(_, total) in totals_by_lang {
             totals.files += total.files;
             totals.count.code += total.count.code;
             totals.count.blank += total.count.blank;
@@ -303,16 +318,4 @@ fn main() {
                  totals.count.code);
         println!("{}", linesep);
     }
-}
-
-fn last_n_chars(s: &str, n: usize) -> String {
-    if s.len() <= n {
-        return String::from(s);
-    }
-    s.chars().skip(s.len() - n).collect::<String>()
-}
-
-
-fn str_repeat(s: &str, n: usize) -> String {
-    std::iter::repeat(s).take(n).collect::<Vec<_>>().join("")
 }

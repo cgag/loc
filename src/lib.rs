@@ -529,7 +529,9 @@ pub fn count(filepath: &str) -> Count {
     let config = counter_config_for_lang(&lang);
     match config {
         LineConfig::Normal { single, multi } => count_normal(filepath, single, multi),
-        LineConfig::Everything { singles, multies } => count_everything(filepath, singles, multies),
+        LineConfig::Everything { singles, multies } => {
+            count_everything(filepath, &singles, &multies)
+        }
     }
 }
 
@@ -577,7 +579,6 @@ pub fn count_normal(filepath: &str,
             }
         }
 
-        // TODO(cgag): how to invert if-let?
         let (multi_start, multi_end) = match multi {
             None => {
                 c.code += 1;
@@ -601,14 +602,17 @@ pub fn count_normal(filepath: &str,
 
         let mut pos = 0;
         let mut found_code = false;
+        let contains_utf8 = (0..trimmed.len()).any(|i| !trimmed.is_char_boundary(i));
+
         'outer: while pos < trimmed_len {
             // TODO(cgag): must be a less stupid way to do this.  At the
-            // very least don't recalculate max over and over.  LLVM probably
-            // optimizes this but it seems dumb to depend on it?
-            for i in pos..pos + min(max(start_len, end_len) + 1, trimmed.len() - pos) {
-                if !trimmed.is_char_boundary(i) {
-                    pos += 1;
-                    continue 'outer;
+            // very least don't recalculate max over and over.  LLVM probably optimizes this but it seems dumb to depend on it?
+            if contains_utf8 {
+                for i in pos..pos + min(max(start_len, end_len) + 1, trimmed.len() - pos) {
+                    if !trimmed.is_char_boundary(i) {
+                        pos += 1;
+                        continue 'outer;
+                    }
                 }
             }
 
@@ -622,8 +626,8 @@ pub fn count_normal(filepath: &str,
                 in_comment = false;
             } else if !in_comment &&
                       !&trimmed[pos..pos + 1].chars().next().unwrap().is_whitespace() {
-                found_code = true;
                 pos += 1;
+                found_code = true;
             } else {
                 pos += 1;
             }
@@ -641,8 +645,8 @@ pub fn count_normal(filepath: &str,
 
 // TODO(cgag): prune down to just count everything, count_single, count_multi?
 pub fn count_everything<'a>(filepath: &str,
-                            singles: Vec<&'a str>,
-                            multies: Vec<(&'a str, &'a str)>)
+                            singles: &Vec<&'a str>,
+                            multies: &Vec<(&'a str, &'a str)>)
                             -> Count {
 
     let mut single_iter = singles.iter();
@@ -659,7 +663,7 @@ pub fn count_everything<'a>(filepath: &str,
         total_count.code -= count.comment;
     }
 
-    for (multi_start, multi_end) in multies {
+    for &(multi_start, multi_end) in multies {
         let count = count_normal(filepath, None, Some((multi_start, multi_end)));
         total_count.comment += count.comment;
         // subtract out comments that were counted as code in previous counts

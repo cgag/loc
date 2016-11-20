@@ -94,7 +94,7 @@ const RUBY_EXPECTED: Count = Count {
     code: 2,
     blank: 0,
     comment: 2,
-    lines: 2+0+2,
+    lines: 2+2,
 };
 test_count![RUBY, RUBY_EXPECTED, ruby_count, ruby_code, ruby_comment, ruby_blank, ruby_lines];
 
@@ -113,6 +113,6 @@ const ADA_EXPECTED: Count = Count {
     code: 4,
     blank: 0,
     comment: 3,
-    lines: 4+0+3,
+    lines: 4+3,
 };
 test_count![ADA, ADA_EXPECTED, ada_count, ada_code, ada_comment, ada_blank, ada_lines];
