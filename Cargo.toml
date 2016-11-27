@@ -13,7 +13,6 @@ license="MIT"
 [dependencies]
 clap          = "2.17.1"
 deque         = "0.3.1"
-errno         = "0.1.8"
 itertools     = "0.5.5"
 libc          = "0.2.17"
 memchr        = "0.1.11"
