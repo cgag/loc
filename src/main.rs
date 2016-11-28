@@ -66,7 +66,7 @@ fn main() {
 
     let matches = App::new("count")
         .global_settings(&[AppSettings::ColoredHelp])
-        .version("0.1")
+        .version(crate_version!())
         .author("Curtis Gagliardi <curtis@curtis.io>")
         .about("counts things quickly hopefully")
         // TODO(cgag): actually implement filtering
