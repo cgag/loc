@@ -445,6 +445,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Php => EV(vec!["#", "//"], vec![("/*", "*/")]),
         Isabelle => {
             EV(vec!["--"],
+               // Is that angle bracket utf8?  What's going to happen with that?
                vec![("{*", "*}"), ("(*", "*)"), ("‹", "›"), ("\\<open>", "\\<close>")])
         }
         Razor => EV(vec![UNLIKELY], vec![("<!--", "-->"), ("@*", "*@")]),
@@ -564,7 +565,6 @@ pub fn count_normal(filepath: &str,
             continue;
         };
 
-        // TODO(cgag): this is pretty gross
         if let Some(single_start) = single_start {
             if !in_comment && trimmed.starts_with(single_start) {
                 if let Some((multi_start, _)) = multi {
@@ -605,8 +605,6 @@ pub fn count_normal(filepath: &str,
         let contains_utf8 = (0..trimmed.len()).any(|i| !trimmed.is_char_boundary(i));
 
         'outer: while pos < trimmed_len {
-            // TODO(cgag): must be a less stupid way to do this.  At the
-            // very least don't recalculate max over and over.  LLVM probably optimizes this but it seems dumb to depend on it?
             if contains_utf8 {
                 for i in pos..pos + min(max(start_len, end_len) + 1, trimmed.len() - pos) {
                     if !trimmed.is_char_boundary(i) {
@@ -617,11 +615,11 @@ pub fn count_normal(filepath: &str,
             }
 
             if !in_comment && pos + start_len <= trimmed_len &&
-               &trimmed[pos..(pos + start_len)] == multi_start {
+               &trimmed[pos..pos + start_len] == multi_start {
                 pos += start_len;
                 in_comment = true;
             } else if in_comment && pos + end_len <= trimmed_len &&
-                      &trimmed[pos..(pos + end_len)] == multi_end {
+                      &trimmed[pos..pos + end_len] == multi_end {
                 pos += end_len;
                 in_comment = false;
             } else if !in_comment &&
@@ -643,17 +641,13 @@ pub fn count_normal(filepath: &str,
     c
 }
 
-// TODO(cgag): prune down to just count everything, count_single, count_multi?
 pub fn count_everything<'a>(filepath: &str,
-                            singles: &Vec<&'a str>,
-                            multies: &Vec<(&'a str, &'a str)>)
+                            singles: &[&'a str],
+                            multies: &[(&'a str, &'a str)])
                             -> Count {
 
     let mut single_iter = singles.iter();
-    // TODO(cgag): actually i think if we just had multiple multiline comments
-    // and no single line comments that this could indeed fail.  Need to potentially
-    // get first one from the multies.
-    let first = single_iter.next().expect("There should always be at least one?");
+    let first = single_iter.next().expect("No single comment.");
     let mut total_count = count_normal(filepath, Some(first), None);
 
     for single in single_iter {
