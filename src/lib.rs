@@ -301,7 +301,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "d" => D,
         "dart" => Dart,
         "dts" | "dtsi" => DeviceTree,
-        "el" | "lisp" | "lsp" => Lisp,
+        "el" | "lisp" | "lsp" | "scm" | "ss" | "rkt" => Lisp,
         "erl" | "hrl" => Erlang,
         "fs" | "fsx" => FSharp,
         "vert" | "tesc" | "tese" | "geom" | "frag" | "comp" => Glsl,
