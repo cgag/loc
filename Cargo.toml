@@ -11,17 +11,16 @@ documentation = "https://github.com/cgag/loc"
 license="MIT"
 
 [dependencies]
-clap          = "2.17.1"
+clap          = "2.20.0"
 deque         = "0.3.1"
-errno         = "0.1.8"
-itertools     = "0.5.5"
-libc          = "0.2.17"
-memchr        = "0.1.11"
-memmap        = "0.4.0"
-regex         = "0.1.80"
+itertools     = "0.5.8"
+libc          = "0.2.18"
+memchr        = "1.0.1"
+memmap        = "0.5.0"
+regex         = "0.2.1"
 thread-scoped = "1.0.1"
-walkdir       = "0.1.8"
-num_cpus      = "1.1.0"
+walkdir       = "1.0.7"
+num_cpus      = "1.2.1"
 
 [profile.release]
 lto = true
