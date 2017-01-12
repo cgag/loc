@@ -1,5 +1,3 @@
-pub mod lines;
-
 extern crate regex;
 extern crate memmap;
 extern crate memchr;
@@ -559,16 +557,16 @@ pub fn count_normal(filepath: &str,
         };
         c.lines += 1;
 
-        let trimmed = line.trim_left();
-        if trimmed.is_empty() {
+        let line = line.trim_left();
+        if line.is_empty() {
             c.blank += 1;
             continue;
         };
 
         if let Some(single_start) = single_start {
-            if !in_comment && trimmed.starts_with(single_start) {
+            if !in_comment && line.starts_with(single_start) {
                 if let Some((multi_start, _)) = multi {
-                    if !trimmed.starts_with(multi_start) {
+                    if !line.starts_with(multi_start) {
                         c.comment += 1;
                         continue;
                     }
@@ -587,7 +585,7 @@ pub fn count_normal(filepath: &str,
             Some(multi) => multi,
         };
 
-        if !(trimmed.contains(multi_start) || trimmed.contains(multi_end)) {
+        if !(line.contains(multi_start) || line.contains(multi_end)) {
             if in_comment {
                 c.comment += 1;
             } else {
@@ -598,32 +596,31 @@ pub fn count_normal(filepath: &str,
 
         let start_len = multi_start.len();
         let end_len = multi_end.len();
-        let trimmed_len = trimmed.len();
+        let line_len = line.len();
 
         let mut pos = 0;
         let mut found_code = false;
-        let contains_utf8 = (0..trimmed.len()).any(|i| !trimmed.is_char_boundary(i));
+        let contains_utf8 = (0..line_len).any(|i| !line.is_char_boundary(i));
 
-        'outer: while pos < trimmed_len {
+        'outer: while pos < line_len {
             if contains_utf8 {
-                for i in pos..pos + min(max(start_len, end_len) + 1, trimmed.len() - pos) {
-                    if !trimmed.is_char_boundary(i) {
+                for i in pos..pos + min(max(start_len, end_len) + 1, line_len - pos) {
+                    if !line.is_char_boundary(i) {
                         pos += 1;
                         continue 'outer;
                     }
                 }
             }
 
-            if !in_comment && pos + start_len <= trimmed_len &&
-               &trimmed[pos..pos + start_len] == multi_start {
+            if !in_comment && pos + start_len <= line_len &&
+               &line[pos..pos + start_len] == multi_start {
                 pos += start_len;
                 in_comment = true;
-            } else if in_comment && pos + end_len <= trimmed_len &&
-                      &trimmed[pos..pos + end_len] == multi_end {
+            } else if in_comment && pos + end_len <= line_len &&
+                      &line[pos..pos + end_len] == multi_end {
                 pos += end_len;
                 in_comment = false;
-            } else if !in_comment &&
-                      !&trimmed[pos..pos + 1].chars().next().unwrap().is_whitespace() {
+            } else if !in_comment && !&line[pos..pos + 1].chars().next().unwrap().is_whitespace() {
                 pos += 1;
                 found_code = true;
             } else {
