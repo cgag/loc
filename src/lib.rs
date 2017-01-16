@@ -120,6 +120,7 @@ pub enum Lang {
     Pyret,
     Python,
     Qcl,
+    Qml,
     R,
     Razor,
     ReStructuredText,
@@ -224,6 +225,7 @@ impl Lang {
             Pyret => "Pyret",
             Python => "Python",
             Qcl => "Qcl",
+            Qml => "Qml",
             R => "R",
             Razor => "Razor",
             ReStructuredText => "reStructuredText",
@@ -337,6 +339,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "php" => Php,
         "pl" => Perl,
         "qcl" => Qcl,
+        "qml" => Qml,
         "cshtml" => Razor,
         "mustache" => Mustache,
         "oz" => Oz,
@@ -463,7 +466,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA |
         CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx |
         Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift |
-        TypeScript | UnrealScript | Stylus => c_style,
+        TypeScript | UnrealScript | Stylus | Qml => c_style,
 
         Unrecognized => unreachable!(),
     };
