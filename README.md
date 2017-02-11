@@ -126,6 +126,7 @@ lines will be incorrectly counted as comments.
 - TeX
 - Toml
 - TypeScript
+- Tsx
 - UnrealScript
 - VimL
 - Wolfram
