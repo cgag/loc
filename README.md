@@ -109,6 +109,7 @@ lines will be incorrectly counted as comments.
 - Pyret
 - Python
 - Qcl
+- QML
 - R
 - Razor
 - reStructuredText
