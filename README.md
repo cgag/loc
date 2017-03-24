@@ -36,6 +36,14 @@ because that would be too long \
 loc counts the first line and last lines correctly as code, but the middle
 lines will be incorrectly counted as comments.
 
+Git-ignored files: By default, loc counts *everything*. Frequently, you'd like to exclude anything not tracked by Git. This can be accomplished with a oneliner:
+
+```
+ag -l -g '' | xargs loc
+```
+
+This uses the `ag` (The Silver Searcher), which among other things can list files tracked by Git. This may not already be installed on your system.
+
 ### Supported Languages
 
 - ActionScript
