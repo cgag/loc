@@ -72,12 +72,14 @@ fn main() {
         // TODO(cgag): actually implement filtering
         .arg(Arg::with_name("exclude")
             .required(false)
+            .multiple(true)
             .long("exclude")
             .value_name("REGEX")
             .takes_value(true)
             .help("Rust regex of files to exclude"))
         .arg(Arg::with_name("include")
             .required(false)
+            .multiple(true)
             .long("include")
             .value_name("REGEX")
             .takes_value(true)
@@ -98,12 +100,16 @@ fn main() {
             .help("File or directory to count"))
         .get_matches();
 
-    let targets = values_t!(matches.values_of("target"), String).unwrap_or(vec![String::from(".")]);
+    let targets = match matches.values_of("target") {
+        Some(targets) => targets.collect(),
+        None => vec!["."]
+    };
     let sort = matches.value_of("sort").unwrap_or("code");
     let by_file = matches.is_present("files");
-    let exclude_regex = match matches.value_of("exclude") {
-        Some(rx_str) => {
-            match Regex::new(rx_str) {
+    let exclude_regex = match matches.values_of("exclude") {
+        Some(regex_strs) => {
+            let combined_regex = regex_strs.map(|r| format!("({})", r)).collect::<Vec<String>>().join("|");
+            match Regex::new(&combined_regex) {
                 Ok(r) => Some(r),
                 Err(e) => {
                     println!("Error processing exclude regex: {}", e);
@@ -113,9 +119,10 @@ fn main() {
         }
         None => None,
     };
-    let include_regex = match matches.value_of("include") {
-        Some(rx_str) => {
-            match Regex::new(rx_str) {
+    let include_regex = match matches.values_of("include") {
+        Some(regex_strs) => {
+            let combined_regex = regex_strs.map(|r| format!("({})", r)).collect::<Vec<String>>().join("|");
+            match Regex::new(&combined_regex) {
                 Ok(r) => Some(r),
                 Err(e) => {
                     println!("Error processing include regex: {}", e);
