@@ -5,11 +5,11 @@ extern crate clap;
 extern crate deque;
 extern crate itertools;
 extern crate num_cpus;
-extern crate walkdir;
 extern crate regex;
+extern crate ignore;
 
 use clap::{Arg, App, AppSettings};
-use walkdir::WalkDir;
+use ignore::WalkBuilder;
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
@@ -95,6 +95,13 @@ fn main() {
             .value_name("COLUMN")
             .takes_value(true)
             .help("Column to sort by"))
+        .arg(Arg::with_name("unrestricted")
+             .required(false)
+             .multiple(true)
+             .long("unrestricted")
+             .short("u")
+             .takes_value(false)
+             .help(". A single -u won't respect .gitignore (etc.) files. Two -u flags will additionally count hidden files and directories."))
         .arg(Arg::with_name("target")
             .multiple(true)
             .help("File or directory to count"))
@@ -106,6 +113,12 @@ fn main() {
     };
     let sort = matches.value_of("sort").unwrap_or("code");
     let by_file = matches.is_present("files");
+    let (use_ignore, ignore_hidden) = match matches.occurrences_of("unrestricted") {
+        0 => (true,  true),
+        1 => (false, true),
+        2 => (false, false),
+        _ => (false, false),
+    };
     let exclude_regex = match matches.values_of("exclude") {
         Some(regex_strs) => {
             let combined_regex = regex_strs.map(|r| format!("({})", r)).collect::<Vec<String>>().join("|");
@@ -142,10 +155,16 @@ fn main() {
     }
 
     for target in targets {
-        let files = WalkDir::new(target)
+        // TODO(cgag): use WalkParallel?
+        let walker = WalkBuilder::new(target).ignore(use_ignore)
+                                             .git_ignore(use_ignore)
+                                             .git_exclude(use_ignore)
+                                             .hidden(ignore_hidden)
+                                             .build();
+        let files = walker
             .into_iter()
             .filter_map(|entry| entry.ok())
-            .filter(|entry| entry.file_type().is_file())
+            .filter(|entry| entry.file_type().expect("no filetype").is_file())
             .map(|entry| String::from(entry.path().to_str().unwrap()))
             .filter(|path| match include_regex {
                 None => true,
