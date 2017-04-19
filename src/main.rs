@@ -189,6 +189,7 @@ fn main() {
         filecounts.extend(worker.join().unwrap().iter().cloned())
     }
 
+    // TODO(cgag): use insecure hashmaps or something
     let mut by_lang: HashMap<Lang, Vec<FileCount>> = HashMap::new();
     for fc in filecounts {
         match by_lang.entry(fc.lang) {
@@ -202,6 +203,7 @@ fn main() {
     let linesep = str_repeat("-", 80);
 
     if by_file {
+        // print breakdown for each individual file
         println!("{}", linesep);
         println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
                  "Language",
@@ -251,6 +253,7 @@ fn main() {
             }
         }
     } else {
+        // print summary by language
         let mut lang_totals: HashMap<&Lang, LangTotal> = HashMap::new();
         for (lang, filecounts) in &by_lang {
             let mut lang_total = Count::default();
@@ -289,59 +292,60 @@ fn main() {
         print_totals_by_lang(&linesep, &totals_by_lang);
     }
 
-    fn last_n_chars(s: &str, n: usize) -> String {
-        if s.len() <= n {
-            return String::from(s);
-        }
-        s.chars().skip(s.len() - n).collect::<String>()
+}
+
+fn last_n_chars(s: &str, n: usize) -> String {
+    if s.len() <= n {
+        return String::from(s);
     }
+    s.chars().skip(s.len() - n).collect::<String>()
+}
 
 
-    fn str_repeat(s: &str, n: usize) -> String {
-        std::iter::repeat(s).take(n).collect::<Vec<_>>().join("")
-    }
+fn str_repeat(s: &str, n: usize) -> String {
+    std::iter::repeat(s).take(n).collect::<Vec<_>>().join("")
+}
 
-    fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) {
-        println!("{}", linesep);
+fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) {
+    println!("{}", linesep);
+    println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
+             "Language",
+             "Files",
+             "Lines",
+             "Blank",
+             "Comment",
+             "Code");
+    println!("{}", linesep);
+
+    for &(lang, total) in totals_by_lang {
         println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
-                 "Language",
-                 "Files",
-                 "Lines",
-                 "Blank",
-                 "Comment",
-                 "Code");
-        println!("{}", linesep);
-
-        for &(lang, total) in totals_by_lang {
-            println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
-                     lang,
-                     total.files,
-                     total.count.lines,
-                     total.count.blank,
-                     total.count.comment,
-                     total.count.code);
-        }
-
-        let mut totals = LangTotal {
-            files: 0,
-            count: Count::default(),
-        };
-        for &(_, total) in totals_by_lang {
-            totals.files += total.files;
-            totals.count.code += total.count.code;
-            totals.count.blank += total.count.blank;
-            totals.count.comment += total.count.comment;
-            totals.count.lines += total.count.lines;
-        }
-
-        println!("{}", linesep);
-        println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
-                 "Total",
-                 totals.files,
-                 totals.count.lines,
-                 totals.count.blank,
-                 totals.count.comment,
-                 totals.count.code);
-        println!("{}", linesep);
+                 lang,
+                 total.files,
+                 total.count.lines,
+                 total.count.blank,
+                 total.count.comment,
+                 total.count.code);
     }
+
+    let mut totals = LangTotal {
+        files: 0,
+        count: Count::default(),
+    };
+    for &(_, total) in totals_by_lang {
+        totals.files += total.files;
+        totals.count.code += total.count.code;
+        totals.count.blank += total.count.blank;
+        totals.count.comment += total.count.comment;
+        totals.count.lines += total.count.lines;
+    }
+
+    println!("{}", linesep);
+    println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
+             "Total",
+             totals.files,
+             totals.count.lines,
+             totals.count.blank,
+             totals.count.comment,
+             totals.count.code);
+    println!("{}", linesep);
 }
