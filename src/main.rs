@@ -193,9 +193,9 @@ fn main() {
     let mut by_lang: HashMap<Lang, Vec<FileCount>> = HashMap::new();
     for fc in filecounts {
         match by_lang.entry(fc.lang) {
-            Entry::Occupied(mut by_lang) => by_lang.get_mut().push(fc),
-            Entry::Vacant(by_lang) => {
-                by_lang.insert(vec![fc]);
+            Entry::Occupied(mut elem) => elem.get_mut().push(fc),
+            Entry::Vacant(elem) => {
+                elem.insert(vec![fc]);
             }
         };
     }
