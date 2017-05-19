@@ -116,3 +116,12 @@ const ADA_EXPECTED: Count = Count {
     lines: 4+3,
 };
 test_count![ADA, ADA_EXPECTED, ada_count, ada_code, ada_comment, ada_blank, ada_lines];
+
+const GHERKIN: &'static str = "tests/data/gherkin.feature";
+const GHERKIN_EXPECTED: Count = Count {
+    code: 8,
+    blank: 2,
+    comment: 2,
+    lines: 8+2+2,
+};
+test_count![GHERKIN, GHERKIN_EXPECTED, gherkin_count, gherkin_code, gherkin_comment, gherkin_blank, gherkin_lines];
