@@ -342,7 +342,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "mm" => ObjectiveCpp,
         "nim" => Nim,
         "php" => Php,
-        "pl" => Perl,
+        "pl" | "pm" => Perl,
         "qcl" => Qcl,
         "qml" => Qml,
         "cshtml" => Razor,
