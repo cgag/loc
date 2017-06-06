@@ -148,7 +148,7 @@ pub enum Lang {
     Yacc,
     Yaml,
     Zsh,
-
+    Haxe,
     Unrecognized,
 }
 use self::Lang::*;
@@ -255,7 +255,7 @@ impl Lang {
             Yacc => "Yacc",
             Yaml => "YAML",
             Zsh => "Z Shell",
-
+            Haxe => "Haxe",
             Unrecognized => "Unrecognized",
         }
     }
@@ -386,7 +386,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "yaml" | "yml" => Yaml,
         "y" => Yacc,
         "zsh" => Zsh,
-
+        "hx" => Haxe,
         // Probably dumb to just default to C.
         _ => Unrecognized,
     }
@@ -472,7 +472,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA |
         CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx |
         Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift |
-        TypeScript | Tsx | UnrealScript | Stylus | Qml => c_style,
+        TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe => c_style,
 
         Unrecognized => unreachable!(),
     };
