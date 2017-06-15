@@ -61,6 +61,7 @@ pub enum Lang {
     BourneShell,
     C,
     CCppHeader,
+    CMake,
     CSharp,
     CShell,
     Clojure,
@@ -168,6 +169,7 @@ impl Lang {
             BourneShell => "Bourne Shell",
             C => "C",
             CCppHeader => "C/C++ Header",
+            CMake => "CMake",
             CSharp => "C#",
             CShell => "C Shell",
             Clojure => "Clojure",
@@ -277,6 +279,8 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
 
     let ext = if file_name_lower.contains("makefile") {
         String::from("makefile")
+    } else if file_name_lower == "cmakelists.txt" {
+        String::from("cmake")
     } else {
         match path.extension() {
             Some(os_str) => os_str.to_str().unwrap().to_lowercase(),
@@ -296,6 +300,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "c" | "ec" | "pgc" => C,
         "cc" | "cpp" | "cxx" | "c++" | "pcc" => Cpp,
         "cfc" => ColdFusionScript,
+        "cmake" => CMake,
         "coffee" => CoffeeScript,
         "cs" => CSharp,
         "csh" => CShell,
@@ -423,6 +428,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         // TODO(cgag): Well, some architectures use ;, @, |, etc.  Figure out something
         // better?
         Assembly => N(Some("#"), Some(("/*", "*/"))),
+        CMake => N(Some("#"), Some(("#[[", "]]"))),
         CoffeeScript => N(Some("#"), Some(("###", "###"))),
         D => N(Some("//"), Some(("/*", "*/"))),
         Forth => N(Some("\\"), Some(("(", ")"))),
