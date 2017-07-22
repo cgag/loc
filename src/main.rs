@@ -71,30 +71,30 @@ fn main() {
         .about("counts things quickly hopefully")
         // TODO(cgag): actually implement filtering
         .arg(Arg::with_name("exclude")
-            .required(false)
-            .multiple(true)
-            .long("exclude")
-            .value_name("REGEX")
-            .takes_value(true)
-            .help("Rust regex of files to exclude"))
+             .required(false)
+             .multiple(true)
+             .long("exclude")
+             .value_name("REGEX")
+             .takes_value(true)
+             .help("Rust regex of files to exclude"))
         .arg(Arg::with_name("include")
-            .required(false)
-            .multiple(true)
-            .long("include")
-            .value_name("REGEX")
-            .takes_value(true)
-            .help("Rust regex matching files to include. Anything not matched will be excluded"))
+             .required(false)
+             .multiple(true)
+             .long("include")
+             .value_name("REGEX")
+             .takes_value(true)
+             .help("Rust regex matching files to include. Anything not matched will be excluded"))
         .arg(Arg::with_name("files")
              .required(false)
              .long("files")
              .takes_value(false)
              .help("Show stats for individual files"))
         .arg(Arg::with_name("sort")
-            .required(false)
-            .long("sort")
-            .value_name("COLUMN")
-            .takes_value(true)
-            .help("Column to sort by"))
+             .required(false)
+             .long("sort")
+             .value_name("COLUMN")
+             .takes_value(true)
+             .help("Column to sort by"))
         .arg(Arg::with_name("unrestricted")
              .required(false)
              .multiple(true)
@@ -103,8 +103,12 @@ fn main() {
              .takes_value(false)
              .help("A single -u won't respect .gitignore (etc.) files. Two -u flags will additionally count hidden files and directories."))
         .arg(Arg::with_name("target")
-            .multiple(true)
-            .help("File or directory to count"))
+             .multiple(true)
+             .help("File or directory to count"))
+        .arg(Arg::with_name("json")
+             .long("json")
+             .required(false)
+             .help("Outputs result in JSON format"))
         .get_matches();
 
     let targets = match matches.values_of("target") {
@@ -289,7 +293,11 @@ fn main() {
             }
         }
 
-        print_totals_by_lang(&linesep, &totals_by_lang);
+        if matches.is_present("json") {
+            json_print_totals_by_lang(&totals_by_lang);
+        } else {
+            print_totals_by_lang(&linesep, &totals_by_lang);
+        }
     }
 
 }
@@ -305,6 +313,41 @@ fn last_n_chars(s: &str, n: usize) -> String {
 fn str_repeat(s: &str, n: usize) -> String {
     std::iter::repeat(s).take(n).collect::<Vec<_>>().join("")
 }
+
+fn json_print_totals_by_lang(totals_by_lang: &[(&&Lang, &LangTotal)]) {
+    println!("{{");
+    for &(lang, total) in totals_by_lang {
+        println!("  \"{0}\": {{ \"nFiles\" : {1}, \"lines\": {2}, \"blank\": {3}, \"comment\": {4}, \"code\": {5} }},",
+                 lang,
+                 total.files,
+                 total.count.lines,
+                 total.count.blank,
+                 total.count.comment,
+                 total.count.code);
+    }
+
+    let mut totals = LangTotal {
+        files: 0,
+        count: Count::default(),
+    };
+    for &(_, total) in totals_by_lang {
+        totals.files += total.files;
+        totals.count.code += total.count.code;
+        totals.count.blank += total.count.blank;
+        totals.count.comment += total.count.comment;
+        totals.count.lines += total.count.lines;
+    }
+
+    println!("  \"{0}\": {{ \"nFiles\" : {1}, \"lines\": {2}, \"blank\": {3}, \"comment\": {4}, \"code\": {5} }}",
+             "SUM",
+             totals.files,
+             totals.count.lines,
+             totals.count.blank,
+             totals.count.comment,
+             totals.count.code);
+    println!("}}");
+}
+
 
 fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) {
     println!("{}", linesep);
