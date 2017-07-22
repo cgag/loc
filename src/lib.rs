@@ -118,6 +118,7 @@ pub enum Lang {
     Polly,
     Prolog,
     Protobuf,
+    PureScript,
     Pyret,
     Python,
     Qcl,
@@ -225,6 +226,7 @@ impl Lang {
             Polly => "Polly",
             Prolog => "Prolog",
             Protobuf => "Protobuf",
+            PureScript => "PureScript",
             Pyret => "Pyret",
             Python => "Python",
             Qcl => "Qcl",
@@ -359,6 +361,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
 
         "polly" => Polly,
         "proto" => Protobuf,
+        "purs" => PureScript,
         "arr" => Pyret,
         "py" => Python,
         "r" => R,
@@ -438,7 +441,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Python => N(Some("#"), Some(("'''", "'''"))),
         Ruby => N(Some("#"), Some(("=begin", "=end"))),
         Sql => N(Some("--"), Some(("/*", "*/"))),
-        Haskell | Idris | Agda => N(Some("--"), Some(("{-", "-}"))),
+        Haskell | Idris | Agda | PureScript => N(Some("--"), Some(("{-", "-}"))),
 
         ColdFusion => N(None, Some(("<!---", "--->"))),
         Mustache => N(None, Some(("{{!", "}}"))),
