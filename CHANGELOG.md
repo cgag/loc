@@ -1,3 +1,7 @@
+## UNRELEASED
+- Add `--list-file` parameter to allow the user to specify a file from which to read
+a list of files to count instead of using the normal directory walking method
+
 ## 0.3.4 (2016-11-04)
 - Default to searching `.` if no target is specified (suggested by chris-morgan)
 - F# support by red75prime

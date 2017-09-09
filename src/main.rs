@@ -13,6 +13,8 @@ use ignore::WalkBuilder;
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
+use std::fs::{self, File};
+use std::io::{BufRead, BufReader};
 use std::thread;
 
 use deque::{Stealer, Stolen};
@@ -85,10 +87,10 @@ fn main() {
             .takes_value(true)
             .help("Rust regex matching files to include. Anything not matched will be excluded"))
         .arg(Arg::with_name("files")
-             .required(false)
-             .long("files")
-             .takes_value(false)
-             .help("Show stats for individual files"))
+            .required(false)
+            .long("files")
+            .takes_value(false)
+            .help("Show stats for individual files"))
         .arg(Arg::with_name("sort")
             .required(false)
             .long("sort")
@@ -96,12 +98,19 @@ fn main() {
             .takes_value(true)
             .help("Column to sort by"))
         .arg(Arg::with_name("unrestricted")
-             .required(false)
-             .multiple(true)
-             .long("unrestricted")
-             .short("u")
-             .takes_value(false)
-             .help("A single -u won't respect .gitignore (etc.) files. Two -u flags will additionally count hidden files and directories."))
+            .required(false)
+            .multiple(true)
+            .long("unrestricted")
+            .short("u")
+            .takes_value(false)
+            .help("A single -u won't respect .gitignore (etc.) files. Two -u flags will additionally count hidden files and directories."))
+        .arg(Arg::with_name("list_file")
+            .required(false)
+            .long("list-file")
+            .short("l")
+            .value_name("PATH")
+            .takes_value(true)
+            .help("The path to a file which contains a single file path per line to count"))
         .arg(Arg::with_name("target")
             .multiple(true)
             .help("File or directory to count"))
@@ -125,7 +134,7 @@ fn main() {
             match Regex::new(&combined_regex) {
                 Ok(r) => Some(r),
                 Err(e) => {
-                    println!("Error processing exclude regex: {}", e);
+                    eprintln!("Error processing exclude regex: {}", e);
                     std::process::exit(1);
                 }
             }
@@ -138,7 +147,7 @@ fn main() {
             match Regex::new(&combined_regex) {
                 Ok(r) => Some(r),
                 Err(e) => {
-                    println!("Error processing include regex: {}", e);
+                    eprintln!("Error processing include regex: {}", e);
                     std::process::exit(1);
                 }
             }
@@ -154,31 +163,73 @@ fn main() {
         workers.push(thread::spawn(|| worker.run()));
     }
 
-    for target in targets {
-        // TODO(cgag): use WalkParallel?
-        let walker = WalkBuilder::new(target).ignore(use_ignore)
-                                             .git_ignore(use_ignore)
-                                             .git_exclude(use_ignore)
-                                             .hidden(ignore_hidden)
-                                             .build();
-        let files = walker
-            .into_iter()
-            .filter_map(|entry| entry.ok())
-            .filter(|entry| entry.file_type().expect("no filetype").is_file())
-            .map(|entry| String::from(entry.path().to_str().unwrap()))
-            .filter(|path| match include_regex {
-                None => true,
-                Some(ref include) => include.is_match(path),
-            })
-            .filter(|path| match exclude_regex {
-                None => true,
-                Some(ref exclude) => !exclude.is_match(path),
-            });
+    match matches.value_of("list_file") {
+        Some(path) => {
+            let list_file = match File::open(path) {
+                Ok(f) => f,
+                Err(e) => {
+                    eprintln!("Failed to open list file '{}': {}", path, e);
+                    std::process::exit(1);
+                }
+            };
 
-        for path in files {
-            workq.push(Work::File(path));
+            let reader = BufReader::new(list_file);
+
+            let paths = reader.lines()
+                .filter_map(|path| path.ok())
+                .filter(|path| match include_regex {
+                    None => true,
+                    Some(ref include) => include.is_match(path),
+                })
+                .filter(|path| match exclude_regex {
+                    None => true,
+                    Some(ref exclude) => !exclude.is_match(path),
+                })
+                .filter_map(|path| {
+                    match fs::metadata(&path) {
+                        Ok(metadata) => {
+                            if metadata.is_file() {
+                                Some(path)
+                            } else {
+                                None
+                            }
+                        },
+                        _ => None,
+                    }
+                });
+
+            for path in paths {
+                workq.push(Work::File(path));
+            }
+        },
+        None => {
+            for target in targets {
+                // TODO(cgag): use WalkParallel?
+                let walker = WalkBuilder::new(target).ignore(use_ignore)
+                                                    .git_ignore(use_ignore)
+                                                    .git_exclude(use_ignore)
+                                                    .hidden(ignore_hidden)
+                                                    .build();
+                let files = walker
+                    .into_iter()
+                    .filter_map(|entry| entry.ok())
+                    .filter(|entry| entry.file_type().expect("no filetype").is_file())
+                    .map(|entry| String::from(entry.path().to_str().unwrap()))
+                    .filter(|path| match include_regex {
+                        None => true,
+                        Some(ref include) => include.is_match(path),
+                    })
+                    .filter(|path| match exclude_regex {
+                        None => true,
+                        Some(ref exclude) => !exclude.is_match(path),
+                    });
+
+                for path in files {
+                    workq.push(Work::File(path));
+                }
+            }
         }
-    }
+    };
 
     for _ in 0..workers.len() {
         workq.push(Work::Quit);
@@ -284,7 +335,7 @@ fn main() {
                 totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.lines.cmp(&c1.count.lines))
             }
             _ => {
-                println!("invalid sort option {}, sorting by code", sort);
+                eprintln!("invalid sort option {}, sorting by code", sort);
                 totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.code.cmp(&c1.count.code))
             }
         }
