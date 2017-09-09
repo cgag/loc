@@ -125,7 +125,7 @@ fn main() {
             match Regex::new(&combined_regex) {
                 Ok(r) => Some(r),
                 Err(e) => {
-                    println!("Error processing exclude regex: {}", e);
+                    eprintln!("Error processing exclude regex: {}", e);
                     std::process::exit(1);
                 }
             }
@@ -138,7 +138,7 @@ fn main() {
             match Regex::new(&combined_regex) {
                 Ok(r) => Some(r),
                 Err(e) => {
-                    println!("Error processing include regex: {}", e);
+                    eprintln!("Error processing include regex: {}", e);
                     std::process::exit(1);
                 }
             }
@@ -284,7 +284,7 @@ fn main() {
                 totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.lines.cmp(&c1.count.lines))
             }
             _ => {
-                println!("invalid sort option {}, sorting by code", sort);
+                eprintln!("invalid sort option {}, sorting by code", sort);
                 totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.code.cmp(&c1.count.code))
             }
         }
