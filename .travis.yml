@@ -19,8 +19,8 @@ matrix:
   # don't need
   include:
     # Linux
-    - env: TARGET=i686-unknown-linux-gnu
-    - env: TARGET=i686-unknown-linux-musl
+    # - env: TARGET=i686-unknown-linux-gnu
+    # - env: TARGET=i686-unknown-linux-musl
     - env: TARGET=x86_64-unknown-linux-gnu
     - env: TARGET=x86_64-unknown-linux-musl
 
@@ -38,14 +38,14 @@ matrix:
     # Other architectures
     - env: TARGET=aarch64-unknown-linux-gnu
     - env: TARGET=armv7-unknown-linux-gnueabihf
-    - env: TARGET=mips-unknown-linux-gnu
-    - env: TARGET=mips64-unknown-linux-gnuabi64
-    - env: TARGET=mips64el-unknown-linux-gnuabi64
-    - env: TARGET=mipsel-unknown-linux-gnu
-    - env: TARGET=powerpc-unknown-linux-gnu
-    - env: TARGET=powerpc64-unknown-linux-gnu
-    - env: TARGET=powerpc64le-unknown-linux-gnu
-    - env: TARGET=s390x-unknown-linux-gnu DISABLE_TESTS=1
+    # - env: TARGET=mips-unknown-linux-gnu
+    # - env: TARGET=mips64-unknown-linux-gnuabi64
+    # - env: TARGET=mips64el-unknown-linux-gnuabi64
+    # - env: TARGET=mipsel-unknown-linux-gnu
+    # - env: TARGET=powerpc-unknown-linux-gnu
+    # - env: TARGET=powerpc64-unknown-linux-gnu
+    # - env: TARGET=powerpc64le-unknown-linux-gnu
+    # - env: TARGET=s390x-unknown-linux-gnu DISABLE_TESTS=1
 
     # Testing other channels
     - env: TARGET=x86_64-unknown-linux-gnu
