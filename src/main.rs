@@ -104,7 +104,7 @@ fn main() {
              .help("A single -u won't respect .gitignore (etc.) files. Two -u flags will additionally count hidden files and directories."))
         .arg(Arg::with_name("target")
             .multiple(true)
-            .help("File or directory to count"))
+            .help("File or directory to count (multiple arguments accepted)"))
         .get_matches();
 
     let targets = match matches.values_of("target") {
