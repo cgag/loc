@@ -249,7 +249,7 @@ impl Lang {
             Text => "Plain Text",
             Toml => "Toml",
             TypeScript => "TypeScript",
-            Tsx => "Tsx",
+            Tsx => "Typescript JSX",
             UnrealScript => "UnrealScript",
             VimScript => "VimL",
             Wolfram => "Wolfram",
