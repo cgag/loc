@@ -73,6 +73,7 @@ ignore files with `loc -u`, and include hidden files/dirs with `loc -uu`.
 - Forth
 - FORTRAN Legacy
 - FORTRAN Modern
+- F# (Fsharp)
 - GLSL
 - Go
 - Handlebars
@@ -144,3 +145,5 @@ ignore files with `loc -u`, and include hidden files/dirs with `loc -uu`.
 ## Attributions
 
 This project contains code from [Tokei](https://github.com/Aaronepower/tokei) by [Aaronepower](https://github.com/Aaronepower) and [ripgrep](https://github.com/BurntSushi/ripgrep) by [BurntSushi](https://github.com/BurntSushi).
+
+### Contributors
