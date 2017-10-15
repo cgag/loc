@@ -1,4 +1,3 @@
-extern crate regex;
 extern crate memmap;
 extern crate memchr;
 

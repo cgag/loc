@@ -3,7 +3,6 @@ extern crate loc;
 #[macro_use]
 extern crate clap;
 extern crate deque;
-extern crate itertools;
 extern crate num_cpus;
 extern crate regex;
 extern crate ignore;

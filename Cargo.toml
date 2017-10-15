@@ -1,6 +1,6 @@
 [package]
 name = "loc"
-version = "0.4.0"
+version = "0.4.1"
 description = "Count lines of code (cloc) fast."
 authors = ["Curtis Gagliardi <curtis@curtis.io>"]
 
@@ -11,16 +11,13 @@ documentation = "https://github.com/cgag/loc"
 license="MIT"
 
 [dependencies]
-clap          = "*"
-deque         = "*"
-itertools     = "*"
-libc          = "*"
-memchr        = "*"
-memmap        = "*"
-regex         = "*"
-thread-scoped = "*"
-num_cpus      = "*"
-ignore        = "*"
+clap          = "2.26.2"
+deque         = "0.3.2"
+memchr        = "1.0.1"
+memmap        = "0.5.2"
+regex         = "0.2.2"
+num_cpus      = "1.7.0"
+ignore        = "0.2.2"
 
 # [profile.release]
 # lto = true
