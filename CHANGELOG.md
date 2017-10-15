@@ -1,3 +1,17 @@
+## 0.4.0
+- respect .gitignore and ignore hidden files by default (-u to allow hidden -uu to allow hidden and ignored files)
+- allow multiple include / exclude regexs
+- remove unused errno crate
+- add languages:
+  - purescript
+  - haxe
+  - gherkin
+  - qml
+  - tsx (typescript + jsx)
+  - schemes (.ss, .scm, .rkt)
+  - pyret
+  - stylus
+
 ## 0.3.4 (2016-11-04)
 - Default to searching `.` if no target is specified (suggested by chris-morgan)
 - F# support by red75prime
