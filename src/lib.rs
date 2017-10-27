@@ -82,6 +82,7 @@ pub enum Lang {
     Gherkin,
     Glsl,
     Go,
+    Groovy,
     Handlebars,
     Haskell,
     Hex,
@@ -190,6 +191,7 @@ impl Lang {
             Gherkin => "Gherkin",
             Glsl => "GLSL",
             Go => "Go",
+            Groovy => "Groovy",
             Handlebars => "Handlebars",
             Haskell => "Haskell",
             Hex => "Hex",
@@ -312,6 +314,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "fs" | "fsx" => FSharp,
         "vert" | "tesc" | "tese" | "geom" | "frag" | "comp" => Glsl,
         "go" => Go,
+        "groovy" => Groovy,
         "h" | "hh" | "hpp" | "hxx" => CCppHeader,
         "hbs" | "handlebars" => Handlebars,
         "hs" => Haskell,
@@ -472,7 +475,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
 
         // TODO(cgag): not 100% sure that yacc belongs here.
         C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA |
-        CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx |
+        CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Groovy | Jai | Java | JavaScript | Jsx |
         Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift |
         TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe => c_style,
 
