@@ -31,6 +31,7 @@ pub struct LangTotal {
     pub count: Count,
 }
 
+// TODO(cgag): smallvec?
 pub enum LineConfig<'a> {
     Normal {
         single: Option<&'a str>,
@@ -398,10 +399,12 @@ enum ConfigTuple<'a> {
     // Normal (terrible name), anything without multiple syntaxes
     N(Option<&'a str>, Option<(&'a str, &'a str)>),
     // Everything (multiple singles, multiple multiline)
+    // TODO(cgag): smallvec?
     EV(Vec<&'a str>, Vec<(&'a str, &'a str)>),
 }
 use self::ConfigTuple::*;
 
+// TODO(cgag): smaller string.  Longer todo: remove
 const UNLIKELY: &'static str = "SLkJJJJJ<!*$(!*&)(*@^#$K8K!(*76(*&(38j8";
 
 pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
@@ -574,6 +577,24 @@ pub fn count_normal(filepath: &str,
             continue;
         };
 
+        // TODO(cgag): move !in_comment to be the outermost if?
+        // TODO(cgag): match (single_start, multi_start)?
+        // match (single_start, multi_start) => {
+        //     (None, None) => break;
+        //     (Some(single_start), None) => {
+        //         if line.start_with(single_start) {
+        //             c.comment += 1;
+        //             continue;
+        //         }
+        //     }
+        //     (Some(single_start), Some(multi_start)) => {
+        //         if line.start_with(single_start) && !line.starts_with(multi_start) {
+        //             c.comment += 1;
+        //             continue;
+        //         }
+        //     }
+        // }
+
         if let Some(single_start) = single_start {
             if !in_comment && line.starts_with(single_start) {
                 if let Some((multi_start, _)) = multi {
@@ -613,8 +634,14 @@ pub fn count_normal(filepath: &str,
         let mut found_code = false;
         let contains_utf8 = (0..line_len).any(|i| !line.is_char_boundary(i));
 
+        // TODO(cgag): faster searching algorithm? think we can do better than pos +1 probably
+        // see what the two way searcher in std does
+        // TODO(cgag): maybe better to use string functions (index) instead of this?
         'outer: while pos < line_len {
             if contains_utf8 {
+                // checking that the next n bytes are all boundaries, where n
+                // is the longer of comment start/end chars, or the rest of the line
+                // TODO(cgag): we're definitely repeating a lot of is_char_boundary checks. 
                 for i in pos..pos + min(max(start_len, end_len) + 1, line_len - pos) {
                     if !line.is_char_boundary(i) {
                         pos += 1;
