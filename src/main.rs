@@ -105,6 +105,12 @@ fn main() {
              .short("u")
              .takes_value(false)
              .help("A single -u won't respect .gitignore (etc.) files. Two -u flags will additionally count hidden files and directories."))
+        .arg(Arg::with_name("width")
+            .required(false)
+            .long("width")
+            .value_name("WIDTH")
+            .takes_value(true)
+            .help("Change width of output (default: 80)"))
         .arg(Arg::with_name("target")
             .multiple(true)
             .help("File or directory to count (multiple arguments accepted)"))
@@ -148,7 +154,10 @@ fn main() {
         }
         None => None,
     };
-    let width: usize = 80;
+    let mut width: usize = 80;
+    if matches.is_present("width") {
+        width = matches.value_of("width").unwrap_or("80").parse::<usize>().unwrap();
+    }
 
     let threads = num_cpus::get();
     let mut workers = vec![];
