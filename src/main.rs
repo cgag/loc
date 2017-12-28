@@ -61,8 +61,14 @@ impl Worker {
     }
 }
 
-macro_rules! line_format {
-    ($w:expr) => (" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}")
+macro_rules! first_column {
+    // this format string takes 2 args: something to print, and a width value
+    () => (" {:<1$}")
+}
+
+macro_rules! remaining_columns {
+    // this format string takes 5 args, simply printed with fixed max widths
+    () => (" {0: >8} {1: >12} {2: >12} {3: >12} {4: >12}")
 }
 
 fn main() {
@@ -218,8 +224,8 @@ fn main() {
     if by_file {
         // print breakdown for each individual file
         println!("{}", linesep);
-        println!(line_format!(width),
-                 "Language",
+        print!(first_column!(), "Language", width - 63);
+        println!(remaining_columns!(),
                  "Files",
                  "Lines",
                  "Blank",
@@ -236,8 +242,8 @@ fn main() {
             }
 
             println!("{}", linesep);
-            println!(line_format!(width),
-                     lang,
+            print!(first_column!(), lang, width - 63);
+            println!(remaining_columns!(),
                      filecounts.len(),
                      total.lines,
                      total.blank,
@@ -257,8 +263,9 @@ fn main() {
 
             println!("{}", linesep);
             for fc in filecounts {
-                println!("|{0: <25} {1: >12} {2: >12} {3: >12} {4: >12}",
-                         last_n_chars(&fc.path, 25),
+                print!("|");
+                print!(first_column!(), last_n_chars(&fc.path, width - 55), width - 55);
+                println!(" {0: >12} {1: >12} {2: >12} {3: >12}",
                          fc.count.lines,
                          fc.count.blank,
                          fc.count.comment,
@@ -321,8 +328,8 @@ fn str_repeat(s: &str, n: usize) -> String {
 
 fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)], width: &usize) {
     println!("{}", linesep);
-    println!(line_format!(width),
-             "Language",
+    print!(first_column!(), "Language", width - 63);
+    println!(remaining_columns!(),
              "Files",
              "Lines",
              "Blank",
@@ -331,8 +338,8 @@ fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)], 
     println!("{}", linesep);
 
     for &(lang, total) in totals_by_lang {
-        println!(line_format!(width),
-                 lang,
+        print!(first_column!(), lang, width - 63);
+        println!(remaining_columns!(),
                  total.files,
                  total.count.lines,
                  total.count.blank,
@@ -353,8 +360,8 @@ fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)], 
     }
 
     println!("{}", linesep);
-    println!(line_format!(width),
-             "Total",
+    print!(first_column!(), "Total", width - 63);
+    println!(remaining_columns!(),
              totals.files,
              totals.count.lines,
              totals.count.blank,
