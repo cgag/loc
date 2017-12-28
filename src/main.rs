@@ -61,6 +61,10 @@ impl Worker {
     }
 }
 
+macro_rules! line_format {
+    ($w:expr) => (" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}")
+}
+
 fn main() {
 
     let matches = App::new("count")
@@ -144,6 +148,7 @@ fn main() {
         }
         None => None,
     };
+    let width: usize = 80;
 
     let threads = num_cpus::get();
     let mut workers = vec![];
@@ -199,12 +204,12 @@ fn main() {
         };
     }
 
-    let linesep = str_repeat("-", 80);
+    let linesep = str_repeat("-", width);
 
     if by_file {
         // print breakdown for each individual file
         println!("{}", linesep);
-        println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
+        println!(line_format!(width),
                  "Language",
                  "Files",
                  "Lines",
@@ -222,7 +227,7 @@ fn main() {
             }
 
             println!("{}", linesep);
-            println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
+            println!(line_format!(width),
                      lang,
                      filecounts.len(),
                      total.lines,
@@ -288,7 +293,7 @@ fn main() {
             }
         }
 
-        print_totals_by_lang(&linesep, &totals_by_lang);
+        print_totals_by_lang(&linesep, &totals_by_lang, &width);
     }
 
 }
@@ -305,9 +310,9 @@ fn str_repeat(s: &str, n: usize) -> String {
     std::iter::repeat(s).take(n).collect::<Vec<_>>().join("")
 }
 
-fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) {
+fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)], width: &usize) {
     println!("{}", linesep);
-    println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
+    println!(line_format!(width),
              "Language",
              "Files",
              "Lines",
@@ -317,7 +322,7 @@ fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) 
     println!("{}", linesep);
 
     for &(lang, total) in totals_by_lang {
-        println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
+        println!(line_format!(width),
                  lang,
                  total.files,
                  total.count.lines,
@@ -339,7 +344,7 @@ fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) 
     }
 
     println!("{}", linesep);
-    println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
+    println!(line_format!(width),
              "Total",
              totals.files,
              totals.count.lines,
