@@ -6,13 +6,16 @@ extern crate deque;
 extern crate num_cpus;
 extern crate regex;
 extern crate ignore;
+extern crate terminal_size;
 
 use clap::{Arg, App, AppSettings};
 use ignore::WalkBuilder;
+use terminal_size::{Width, terminal_size};
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::thread;
+use std::option::Option;
 
 use deque::{Stealer, Stolen};
 use regex::Regex;
@@ -114,9 +117,10 @@ fn main() {
         .arg(Arg::with_name("width")
             .required(false)
             .long("width")
-            .value_name("WIDTH")
+            .short("w")
             .takes_value(true)
-            .help("Change width of output (default: 80)"))
+            .value_name("N")
+            .help("Change width of output from 80 to N, or use full terminal width with N = `full`"))
         .arg(Arg::with_name("target")
             .multiple(true)
             .help("File or directory to count (multiple arguments accepted)"))
@@ -162,7 +166,17 @@ fn main() {
     };
     let mut width: usize = 80;
     if matches.is_present("width") {
-        width = matches.value_of("width").unwrap_or("80").parse::<usize>().unwrap();
+        let val = matches.value_of("width");
+        let x: Option<&str> = Some("full");
+        if val == x {
+            let size = terminal_size();
+            if let Some((Width(w), _)) = size {
+                width = w as usize;
+            }
+        }
+        else {
+            width = val.unwrap_or("80").parse::<usize>().unwrap();
+        }
     }
 
     let threads = num_cpus::get();

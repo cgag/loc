@@ -18,6 +18,7 @@ memmap        = "0.5.2"
 regex         = "0.2.2"
 num_cpus      = "1.7.0"
 ignore        = "0.2.2"
+terminal_size = "0.1.7"
 
 # [profile.release]
 # lto = true
