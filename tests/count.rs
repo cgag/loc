@@ -125,3 +125,21 @@ const GHERKIN_EXPECTED: Count = Count {
     lines: 8+2+2,
 };
 test_count![GHERKIN, GHERKIN_EXPECTED, gherkin_count, gherkin_code, gherkin_comment, gherkin_blank, gherkin_lines];
+
+const GROOVY: &'static str = "tests/data/test.groovy";
+const GROOVY_EXPECTED: Count = Count {
+    code: 6,
+    blank: 1,
+    comment: 10,
+    lines: 6+1+10,
+};
+test_count![GROOVY, GROOVY_EXPECTED, groovy_count, groovy_code, groovy_comment, groovy_blank, groovy_lines];
+
+const TERRAFORM: &'static str = "tests/data/test.tf";
+const TERRAFORM_EXPECTED: Count = Count {
+    code: 65,
+    blank: 13,
+    comment: 11,
+    lines: 65+13+11,
+};
+test_count![TERRAFORM, TERRAFORM_EXPECTED, terraform_count, terraform_code, terraform_comment, terraform_blank, terraform_lines];
