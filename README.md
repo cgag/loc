@@ -181,6 +181,7 @@ ignore files with `loc -u`, and include hidden files/dirs with `loc -uu`.
 - F# (Fsharp)
 - GLSL
 - Go
+- Groovy
 - Handlebars
 - Haskell
 - Hex
@@ -235,6 +236,7 @@ ignore files with `loc -u`, and include hidden files/dirs with `loc -uu`.
 - Stylus
 - Swift
 - Tcl
+- Terraform
 - TeX
 - Toml
 - TypeScript

@@ -83,6 +83,7 @@ pub enum Lang {
     Gherkin,
     Glsl,
     Go,
+    Groovy,
     Handlebars,
     Haskell,
     Hex,
@@ -137,6 +138,7 @@ pub enum Lang {
     Stylus,
     Swift,
     Tcl,
+    Terraform,
     Tex,
     Text,
     Toml,
@@ -192,6 +194,7 @@ impl Lang {
             Gherkin => "Gherkin",
             Glsl => "GLSL",
             Go => "Go",
+            Groovy => "Groovy",
             Handlebars => "Handlebars",
             Haskell => "Haskell",
             Hex => "Hex",
@@ -246,6 +249,7 @@ impl Lang {
             Stylus => "Stylus",
             Swift => "Swift",
             Tcl => "Tcl",
+            Terraform => "Terraform",
             Tex => "TeX",
             Text => "Plain Text",
             Toml => "Toml",
@@ -315,6 +319,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "fs" | "fsx" => FSharp,
         "vert" | "tesc" | "tese" | "geom" | "frag" | "comp" => Glsl,
         "go" => Go,
+        "groovy" => Groovy,
         "h" | "hh" | "hpp" | "hxx" => CCppHeader,
         "hbs" | "handlebars" => Handlebars,
         "hs" => Haskell,
@@ -379,6 +384,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "styl" => Stylus,
         "swift" => Swift,
         "tcl" => Tcl,
+        "tf" => Terraform,
         "tex" | "sty" => Tex,
         "toml" => Toml,
         "ts" => TypeScript,
@@ -423,6 +429,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         INI => N(Some(";"), None),
         Protobuf => N(Some("//"), None),
         VimScript => N(Some("\""), None),
+        Terraform => N(Some("#"), Some(("/*", "*/"))),
 
         // TODO(cgag): Well, some architectures use ;, @, |, etc.  Figure out something
         // better?
@@ -483,7 +490,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA
         | CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx
         | Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift
-        | TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe => c_style,
+        | TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe | Groovy => c_style,
 
         Unrecognized => unreachable!(),
     };
