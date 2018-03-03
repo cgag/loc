@@ -1,8 +1,8 @@
-extern crate memmap;
 extern crate memchr;
+extern crate memmap;
 
 use std::path::Path;
-use std::cmp::{min, max};
+use std::cmp::{max, min};
 use std::fmt;
 
 use memmap::{Mmap, Protection};
@@ -74,6 +74,7 @@ pub enum Lang {
     D,
     Dart,
     DeviceTree,
+    Elixir,
     Erlang,
     Forth,
     FortranLegacy,
@@ -182,6 +183,7 @@ impl Lang {
             D => "D",
             Dart => "Dart",
             DeviceTree => "DeviceTree",
+            Elixir => "Elixir",
             Erlang => "Erlang",
             Forth => "Forth",
             FortranLegacy => "FORTRAN Legacy",
@@ -307,6 +309,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "dart" => Dart,
         "dts" | "dtsi" => DeviceTree,
         "el" | "lisp" | "lsp" | "scm" | "ss" | "rkt" => Lisp,
+        "ex" | "exs" => Elixir,
         "erl" | "hrl" => Erlang,
         "feature" => Gherkin,
         "fs" | "fsx" => FSharp,
@@ -405,7 +408,6 @@ use self::ConfigTuple::*;
 const UNLIKELY: &'static str = "SLkJJJJJ<!*$(!*&)(*@^#$K8K!(*76(*&(38j8";
 
 pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
-
     let c_style = N(Some("//"), Some(("/*", "*/")));
     let html_style = N(None, Some(("<!--", "-->")));
     let ml_style = N(None, Some(("(*", "*)")));
@@ -453,9 +455,16 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Handlebars => EV(vec![UNLIKELY], vec![("<!--", "-->"), ("{{!", "}}")]),
         Php => EV(vec!["#", "//"], vec![("/*", "*/")]),
         Isabelle => {
-            EV(vec!["--"],
-               // Is that angle bracket utf8?  What's going to happen with that?
-               vec![("{*", "*}"), ("(*", "*)"), ("‹", "›"), ("\\<open>", "\\<close>")])
+            EV(
+                vec!["--"],
+                // Is that angle bracket utf8?  What's going to happen with that?
+                vec![
+                    ("{*", "*}"),
+                    ("(*", "*)"),
+                    ("‹", "›"),
+                    ("\\<open>", "\\<close>"),
+                ],
+            )
         }
         Razor => EV(vec![UNLIKELY], vec![("<!--", "-->"), ("@*", "*@")]),
         Pascal => EV(vec!["//", "(*"], vec![("{", "}")]),
@@ -467,31 +476,27 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
 
         Html | Polly | RubyHtml | XML => html_style,
 
-        BourneShell | Make | Awk | CShell | Gherkin | Makefile | Nim | R | SaltStack | Tcl |
-        Toml | Yaml | Zsh => sh_style,
+        BourneShell | Make | Awk | CShell | Gherkin | Makefile | Nim | R | SaltStack | Tcl
+        | Toml | Yaml | Zsh | Elixir => sh_style,
 
         // TODO(cgag): not 100% sure that yacc belongs here.
-        C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA |
-        CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx |
-        Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift |
-        TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe => c_style,
+        C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA
+        | CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx
+        | Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift
+        | TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe => c_style,
 
         Unrecognized => unreachable!(),
     };
 
     match ctuple {
-        N(single, multi) => {
-            LineConfig::Normal {
-                single: single,
-                multi: multi,
-            }
-        }
-        EV(singles, multies) => {
-            LineConfig::Everything {
-                singles: singles,
-                multies: multies,
-            }
-        }
+        N(single, multi) => LineConfig::Normal {
+            single: single,
+            multi: multi,
+        },
+        EV(singles, multies) => LineConfig::Everything {
+            singles: singles,
+            multies: multies,
+        },
     }
 }
 
@@ -545,11 +550,11 @@ pub fn count(filepath: &str) -> Count {
     }
 }
 
-pub fn count_normal(filepath: &str,
-                    single_start: Option<&str>,
-                    multi: Option<(&str, &str)>)
-                    -> Count {
-
+pub fn count_normal(
+    filepath: &str,
+    single_start: Option<&str>,
+    multi: Option<(&str, &str)>,
+) -> Count {
     let fmmap = match Mmap::open_path(filepath, Protection::Read) {
         Ok(mmap) => mmap,
         Err(_) => {
@@ -623,12 +628,14 @@ pub fn count_normal(filepath: &str,
                 }
             }
 
-            if !in_comment && pos + start_len <= line_len &&
-               &line[pos..pos + start_len] == multi_start {
+            if !in_comment && pos + start_len <= line_len
+                && &line[pos..pos + start_len] == multi_start
+            {
                 pos += start_len;
                 in_comment = true;
-            } else if in_comment && pos + end_len <= line_len &&
-                      &line[pos..pos + end_len] == multi_end {
+            } else if in_comment && pos + end_len <= line_len
+                && &line[pos..pos + end_len] == multi_end
+            {
                 pos += end_len;
                 in_comment = false;
             } else if !in_comment && !&line[pos..pos + 1].chars().next().unwrap().is_whitespace() {
@@ -649,11 +656,11 @@ pub fn count_normal(filepath: &str,
     c
 }
 
-pub fn count_everything<'a>(filepath: &str,
-                            singles: &[&'a str],
-                            multies: &[(&'a str, &'a str)])
-                            -> Count {
-
+pub fn count_everything<'a>(
+    filepath: &str,
+    singles: &[&'a str],
+    multies: &[(&'a str, &'a str)],
+) -> Count {
     let mut single_iter = singles.iter();
     let first = single_iter.next().expect("No single comment.");
     let mut total_count = count_normal(filepath, Some(first), None);
