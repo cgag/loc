@@ -83,6 +83,13 @@ fn main() {
             .value_name("REGEX")
             .takes_value(true)
             .help("Rust regex matching files to include. Anything not matched will be excluded"))
+        .arg(Arg::with_name("csv")
+                .required(false)
+                .multiple(false)
+                .long("csv")
+                .value_name("sep")
+                .takes_value(true)
+                .help("Output csv"))
         .arg(Arg::with_name("files")
              .required(false)
              .long("files")
@@ -110,7 +117,10 @@ fn main() {
         Some(targets) => targets.collect(),
         None => vec!["."]
     };
+
+    let sep = matches.value_of("csv").unwrap_or("None");
     let sort = matches.value_of("sort").unwrap_or("code");
+
     let by_file = matches.is_present("files");
     let (use_ignore, ignore_hidden) = match matches.occurrences_of("unrestricted") {
         0 => (true,  true),
@@ -288,7 +298,7 @@ fn main() {
             }
         }
 
-        print_totals_by_lang(&linesep, &totals_by_lang);
+        print_totals_by_lang(&linesep, &totals_by_lang,sep);
     }
 
 }
@@ -300,37 +310,30 @@ fn last_n_chars(s: &str, n: usize) -> String {
     s.chars().skip(s.len() - n).collect::<String>()
 }
 
-
 fn str_repeat(s: &str, n: usize) -> String {
     std::iter::repeat(s).take(n).collect::<Vec<_>>().join("")
 }
 
-fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) {
-    println!("{}", linesep);
-    println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
-             "Language",
-             "Files",
-             "Lines",
-             "Blank",
-             "Comment",
-             "Code");
-    println!("{}", linesep);
+fn print_totals_by_lang(linesep: &str,
+        totals_by_lang: &[(&&Lang, &LangTotal)],
+        colsep : &str) {
 
-    for &(lang, total) in totals_by_lang {
-        println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
-                 lang,
-                 total.files,
-                 total.count.lines,
-                 total.count.blank,
-                 total.count.comment,
-                 total.count.code);
-    }
+    let arr_header : &[&str] = &["Language","Files","Lines","Blank","Comment","Code"];
+
+    output(linesep,arr_header,colsep);
 
     let mut totals = LangTotal {
         files: 0,
         count: Count::default(),
     };
-    for &(_, total) in totals_by_lang {
+
+    for &(lang, total) in totals_by_lang {
+        let arr_line : &[&str] = &[&lang.to_string(), &total.files.to_string(),
+                    &total.count.lines.to_string(), &total.count.blank.to_string(),
+                    &total.count.comment.to_string(), &total.count.code.to_string()];
+
+        output("",arr_line,colsep);
+
         totals.files += total.files;
         totals.count.code += total.count.code;
         totals.count.blank += total.count.blank;
@@ -338,13 +341,38 @@ fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) 
         totals.count.lines += total.count.lines;
     }
 
-    println!("{}", linesep);
+    let arr_total: &[&str] = &["Total",&totals.files.to_string(),
+        &totals.count.lines.to_string(),&totals.count.blank.to_string(),
+        &totals.count.comment.to_string(), &totals.count.code.to_string()];
+
+    output(linesep,arr_total,colsep);
+}
+
+fn output(linesep:&str,data:&[&str],colsep:&str)
+{
+    if colsep == "None" {
+        normal_output(linesep,data);
+    }
+    else {
+        csv_output(colsep,data);
+    }
+}
+
+fn normal_output(linesep:&str,data:&[&str])
+{
+    if linesep != "" {
+        println!("{}", linesep);
+    }
+
     println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
-             "Total",
-             totals.files,
-             totals.count.lines,
-             totals.count.blank,
-             totals.count.comment,
-             totals.count.code);
-    println!("{}", linesep);
+            data[0], data[1], data[2], data[3], data[4], data[5]);
+
+    if linesep != "" {
+        println!("{}", linesep);
+    }
+}
+
+fn csv_output(colsep:&str,data:&[&str])
+{
+    println!("{}",data.join(colsep));
 }
