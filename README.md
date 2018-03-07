@@ -247,6 +247,7 @@ ignore files with `loc -u`, and include hidden files/dirs with `loc -uu`.
 - XML
 - Yacc
 - YAML
+- Zig
 - Z Shell
 
 ## Attributions

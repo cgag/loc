@@ -143,3 +143,12 @@ const TERRAFORM_EXPECTED: Count = Count {
     lines: 65+13+11,
 };
 test_count![TERRAFORM, TERRAFORM_EXPECTED, terraform_count, terraform_code, terraform_comment, terraform_blank, terraform_lines];
+
+const ZIG: &'static str = "tests/data/zig.zig";
+const ZIG_EXPECTED: Count = Count {
+    code: 5,
+    blank: 2,
+    comment: 2,
+    lines: 5+2+2,
+};
+test_count![ZIG, ZIG_EXPECTED, zig_count, zig_code, zig_comment, zig_blank, zig_lines];
