@@ -150,6 +150,7 @@ pub enum Lang {
     XML,
     Yacc,
     Yaml,
+    Zig,
     Zsh,
     Haxe,
     Unrecognized,
@@ -261,6 +262,7 @@ impl Lang {
             XML => "XML",
             Yacc => "Yacc",
             Yaml => "YAML",
+            Zig => "Zig",
             Zsh => "Z Shell",
             Haxe => "Haxe",
             Unrecognized => "Unrecognized",
@@ -396,6 +398,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "xml" => XML,
         "yaml" | "yml" => Yaml,
         "y" => Yacc,
+        "zig" => Zig,
         "zsh" => Zsh,
         "hx" => Haxe,
         // Probably dumb to just default to C.
@@ -427,7 +430,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Erlang | Tex => N(Some("%"), None),
         FortranModern => N(Some("!"), None),
         INI => N(Some(";"), None),
-        Protobuf => N(Some("//"), None),
+        Protobuf | Zig => N(Some("//"), None),
         VimScript => N(Some("\""), None),
         Terraform => N(Some("#"), Some(("/*", "*/"))),
 
