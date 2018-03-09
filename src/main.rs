@@ -6,13 +6,16 @@ extern crate deque;
 extern crate num_cpus;
 extern crate regex;
 extern crate ignore;
+extern crate terminal_size;
 
 use clap::{Arg, App, AppSettings};
 use ignore::WalkBuilder;
+use terminal_size::{Width, terminal_size};
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::thread;
+use std::option::Option;
 
 use deque::{Stealer, Stolen};
 use regex::Regex;
@@ -61,6 +64,16 @@ impl Worker {
     }
 }
 
+macro_rules! first_column {
+    // this format string takes 2 args: something to print, and a width value
+    () => (" {:<1$}")
+}
+
+macro_rules! remaining_columns {
+    // this format string takes 5 args, simply printed with fixed max widths
+    () => (" {0: >8} {1: >12} {2: >12} {3: >12} {4: >12}")
+}
+
 fn main() {
 
     let matches = App::new("count")
@@ -101,6 +114,13 @@ fn main() {
              .short("u")
              .takes_value(false)
              .help("A single -u won't respect .gitignore (etc.) files. Two -u flags will additionally count hidden files and directories."))
+        .arg(Arg::with_name("width")
+            .required(false)
+            .long("width")
+            .short("w")
+            .takes_value(true)
+            .value_name("N")
+            .help("Change width of output from 80 to N, or use full terminal width with N = `full`"))
         .arg(Arg::with_name("target")
             .multiple(true)
             .help("File or directory to count (multiple arguments accepted)"))
@@ -144,6 +164,20 @@ fn main() {
         }
         None => None,
     };
+    let mut width: usize = 80;
+    if matches.is_present("width") {
+        let val = matches.value_of("width");
+        let x: Option<&str> = Some("full");
+        if val == x {
+            let size = terminal_size();
+            if let Some((Width(w), _)) = size {
+                width = w as usize;
+            }
+        }
+        else {
+            width = val.unwrap_or("80").parse::<usize>().unwrap();
+        }
+    }
 
     let threads = num_cpus::get();
     let mut workers = vec![];
@@ -199,13 +233,13 @@ fn main() {
         };
     }
 
-    let linesep = str_repeat("-", 80);
+    let linesep = str_repeat("-", width);
 
     if by_file {
         // print breakdown for each individual file
         println!("{}", linesep);
-        println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
-                 "Language",
+        print!(first_column!(), "Language", width - 63);
+        println!(remaining_columns!(),
                  "Files",
                  "Lines",
                  "Blank",
@@ -222,8 +256,8 @@ fn main() {
             }
 
             println!("{}", linesep);
-            println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
-                     lang,
+            print!(first_column!(), lang, width - 63);
+            println!(remaining_columns!(),
                      filecounts.len(),
                      total.lines,
                      total.blank,
@@ -243,8 +277,9 @@ fn main() {
 
             println!("{}", linesep);
             for fc in filecounts {
-                println!("|{0: <25} {1: >12} {2: >12} {3: >12} {4: >12}",
-                         last_n_chars(&fc.path, 25),
+                print!("|");
+                print!(first_column!(), last_n_chars(&fc.path, width - 55), width - 55);
+                println!(" {0: >12} {1: >12} {2: >12} {3: >12}",
                          fc.count.lines,
                          fc.count.blank,
                          fc.count.comment,
@@ -288,7 +323,7 @@ fn main() {
             }
         }
 
-        print_totals_by_lang(&linesep, &totals_by_lang);
+        print_totals_by_lang(&linesep, &totals_by_lang, &width);
     }
 
 }
@@ -305,10 +340,10 @@ fn str_repeat(s: &str, n: usize) -> String {
     std::iter::repeat(s).take(n).collect::<Vec<_>>().join("")
 }
 
-fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) {
+fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)], width: &usize) {
     println!("{}", linesep);
-    println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
-             "Language",
+    print!(first_column!(), "Language", width - 63);
+    println!(remaining_columns!(),
              "Files",
              "Lines",
              "Blank",
@@ -317,8 +352,8 @@ fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) 
     println!("{}", linesep);
 
     for &(lang, total) in totals_by_lang {
-        println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
-                 lang,
+        print!(first_column!(), lang, width - 63);
+        println!(remaining_columns!(),
                  total.files,
                  total.count.lines,
                  total.count.blank,
@@ -339,8 +374,8 @@ fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) 
     }
 
     println!("{}", linesep);
-    println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
-             "Total",
+    print!(first_column!(), "Total", width - 63);
+    println!(remaining_columns!(),
              totals.files,
              totals.count.lines,
              totals.count.blank,
