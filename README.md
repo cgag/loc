@@ -1,3 +1,6 @@
+2018-03-08:
+I saw a bunch of stars pop up and thought I should mention that tokei is smarter and more accurate so please give that a look and see if there are any wild discrepancies (mostly for your benefit but please let me know if so).  Tokei is linked below but it's also rust so `cargo install tokei` is all you need.  Also these benchmarks are quite old. I doubt cloc has changed but tokei probably has. 
+
 `loc` is a tool for counting lines of code. It's a rust implementation of [cloc](http://cloc.sourceforge.net/), but it's more than 100x faster. There's another rust code counting tool called [tokei](https://github.com/Aaronepower/tokei), loc is ~2-10x faster than tokei, depending on how many files are being counted.
 
 I can count my 400k file `src` directory (thanks npm) in just under 7 seconds with loc, in a 1m14s with tokei, and I'm not even willing to try with cloc.
