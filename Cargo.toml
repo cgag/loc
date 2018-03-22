@@ -18,6 +18,7 @@ memmap        = "0.5.2"
 regex         = "0.2.2"
 num_cpus      = "1.7.0"
 ignore        = "0.2.2"
+edit-distance = "2.0.1"
 
 # [profile.release]
 # lto = true
