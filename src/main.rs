@@ -63,7 +63,7 @@ impl Worker {
 
 fn main() {
 
-    let matches = App::new("count")
+    let matches = App::new("loc")
         .global_settings(&[AppSettings::ColoredHelp])
         .version(crate_version!())
         .author("Curtis Gagliardi <curtis@curtis.io>")
