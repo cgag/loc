@@ -2,10 +2,11 @@ extern crate memchr;
 extern crate memmap;
 
 use std::path::Path;
+use std::fs::File;
 use std::cmp::{max, min};
 use std::fmt;
 
-use memmap::{Mmap, Protection};
+use memmap::{Mmap};
 use memchr::memchr;
 
 // Why is it called partialEq?
@@ -565,13 +566,22 @@ pub fn count_normal(
     single_start: Option<&str>,
     multi: Option<(&str, &str)>,
 ) -> Count {
-    let fmmap = match Mmap::open_path(filepath, Protection::Read) {
-        Ok(mmap) => mmap,
+    let mfile = File::open(filepath);
+    let file = match mfile {
+        Ok(file) => file,
         Err(_) => {
             return Count::default();
         }
     };
-    let bytes: &[u8] = unsafe { fmmap.as_slice() };
+    let fmmap = unsafe {
+        match Mmap::map(&file) {
+            Ok(mmap) => mmap,
+            Err(_) => {
+                return Count::default();
+            }
+        }
+    };
+    let bytes: &[u8] = &fmmap;
 
     let mut c = Count::default();
     let mut in_comment = false;
