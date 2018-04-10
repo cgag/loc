@@ -152,3 +152,12 @@ const ZIG_EXPECTED: Count = Count {
     lines: 5+2+2,
 };
 test_count![ZIG, ZIG_EXPECTED, zig_count, zig_code, zig_comment, zig_blank, zig_lines];
+
+const NIX: &'static str = "tests/data/test.nix";
+const NIX_EXPECTED: Count = Count {
+    code: 3,
+    blank: 2,
+    comment: 3,
+    lines: 3+2+3,
+};
+test_count![NIX, NIX_EXPECTED, nix_count, nix_code, nix_comment, nix_blank, nix_lines];
