@@ -189,7 +189,7 @@ impl Lang {
             Dart => "Dart",
             DeviceTree => "DeviceTree",
             Elixir => "Elixir",
-            Elm => "Elm"
+            Elm => "Elm",
             Erlang => "Erlang",
             Forth => "Forth",
             FortranLegacy => "FORTRAN Legacy",
