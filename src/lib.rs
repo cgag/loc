@@ -111,6 +111,7 @@ pub enum Lang {
     Markdown,
     Mustache,
     Nim,
+    Nix,
     OCaml,
     ObjectiveC,
     ObjectiveCpp,
@@ -224,6 +225,7 @@ impl Lang {
             Markdown => "Markdown",
             Mustache => "Mustache",
             Nim => "Nim",
+            Nix => "Nix",
             OCaml => "OCaml",
             ObjectiveC => "Objective-C",
             ObjectiveCpp => "Objective-C++",
@@ -356,6 +358,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "makefile" | "mk" => Makefile,
         "mm" => ObjectiveCpp,
         "nim" => Nim,
+        "nix" => Nix,
         "php" => Php,
         "pl" | "pm" => Perl,
         "qcl" => Qcl,
@@ -437,6 +440,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Protobuf | Zig => N(Some("//"), None),
         VimScript => N(Some("\""), None),
         Terraform => N(Some("#"), Some(("/*", "*/"))),
+        Nix => N(Some("#"), Some(("/*", "*/"))),
 
         // TODO(cgag): Well, some architectures use ;, @, |, etc.  Figure out something
         // better?
