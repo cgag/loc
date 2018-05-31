@@ -15,9 +15,9 @@ clap          = "2.31.2"
 deque         = "0.3.2"
 memchr        = "2.0.1"
 memmap        = "0.6.2"
-regex         = "0.2.10"
+regex         = "1.0.0"
 num_cpus      = "1.8.0"
-ignore        = "0.4.1"
+ignore        = "0.4.2"
 
 # [profile.release]
 # lto = true
