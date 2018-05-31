@@ -421,13 +421,11 @@ enum ConfigTuple<'a> {
 }
 use self::ConfigTuple::*;
 
-const UNLIKELY: &'static str = "SLkJJJJJ<!*$(!*&)(*@^#$K8K!(*76(*&(38j8";
-
 pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
     let c_style = N(Some("//"), Some(("/*", "*/")));
     let html_style = N(None, Some(("<!--", "-->")));
     let ml_style = N(None, Some(("(*", "*)")));
-    let no_comments = N(Some(UNLIKELY), None);
+    let no_comments = N(None, None);
     let prolog_style = N(Some("%"), Some(("/*", "*/")));
     let sh_style = N(Some("#"), None);
 
@@ -466,11 +464,11 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Mustache => N(None, Some(("{{!", "}}"))),
 
         Asp => EV(vec!["'", "REM"], vec![]),
-        AspNet => EV(vec![UNLIKELY], vec![("<!--", "-->"), ("<%--", "-->")]),
+        AspNet => EV(vec![], vec![("<!--", "-->"), ("<%--", "-->")]),
         Autoconf => EV(vec!["#", "dnl"], vec![]),
         Clojure => EV(vec![";", "#"], vec![]),
         FortranLegacy => EV(vec!["c", "C", "!", "*"], vec![]),
-        Handlebars => EV(vec![UNLIKELY], vec![("<!--", "-->"), ("{{!", "}}")]),
+        Handlebars => EV(vec![], vec![("<!--", "-->"), ("{{!", "}}")]),
         Php => EV(vec!["#", "//"], vec![("/*", "*/")]),
         Isabelle => {
             EV(
@@ -484,7 +482,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
                 ],
             )
         }
-        Razor => EV(vec![UNLIKELY], vec![("<!--", "-->"), ("@*", "*@")]),
+        Razor => EV(vec![], vec![("<!--", "-->"), ("@*", "*@")]),
         Pascal => EV(vec!["//", "(*"], vec![("{", "}")]),
         Text | Markdown | Json | IntelHex | Hex | ReStructuredText => no_comments,
 
@@ -606,6 +604,9 @@ pub fn count_normal(
             continue;
         };
 
+        // TODO(cgag): does this get optomized? is it bad to check this
+        // every iteration?
+        // TODO(cgag): is the multiline comment start symbol ever the shorter one?
         if let Some(single_start) = single_start {
             if !in_comment && line.starts_with(single_start) {
                 if let Some((multi_start, _)) = multi {
@@ -683,6 +684,7 @@ pub fn count_normal(
     c
 }
 
+// TODO(cgag): this whole concept sucks
 pub fn count_everything<'a>(
     filepath: &str,
     singles: &[&'a str],

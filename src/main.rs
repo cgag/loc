@@ -50,7 +50,7 @@ impl Worker {
                         let count = count(&path);
                         v.push(FileCount {
                             lang: lang,
-                            path: String::from(path),
+                            path: path,
                             count: count,
                         });
                     }
