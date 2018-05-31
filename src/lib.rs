@@ -690,11 +690,8 @@ pub fn count_everything<'a>(
     singles: &[&'a str],
     multies: &[(&'a str, &'a str)],
 ) -> Count {
-    let mut single_iter = singles.iter();
-    let first = single_iter.next().expect("No single comment.");
-    let mut total_count = count_normal(filepath, Some(first), None);
-
-    for single in single_iter {
+    let mut total_count = Count::default();
+    for single in singles.iter() {
         let count = count_normal(filepath, Some(single), None);
         total_count.comment += count.comment;
         // subtract out comments that were counted as code in previous counts

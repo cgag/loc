@@ -354,6 +354,7 @@ fn main() {
 
 }
 
+// TODO(cgag): i think this is in the stdlib
 fn last_n_chars(s: &str, n: usize) -> String {
     if s.len() <= n {
         return String::from(s);
@@ -361,7 +362,7 @@ fn last_n_chars(s: &str, n: usize) -> String {
     s.chars().skip(s.len() - n).collect::<String>()
 }
 
-
+// TODO(cgag): i think this is in the stdlib
 fn str_repeat(s: &str, n: usize) -> String {
     std::iter::repeat(s).take(n).collect::<Vec<_>>().join("")
 }
