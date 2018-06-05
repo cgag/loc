@@ -161,3 +161,12 @@ const NIX_EXPECTED: Count = Count {
     lines: 3+2+3,
 };
 test_count![NIX, NIX_EXPECTED, nix_count, nix_code, nix_comment, nix_blank, nix_lines];
+
+const POWERSHELL: &'static str = "tests/data/test.ps1";
+const POWERSHELL_EXPECTED: Count = Count {
+    code: 2,
+    blank: 1,
+    comment: 6,
+    lines: 2+1+6,
+};
+test_count![POWERSHELL, POWERSHELL_EXPECTED, powershell_count, powershell_code, powershell_comment, powershell_blank, powershell_lines];
