@@ -115,6 +115,7 @@ pub enum Lang {
     OCaml,
     ObjectiveC,
     ObjectiveCpp,
+    OpenCl,
     Oz,
     Pascal,
     Perl,
@@ -229,6 +230,7 @@ impl Lang {
             OCaml => "OCaml",
             ObjectiveC => "Objective-C",
             ObjectiveCpp => "Objective-C++",
+            OpenCl => "OpenCL",
             Oz => "Oz",
             Pascal => "Pascal",
             Perl => "Perl",
@@ -310,6 +312,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "c" | "ec" | "pgc" => C,
         "cc" | "cpp" | "cxx" | "c++" | "pcc" => Cpp,
         "cfc" => ColdFusionScript,
+        "cl" => OpenCl,
         "coffee" => CoffeeScript,
         "cs" => CSharp,
         "csh" => CShell,
@@ -498,7 +501,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         // TODO(cgag): not 100% sure that yacc belongs here.
         C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA
         | CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx
-        | Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift
+        | Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | OpenCl | Qcl | Sass | Scala | Swift
         | TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe | Groovy => c_style,
 
         Unrecognized => unreachable!(),
