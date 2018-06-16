@@ -75,6 +75,7 @@ pub enum Lang {
     D,
     Dart,
     DeviceTree,
+    Docker,
     Elixir,
     Elm,
     Erlang,
@@ -189,6 +190,7 @@ impl Lang {
             D => "D",
             Dart => "Dart",
             DeviceTree => "DeviceTree",
+            Docker => "Docker",
             Elixir => "Elixir",
             Elm => "Elm",
             Erlang => "Erlang",
@@ -291,6 +293,8 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
 
     let ext = if file_name_lower.contains("makefile") {
         String::from("makefile")
+    } else if file_name_lower == "dockerfile" {
+        String::from("docker")
     } else {
         match path.extension() {
             Some(os_str) => os_str.to_str().unwrap().to_lowercase(),
@@ -319,6 +323,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "d" => D,
         "dart" => Dart,
         "dts" | "dtsi" => DeviceTree,
+        "docker" => Docker,
         "el" | "lisp" | "lsp" | "scm" | "ss" | "rkt" => Lisp,
         "ex" | "exs" => Elixir,
         "elm" => Elm,
@@ -445,6 +450,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Assembly => N(Some("#"), Some(("/*", "*/"))),
         CoffeeScript => N(Some("#"), Some(("###", "###"))),
         D => N(Some("//"), Some(("/*", "*/"))),
+        Docker => N(Some("#"), None),
         Forth => N(Some("\\"), Some(("(", ")"))),
         FSharp => N(Some("//"), Some(("(*", "*)"))),
         Julia => N(Some("#"), Some(("#=", "=#"))),
