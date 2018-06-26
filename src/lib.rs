@@ -313,7 +313,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "coffee" => CoffeeScript,
         "cs" => CSharp,
         "csh" => CShell,
-        "css" | "postcss" => Css,
+        "css" | "pcss" | "sss" | "postcss" => Css,
         "cu" => CUDA,
         "cuh" => CUDAHeader,
         "d" => D,
