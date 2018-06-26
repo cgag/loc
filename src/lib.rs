@@ -337,7 +337,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "jai" => Jai,
         "java" => Java,
         "jl" => Julia,
-        "js" => JavaScript,
+        "js" | "mjs" => JavaScript,
         "jsx" => Jsx,
         "kt" | "kts" => Kotlin,
         "lds" => LinkerScript,
