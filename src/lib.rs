@@ -382,7 +382,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "py" => Python,
         "r" => R,
         "rake" | "rb" => Ruby,
-        "rhtml" => RubyHtml,
+        "rhtml" | "erb" => RubyHtml,
         "rs" => Rust,
         "s" | "asm" => Assembly,
         "sass" | "scss" => Sass,
