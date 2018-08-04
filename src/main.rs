@@ -99,8 +99,9 @@ impl FromStr for Sort {
     }
 }
 
+// TODO(cgag): would smallvec help performance at all?  our vecs are all like 3 elements at most.
+// TODO(cgag): try dropping mmap and just slurping all bytes
 fn main() {
-
     let matches = App::new("loc")
         .global_settings(&[AppSettings::ColoredHelp])
         .version(crate_version!())
