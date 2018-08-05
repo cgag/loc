@@ -5,8 +5,9 @@ use std::path::Path;
 use std::fs::File;
 use std::cmp::{max, min};
 use std::fmt;
+use std::io::prelude::*;
 
-use memmap::{Mmap};
+// use memmap::{Mmap};
 use memchr::memchr;
 
 // Why is it called partialEq?
@@ -293,7 +294,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         String::from("makefile")
     } else {
         match path.extension() {
-            Some(os_str) => os_str.to_str().unwrap().to_lowercase(),
+            Some(os_str) => os_str.to_str().expect("path to_str").to_lowercase(),
             None => file_name_lower,
         }
     };
@@ -559,151 +560,156 @@ pub fn count(filepath: &str) -> Count {
     let lang = lang_from_ext(filepath);
     let config = counter_config_for_lang(&lang);
     match config {
-        LineConfig::Normal { single, multi } => count_normal(filepath, single, multi),
+        LineConfig::Normal { single, multi } => {
+            // TODO(cgag):get rid of this once we unify count_normal and count_everything
+            let singles = match single {
+                Some(s) => vec![s],
+                None => vec![],
+            };
+            let multies = match multi {
+                Some(m) => vec![m],
+                None => vec![],
+            };
+            count_normal(filepath, &singles, multies)
+        }
+        // TODO(cgag): get rid of this or normal
         LineConfig::Everything { singles, multies } => {
-            count_everything(filepath, &singles, &multies)
+            count_normal(filepath, &singles, multies)
         }
     }
 }
 
 pub fn count_normal(
     filepath: &str,
-    single_start: Option<&str>,
-    multi: Option<(&str, &str)>,
+    singles: &[&str],
+    multies: Vec<(&str, &str)>,
 ) -> Count {
     let mfile = File::open(filepath);
-    let file = match mfile {
+    let mut file = match mfile {
         Ok(file) => file,
         Err(_) => {
             return Count::default();
         }
     };
-    let fmmap = unsafe {
-        match Mmap::map(&file) {
-            Ok(mmap) => mmap,
-            Err(_) => {
-                return Count::default();
-            }
-        }
-    };
-    let bytes: &[u8] = &fmmap;
+    let mut bytes = vec![];
+    file.read_to_end(&mut bytes).expect("nani?!");
 
     let mut c = Count::default();
-    let mut in_comment = false;
+    let mut multi_stack: Vec<(&str, &str)> = vec![];
 
-    for byte_line in ByteLines(bytes).lines() {
+    'line: for byte_line in ByteLines(&bytes).lines() {
         let line = match std::str::from_utf8(byte_line) {
             Ok(s) => s,
+            // TODO(cgag): should we report when this happens?
             Err(_) => return Count::default(),
         };
         c.lines += 1;
 
         let line = line.trim_left();
+        // should blanks within a comment count as blank or comment? This counts them as blank.
         if line.is_empty() {
             c.blank += 1;
             continue;
         };
 
-        // TODO(cgag): does this get optomized? is it bad to check this
-        // every iteration?
+        // if we match a single line comment, count it and go onto next line
         // TODO(cgag): is the multiline comment start symbol ever the shorter one?
-        if let Some(single_start) = single_start {
-            if !in_comment && line.starts_with(single_start) {
-                if let Some((multi_start, _)) = multi {
-                    if !line.starts_with(multi_start) {
-                        c.comment += 1;
-                        continue;
+        // if multi_stack.is_empty, then we're not currently in a multiline comment
+        if multi_stack.is_empty() {
+            for single_start in singles.iter() {
+                if line.starts_with(single_start) {
+                    // if this single_start is a prefix of a multi_start,
+                    // make sure that the line doesn't actually start with the multi_start
+                    // TODO(cgag): donm't do this check here
+                    // TODO(cgag): this assumption that the multi-line comment is always the longer one
+                    //             may well be a terrible one
+                    if multies.iter().clone().any(|(m_start, _)| line.starts_with(m_start)) {
+                        break;
                     }
-                } else {
+
                     c.comment += 1;
-                    continue;
+                    continue 'line;
                 }
             }
+
+            if multies.len() == 0 {
+                c.code += 1;
+                continue 'line;
+            }
         }
 
-        let (multi_start, multi_end) = match multi {
-            None => {
-                c.code += 1;
-                continue;
-            }
-            Some(multi) => multi,
-        };
-
-        if !(line.contains(multi_start) || line.contains(multi_end)) {
-            if in_comment {
-                c.comment += 1;
-            } else {
-                c.code += 1;
-            }
-            continue;
+        if multi_stack.is_empty() && !multies.iter().any(|(start, end)| line.contains(start) || line.contains(end)) {
+            c.code += 1;
+            continue 'line;
         }
-
-        let start_len = multi_start.len();
-        let end_len = multi_end.len();
-        let line_len = line.len();
 
         let mut pos = 0;
-        let mut found_code = false;
+        let mut found_code = 0;
+        let line_len = line.len();
         let contains_utf8 = (0..line_len).any(|i| !line.is_char_boundary(i));
 
         'outer: while pos < line_len {
-            if contains_utf8 {
-                for i in pos..pos + min(max(start_len, end_len) + 1, line_len - pos) {
-                    if !line.is_char_boundary(i) {
-                        pos += 1;
-                        continue 'outer;
+
+            // TODO(cgag):  If we're not in a comment yet, we need to be searching for all possible
+            // multi-line starts, and if we fin one, add it to the stack.  If there's one on the
+            // stack, we then need to both be searching for new starts of any kind, and the end
+            // marker of the one on top of the stack.  If we ever hit any non-whitespace while the
+            // stack is empty, then we found some code on that line and it gets counted as code.
+
+            // TODO(cgag): merge the representation of in_comment with the multi_stack
+            { // new version
+                // TODO(cgag): figure out how to remove all these clones
+                for multi in multies.iter() {
+                    let (start, end) = multi;
+                    let start_len    = start.len();
+                    let end_len      = end.len();
+
+                    // TODO(cgag): this is almost ceratinly giving us incorrect results.  Say the
+                    // first multi is the longest.  If we advance position because the final byte
+                    // position of that multi hits unicode, we might have skipped over a perfectly
+                    // valid comment start that was unaffected by the unicode.
+                    if contains_utf8 {
+                        // TODO(cgag): was: for i in pos..pos + min(max(start_len, end_len) + 1, line_len - pos) {
+                        // ensure the next N bytes are true characters, where N is the largest thing we
+                        // might be looking for.
+                        // TODO(cgag): Now that we're looking for multiple possible things, we've got
+                        // problems.  Really not sure what this should look like.
+                        for i in pos..pos + min(max(start_len, end_len) + 1, line_len - pos) {
+                            if !line.is_char_boundary(i) {
+                                pos += 1;
+                                continue 'outer;
+                            }
+                        }
+                    }
+
+                    if pos + start_len <= line_len && &line[pos..pos + start_len] == *start {
+                        pos += start_len;
+                        multi_stack.push(*multi);
+                        continue;
+                    }
+
+                    if multi_stack.len() > 0 {
+                        // TODO(cgag): clone, bad
+                        let (_, end) = multi_stack.last().expect("stack clone").clone();
+                        if pos+end.len() <= line_len && &line[pos..pos+end.len()] == end {
+                            let _ = multi_stack.pop();
+                            pos += end.len();
+                        }
+                    } else if multi_stack.is_empty() && pos+1 <= line_len && !&line[pos..pos + 1].chars().next().expect("whitespace check").is_whitespace() {
+                        found_code += 1;
                     }
                 }
-            }
-
-            if !in_comment && pos + start_len <= line_len
-                && &line[pos..pos + start_len] == multi_start
-            {
-                pos += start_len;
-                in_comment = true;
-            } else if in_comment && pos + end_len <= line_len
-                && &line[pos..pos + end_len] == multi_end
-            {
-                pos += end_len;
-                in_comment = false;
-            } else if !in_comment && !&line[pos..pos + 1].chars().next().unwrap().is_whitespace() {
-                pos += 1;
-                found_code = true;
-            } else {
                 pos += 1;
             }
         }
 
-        if found_code {
+        if found_code >= multies.len() {
             c.code += 1;
         } else {
             c.comment += 1;
         }
+
     }
 
     c
-}
-
-// TODO(cgag): this whole concept sucks
-pub fn count_everything<'a>(
-    filepath: &str,
-    singles: &[&'a str],
-    multies: &[(&'a str, &'a str)],
-) -> Count {
-    let mut total_count = Count::default();
-    for single in singles.iter() {
-        let count = count_normal(filepath, Some(single), None);
-        total_count.comment += count.comment;
-        // subtract out comments that were counted as code in previous counts
-        total_count.code -= count.comment;
-    }
-
-    for &(multi_start, multi_end) in multies {
-        let count = count_normal(filepath, None, Some((multi_start, multi_end)));
-        total_count.comment += count.comment;
-        // subtract out comments that were counted as code in previous counts
-        total_count.code -= count.comment;
-    }
-
-    total_count
 }
