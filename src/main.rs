@@ -293,14 +293,10 @@ fn main() {
                      total.code);
 
             match sort {
-                Sort::Code =>
-                    filecounts.sort_by(|fc1, fc2| fc2.count.code.cmp(&fc1.count.code)),
-                Sort::Comment =>
-                    filecounts.sort_by(|fc1, fc2| fc2.count.comment.cmp(&fc1.count.comment)),
-                Sort::Blank =>
-                    filecounts.sort_by(|fc1, fc2| fc2.count.blank.cmp(&fc1.count.blank)),
-                Sort::Lines =>
-                    filecounts.sort_by(|fc1, fc2| fc2.count.lines.cmp(&fc1.count.lines)),
+                Sort::Code    => filecounts.sort_by(|fc1, fc2| fc2.count.code.cmp(&fc1.count.code)),
+                Sort::Comment => filecounts.sort_by(|fc1, fc2| fc2.count.comment.cmp(&fc1.count.comment)),
+                Sort::Blank   => filecounts.sort_by(|fc1, fc2| fc2.count.blank.cmp(&fc1.count.blank)),
+                Sort::Lines   => filecounts.sort_by(|fc1, fc2| fc2.count.lines.cmp(&fc1.count.lines)),
                 // No sorting by language or files here when using --files. This should
                 // have been checked above.
                 Sort::Language | Sort::Files => panic!("Sorting by language or files \
@@ -334,18 +330,12 @@ fn main() {
 
         let mut totals_by_lang = lang_totals.iter().collect::<Vec<(&&Lang, &LangTotal)>>();
         match sort {
-            Sort::Language => totals_by_lang
-                .sort_by(|&(l1, _), &(l2, _)| l1.to_s().cmp(l2.to_s())),
-            Sort::Files => totals_by_lang
-                .sort_by(|&(_, c1), &(_, c2)| c2.files.cmp(&c1.files)),
-            Sort::Code => totals_by_lang
-                .sort_by(|&(_, c1), &(_, c2)| c2.count.code.cmp(&c1.count.code)),
-            Sort::Comment => totals_by_lang
-                .sort_by(|&(_, c1), &(_, c2)| c2.count.comment.cmp(&c1.count.comment)),
-            Sort::Blank => totals_by_lang
-                .sort_by(|&(_, c1), &(_, c2)| c2.count.blank.cmp(&c1.count.blank)),
-            Sort::Lines => totals_by_lang
-                .sort_by(|&(_, c1), &(_, c2)| c2.count.lines.cmp(&c1.count.lines)),
+            Sort::Language => totals_by_lang.sort_by(|&(l1, _), &(l2, _)| l1.to_s().cmp(l2.to_s())),
+            Sort::Files    => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.files.cmp(&c1.files)),
+            Sort::Code     => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.code.cmp(&c1.count.code)),
+            Sort::Comment  => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.comment.cmp(&c1.count.comment)),
+            Sort::Blank    => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.blank.cmp(&c1.count.blank)),
+            Sort::Lines    => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.lines.cmp(&c1.count.lines)),
         }
 
         print_totals_by_lang(&linesep, &totals_by_lang);
@@ -392,11 +382,11 @@ fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) 
         count: Count::default(),
     };
     for &(_, total) in totals_by_lang {
-        totals.files += total.files;
-        totals.count.code += total.count.code;
-        totals.count.blank += total.count.blank;
+        totals.files         += total.files;
+        totals.count.code    += total.count.code;
+        totals.count.blank   += total.count.blank;
         totals.count.comment += total.count.comment;
-        totals.count.lines += total.count.lines;
+        totals.count.lines   += total.count.lines;
     }
 
     println!("{}", linesep);

@@ -13,18 +13,18 @@ use smallvec::*;
 // Why is it called partialEq?
 #[derive(Debug, PartialEq, Default, Clone)]
 pub struct Count {
-    pub code: u32,
+    pub code:    u32,
     pub comment: u32,
-    pub blank: u32,
-    pub lines: u32,
+    pub blank:   u32,
+    pub lines:   u32,
 }
 
 impl Count {
     pub fn merge(&mut self, o: &Count) {
-        self.code += o.code;
+        self.code    += o.code;
         self.comment += o.comment;
-        self.blank += o.blank;
-        self.lines += o.lines;
+        self.blank   += o.blank;
+        self.lines   += o.lines;
     }
 }
 
@@ -153,114 +153,114 @@ use self::Lang::*;
 impl Lang {
     pub fn to_s(&self) -> &str {
         match *self {
-            ActionScript => "ActionScript",
-            Ada => "Ada",
-            Agda => "Agda",
-            Asp => "ASP",
-            AspNet => "ASP.NET",
-            Assembly => "Assembly",
-            Autoconf => "Autoconf",
-            Awk => "Awk",
-            Batch => "Batch",
-            BourneShell => "Bourne Shell",
-            C => "C",
-            CCppHeader => "C/C++ Header",
-            CSharp => "C#",
-            CShell => "C Shell",
-            Clojure => "Clojure",
-            CoffeeScript => "CoffeeScript",
-            ColdFusion => "ColdFusion",
+            ActionScript     => "ActionScript",
+            Ada              => "Ada",
+            Agda             => "Agda",
+            Asp              => "ASP",
+            AspNet           => "ASP.NET",
+            Assembly         => "Assembly",
+            Autoconf         => "Autoconf",
+            Awk              => "Awk",
+            Batch            => "Batch",
+            BourneShell      => "Bourne Shell",
+            C                => "C",
+            CCppHeader       => "C/C++ Header",
+            CSharp           => "C#",
+            CShell           => "C Shell",
+            Clojure          => "Clojure",
+            CoffeeScript     => "CoffeeScript",
+            ColdFusion       => "ColdFusion",
             ColdFusionScript => "ColdFusionScript",
-            Coq => "Coq",
-            Cpp => "C++",
-            Css => "CSS",
-            CUDA => "CUDA",
-            CUDAHeader => "CUDA Header",
-            D => "D",
-            Dart => "Dart",
-            DeviceTree => "DeviceTree",
-            Elixir => "Elixir",
-            Elm => "Elm",
-            Erlang => "Erlang",
-            Forth => "Forth",
-            FortranLegacy => "FORTRAN Legacy",
-            FortranModern => "FORTRAN Modern",
-            FSharp => "F#",
-            Gherkin => "Gherkin",
-            Glsl => "GLSL",
-            Go => "Go",
-            Groovy => "Groovy",
-            Handlebars => "Handlebars",
-            Haskell => "Haskell",
-            Hex => "Hex",
-            Html => "HTML",
-            INI => "INI",
-            Idris => "Idris",
-            IntelHex => "Intel Hex",
-            Isabelle => "Isabelle",
-            Jai => "Jai",
-            Java => "Java",
-            JavaScript => "JavaScript",
-            Json => "JSON",
-            Jsx => "Jsx",
-            Julia => "Julia",
-            Kotlin => "Kotlin",
-            Less => "Less",
-            LinkerScript => "LinkerScript",
-            Lean => "Lean",
-            Lisp => "Lisp",
-            Lua => "Lua",
-            Make => "Make",
-            Makefile => "Makefile",
-            Markdown => "Markdown",
-            Mustache => "Mustache",
-            Nim => "Nim",
-            Nix => "Nix",
-            OCaml => "OCaml",
-            ObjectiveC => "Objective-C",
-            ObjectiveCpp => "Objective-C++",
-            Oz => "Oz",
-            Pascal => "Pascal",
-            Perl => "Perl",
-            Php => "PHP",
-            Polly => "Polly",
-            Prolog => "Prolog",
-            Protobuf => "Protobuf",
-            PureScript => "PureScript",
-            Pyret => "Pyret",
-            Python => "Python",
-            Qcl => "Qcl",
-            Qml => "Qml",
-            R => "R",
-            Razor => "Razor",
+            Coq              => "Coq",
+            Cpp              => "C++",
+            Css              => "CSS",
+            CUDA             => "CUDA",
+            CUDAHeader       => "CUDA Header",
+            D                => "D",
+            Dart             => "Dart",
+            DeviceTree       => "DeviceTree",
+            Elixir           => "Elixir",
+            Elm              => "Elm",
+            Erlang           => "Erlang",
+            Forth            => "Forth",
+            FortranLegacy    => "FORTRAN Legacy",
+            FortranModern    => "FORTRAN Modern",
+            FSharp           => "F#",
+            Gherkin          => "Gherkin",
+            Glsl             => "GLSL",
+            Go               => "Go",
+            Groovy           => "Groovy",
+            Handlebars       => "Handlebars",
+            Haskell          => "Haskell",
+            Hex              => "Hex",
+            Html             => "HTML",
+            INI              => "INI",
+            Idris            => "Idris",
+            IntelHex         => "Intel Hex",
+            Isabelle         => "Isabelle",
+            Jai              => "Jai",
+            Java             => "Java",
+            JavaScript       => "JavaScript",
+            Json             => "JSON",
+            Jsx              => "Jsx",
+            Julia            => "Julia",
+            Kotlin           => "Kotlin",
+            Less             => "Less",
+            LinkerScript     => "LinkerScript",
+            Lean             => "Lean",
+            Lisp             => "Lisp",
+            Lua              => "Lua",
+            Make             => "Make",
+            Makefile         => "Makefile",
+            Markdown         => "Markdown",
+            Mustache         => "Mustache",
+            Nim              => "Nim",
+            Nix              => "Nix",
+            OCaml            => "OCaml",
+            ObjectiveC       => "Objective-C",
+            ObjectiveCpp     => "Objective-C++",
+            Oz               => "Oz",
+            Pascal           => "Pascal",
+            Perl             => "Perl",
+            Php              => "PHP",
+            Polly            => "Polly",
+            Prolog           => "Prolog",
+            Protobuf         => "Protobuf",
+            PureScript       => "PureScript",
+            Pyret            => "Pyret",
+            Python           => "Python",
+            Qcl              => "Qcl",
+            Qml              => "Qml",
+            R                => "R",
+            Razor            => "Razor",
             ReStructuredText => "reStructuredText",
-            Ruby => "Ruby",
-            RubyHtml => "RubyHtml",
-            Rust => "Rust",
-            SaltStack => "SaltStack",
-            Sass => "Sass",
-            Scala => "Scala",
-            Sml => "SML",
-            Sql => "SQL",
-            Stylus => "Stylus",
-            Swift => "Swift",
-            Tcl => "Tcl",
-            Terraform => "Terraform",
-            Tex => "TeX",
-            Text => "Plain Text",
-            Toml => "Toml",
-            TypeScript => "TypeScript",
-            Tsx => "Typescript JSX",
-            UnrealScript => "UnrealScript",
-            VimScript => "VimL",
-            Wolfram => "Wolfram",
-            XML => "XML",
-            Yacc => "Yacc",
-            Yaml => "YAML",
-            Zig => "Zig",
-            Zsh => "Z Shell",
-            Haxe => "Haxe",
-            Unrecognized => "Unrecognized",
+            Ruby             => "Ruby",
+            RubyHtml         => "RubyHtml",
+            Rust             => "Rust",
+            SaltStack        => "SaltStack",
+            Sass             => "Sass",
+            Scala            => "Scala",
+            Sml              => "SML",
+            Sql              => "SQL",
+            Stylus           => "Stylus",
+            Swift            => "Swift",
+            Tcl              => "Tcl",
+            Terraform        => "Terraform",
+            Tex              => "TeX",
+            Text             => "Plain Text",
+            Toml             => "Toml",
+            TypeScript       => "TypeScript",
+            Tsx              => "Typescript JSX",
+            UnrealScript     => "UnrealScript",
+            VimScript        => "VimL",
+            Wolfram          => "Wolfram",
+            XML              => "XML",
+            Yacc             => "Yacc",
+            Yaml             => "YAML",
+            Zig              => "Zig",
+            Zsh              => "Z Shell",
+            Haxe             => "Haxe",
+            Unrecognized     => "Unrecognized",
         }
     }
 }
@@ -404,54 +404,55 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
 }
 
 pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, SmallVec<[(&'a str, &'a str); 3]>) {
-    let c_style = (smallvec!["//"], smallvec![("/*", "*/")]);
-    let html_style = (smallvec![], smallvec![("<!--", "-->")]);
-    let ml_style = (smallvec![], smallvec![("(*", "*)")]);
-    let no_comments = (smallvec![], smallvec![]);
-    let prolog_style = (smallvec!["%"], smallvec![("/*", "*/")]);
-    let sh_style = (smallvec!["#"], smallvec![]);
+    let c_style      = (smallvec!["//"], smallvec![("/*", "*/")]);
+    let html_style   = (smallvec![],     smallvec![("<!--", "-->")]);
+    let ml_style     = (smallvec![],     smallvec![("(*", "*)")]);
+    let no_comments  = (smallvec![],     smallvec![]);
+    let prolog_style = (smallvec!["%"],  smallvec![("/*", "*/")]);
+    let sh_style     = (smallvec!["#"],  smallvec![]);
 
     let ctuple = match lang {
-        Ada => (smallvec!["--"], smallvec![]),
-        Batch => (smallvec!["REM"], smallvec![]),
-        Erlang | Tex => (smallvec!["%"], smallvec![]),
-        FortranModern => (smallvec!["!"], smallvec![]),
-        INI => (smallvec![";"], smallvec![]),
+        Ada            => (smallvec!["--"], smallvec![]),
+        Batch          => (smallvec!["REM"], smallvec![]),
+        Erlang | Tex   => (smallvec!["%"], smallvec![]),
+        FortranModern  => (smallvec!["!"], smallvec![]),
+        INI            => (smallvec![";"], smallvec![]),
         Protobuf | Zig => (smallvec!["//"], smallvec![]),
-        VimScript => (smallvec!["\""], smallvec![]),
-        Terraform => (smallvec!["#"], smallvec![("/*", "*/")]),
-        Nix => (smallvec!["#"], smallvec![("/*", "*/")]),
+        VimScript      => (smallvec!["\""], smallvec![]),
+        Terraform      => (smallvec!["#"], smallvec![("/*", "*/")]),
+        Nix            => (smallvec!["#"], smallvec![("/*", "*/")]),
 
         // TODO(cgag): Well, some architectures use ;, @, |, etc.  Figure out something
         // better?
-        Assembly => (smallvec!["#"], smallvec![("/*", "*/")]),
+        Assembly     => (smallvec!["#"], smallvec![("/*", "*/")]),
         CoffeeScript => (smallvec!["#"], smallvec![("###", "###")]),
-        D => (smallvec!["//"], smallvec![("/*", "*/")]),
-        Forth => (smallvec!["\\"], smallvec![("(", ")")]),
-        FSharp => (smallvec!["//"], smallvec![("(*", "*)")]),
-        Julia => (smallvec!["#"], smallvec![("#=", "=#")]),
-        Lisp => (smallvec![";"], smallvec![("#|", "|#")]),
-        Lean => (smallvec!["--"], smallvec![("/-", "-/")]),
-        Lua => (smallvec!["--"], smallvec![("--[[", "]]")]),
+        D            => (smallvec!["//"], smallvec![("/*", "*/")]),
+        Forth        => (smallvec!["\\"], smallvec![("(", ")")]),
+        FSharp       => (smallvec!["//"], smallvec![("(*", "*)")]),
+        Julia        => (smallvec!["#"], smallvec![("#=", "=#")]),
+        Lisp         => (smallvec![";"], smallvec![("#|", "|#")]),
+        Lean         => (smallvec!["--"], smallvec![("/-", "-/")]),
+        Lua          => (smallvec!["--"], smallvec![("--[[", "]]")]),
         // which one is right? = or =pod?
         // Perl => SM("#""=", "=cut"),
-        Perl => (smallvec!["#"], smallvec![("=pod", "=cut")]),
-        Pyret => (smallvec!["#"], smallvec![("#|", "|#")]),
+        Perl   => (smallvec!["#"], smallvec![("=pod", "=cut")]),
+        Pyret  => (smallvec!["#"], smallvec![("#|", "|#")]),
         Python => (smallvec!["#"], smallvec![("'''", "'''")]),
-        Ruby => (smallvec!["#"], smallvec![("=begin", "=end")]),
-        Sql => (smallvec!["--"], smallvec![("/*", "*/")]),
+        Ruby   => (smallvec!["#"], smallvec![("=begin", "=end")]),
+        Sql    => (smallvec!["--"], smallvec![("/*", "*/")]),
+
         Haskell | Idris | Agda | PureScript | Elm => (smallvec!["--"], smallvec![("{-", "-}")]),
 
-        ColdFusion => (smallvec![], smallvec![("<!---", "--->")]),
-        Mustache => (smallvec![], smallvec![("{{!", "}}")]),
-
-        Asp => (smallvec!["'", "REM"], smallvec![]),
-        AspNet => (smallvec![], smallvec![("<!--", "-->"), ("<%--", "-->")]),
-        Autoconf => (smallvec!["#", "dnl"], smallvec![]),
-        Clojure => (smallvec![";", "#"], smallvec![]),
+        ColdFusion    => (smallvec![],   smallvec![("<!---", "--->")]),
+        Mustache      => (smallvec![],   smallvec![("{{!", "}}")]),
+        Asp           => (smallvec!["'", "REM"], smallvec![]),
+        AspNet        => (smallvec![],   smallvec![("<!--", "-->"), ("<%--", "-->")]),
+        Autoconf      => (smallvec!["#", "dnl"], smallvec![]),
+        Clojure       => (smallvec![";", "#"], smallvec![]),
         FortranLegacy => (smallvec!["c", "C", "!", "*"], smallvec![]),
-        Handlebars => (smallvec![], smallvec![("<!--", "-->"), ("{{!", "}}")]),
-        Php => (smallvec!["#", "//"], smallvec![("/*", "*/")]),
+        Handlebars    => (smallvec![],   smallvec![("<!--", "-->"), ("{{!", "}}")]),
+        Php           => (smallvec!["#", "//"], smallvec![("/*", "*/")]),
+
         Isabelle => {
             (
                 smallvec!["--"],
@@ -464,7 +465,8 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
                 ],
             )
         }
-        Razor => (smallvec![], smallvec![("<!--", "-->"), ("@*", "*@")]),
+
+        Razor  => (smallvec![], smallvec![("<!--", "-->"), ("@*", "*@")]),
         Pascal => (smallvec!["//", "(*"], smallvec![("{", "}")]),
         Text | Markdown | Json | IntelHex | Hex | ReStructuredText => no_comments,
 
@@ -479,9 +481,9 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
 
         // TODO(cgag): not 100% sure that yacc belongs here.
         C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA
-        | CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx
-        | Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift
-        | TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe | Groovy => c_style,
+          | CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx
+          | Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift
+          | TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe | Groovy => c_style,
 
         Unrecognized => unreachable!(),
     };
@@ -605,57 +607,46 @@ pub fn count_normal(
         let contains_utf8 = (0..line_len).any(|i| !line.is_char_boundary(i));
 
         'outer: while pos < line_len {
+            for multi in multis.iter() {
+                let (start, end) = multi;
+                let start_len    = start.len();
+                let end_len      = end.len();
 
-            // TODO(cgag):  If we're not in a comment yet, we need to be searching for all possible
-            // multi-line starts, and if we fin one, add it to the stack.  If there's one on the
-            // stack, we then need to both be searching for new starts of any kind, and the end
-            // marker of the one on top of the stack.  If we ever hit any non-whitespace while the
-            // stack is empty, then we found some code on that line and it gets counted as code.
-
-            // TODO(cgag): merge the representation of in_comment with the multi_stack
-            { // new version
-                for multi in multis.iter() {
-                    let (start, end) = multi;
-                    let start_len    = start.len();
-                    let end_len      = end.len();
-
-                    // TODO(cgag): this is almost ceratinly giving us incorrect results.  Say the
-                    // first multi is the longest.  If we advance position because the final byte
-                    // position of that multi hits unicode, we might have skipped over a perfectly
-                    // valid comment start that was unaffected by the unicode.
-                    if contains_utf8 {
-                        // TODO(cgag): was: for i in pos..pos + min(max(start_len, end_len) + 1, line_len - pos) {
-                        // ensure the next N bytes are true characters, where N is the largest thing we
-                        // might be looking for.
-                        // TODO(cgag): Now that we're looking for multiple possible things, we've got
-                        // problems.  Really not sure what this should look like.
-                        for i in pos..pos + min(max(start_len, end_len) + 1, line_len - pos) {
-                            if !line.is_char_boundary(i) {
-                                pos += 1;
-                                continue 'outer;
-                            }
+                // TODO(cgag): this is almost ceratinly giving us incorrect results.  Say the
+                // first multi is the longest.  If we advance position because the final byte
+                // position of that multi hits unicode, we might have skipped over a perfectly
+                // valid comment start that was unaffected by the unicode.
+                if contains_utf8 {
+                    // TODO(cgag): was: for i in pos..pos + min(max(start_len, end_len) + 1, line_len - pos) {
+                    // ensure the next N bytes are true characters, where N is the largest thing we
+                    // might be looking for.
+                    // TODO(cgag): Now that we're looking for multiple possible things, we've got
+                    // problems.  Really not sure what this should look like.
+                    for i in pos..pos + min(max(start_len, end_len) + 1, line_len - pos) {
+                        if !line.is_char_boundary(i) {
+                            pos += 1;
+                            continue 'outer;
                         }
-                    }
-
-                    if pos + start_len <= line_len && &line[pos..pos + start_len] == *start {
-                        pos += start_len;
-                        multi_stack.push(*multi);
-                        continue;
-                    }
-
-                    if !multi_stack.is_empty() {
-                        // TODO(cgag): clone, bad
-                        let (_, mut end) = multi_stack.last().expect("stack clone");
-                        if pos+end.len() <= line_len && &line[pos..pos+end.len()] == end {
-                            let _ = multi_stack.pop();
-                            pos += end.len();
-                        }
-                    } else if multi_stack.is_empty() && pos < line_len && !&line[pos..pos + 1].chars().next().expect("whitespace check").is_whitespace() {
-                        found_code += 1;
                     }
                 }
-                pos += 1;
+
+                if pos + start_len <= line_len && &line[pos..pos + start_len] == *start {
+                    pos += start_len;
+                    multi_stack.push(*multi);
+                    continue;
+                }
+
+                if !multi_stack.is_empty() {
+                    let (_, mut end) = multi_stack.last().expect("stack last");
+                    if pos+end.len() <= line_len && &line[pos..pos+end.len()] == end {
+                        let _ = multi_stack.pop();
+                        pos += end.len();
+                    }
+                } else if multi_stack.is_empty() && pos < line_len && !&line[pos..pos + 1].chars().next().expect("whitespace check").is_whitespace() {
+                    found_code += 1;
+                }
             }
+            pos += 1;
         }
 
         if found_code >= multis.len() {
@@ -663,7 +654,6 @@ pub fn count_normal(
         } else {
             c.comment += 1;
         }
-
     }
 
     c
