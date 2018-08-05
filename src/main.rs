@@ -99,15 +99,13 @@ impl FromStr for Sort {
     }
 }
 
-// TODO(cgag): would smallvec help performance at all?  our vecs are all like 3 elements at most.
-// TODO(cgag): try dropping mmap and just slurping all bytes
+// TODO(cgag): tune smallvec array sizes
 fn main() {
     let matches = App::new("loc")
         .global_settings(&[AppSettings::ColoredHelp])
         .version(crate_version!())
         .author("Curtis Gagliardi <curtis@curtis.io>")
         .about("counts things quickly hopefully")
-        // TODO(cgag): actually implement filtering
         .arg(Arg::with_name("exclude")
             .required(false)
             .multiple(true)

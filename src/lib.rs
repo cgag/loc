@@ -1,5 +1,5 @@
 extern crate memchr;
-extern crate memmap;
+extern crate smallvec;
 
 use std::path::Path;
 use std::fs::File;
@@ -7,8 +7,8 @@ use std::cmp::{max, min};
 use std::fmt;
 use std::io::prelude::*;
 
-// use memmap::{Mmap};
 use memchr::memchr;
+use smallvec::*;
 
 // Why is it called partialEq?
 #[derive(Debug, PartialEq, Default, Clone)]
@@ -31,17 +31,6 @@ impl Count {
 pub struct LangTotal {
     pub files: u32,
     pub count: Count,
-}
-
-pub enum LineConfig<'a> {
-    Normal {
-        single: Option<&'a str>,
-        multi: Option<(&'a str, &'a str)>,
-    },
-    Everything {
-        singles: Vec<&'a str>,
-        multies: Vec<(&'a str, &'a str)>,
-    },
 }
 
 // Do any languages actually use utf8 chars as comment chars?
@@ -414,68 +403,60 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
     }
 }
 
-enum ConfigTuple<'a> {
-    // Normal (terrible name), anything without multiple syntaxes
-    N(Option<&'a str>, Option<(&'a str, &'a str)>),
-    // Everything (multiple singles, multiple multiline)
-    EV(Vec<&'a str>, Vec<(&'a str, &'a str)>),
-}
-use self::ConfigTuple::*;
+pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, SmallVec<[(&'a str, &'a str); 3]>) {
+    let c_style = (smallvec!["//"], smallvec![("/*", "*/")]);
+    let html_style = (smallvec![], smallvec![("<!--", "-->")]);
+    let ml_style = (smallvec![], smallvec![("(*", "*)")]);
+    let no_comments = (smallvec![], smallvec![]);
+    let prolog_style = (smallvec!["%"], smallvec![("/*", "*/")]);
+    let sh_style = (smallvec!["#"], smallvec![]);
 
-pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
-    let c_style = N(Some("//"), Some(("/*", "*/")));
-    let html_style = N(None, Some(("<!--", "-->")));
-    let ml_style = N(None, Some(("(*", "*)")));
-    let no_comments = N(None, None);
-    let prolog_style = N(Some("%"), Some(("/*", "*/")));
-    let sh_style = N(Some("#"), None);
-
-    let ctuple = match *lang {
-        Ada => N(Some("--"), None),
-        Batch => N(Some("REM"), None),
-        Erlang | Tex => N(Some("%"), None),
-        FortranModern => N(Some("!"), None),
-        INI => N(Some(";"), None),
-        Protobuf | Zig => N(Some("//"), None),
-        VimScript => N(Some("\""), None),
-        Terraform => N(Some("#"), Some(("/*", "*/"))),
-        Nix => N(Some("#"), Some(("/*", "*/"))),
+    let ctuple = match lang {
+        Ada => (smallvec!["--"], smallvec![]),
+        Batch => (smallvec!["REM"], smallvec![]),
+        Erlang | Tex => (smallvec!["%"], smallvec![]),
+        FortranModern => (smallvec!["!"], smallvec![]),
+        INI => (smallvec![";"], smallvec![]),
+        Protobuf | Zig => (smallvec!["//"], smallvec![]),
+        VimScript => (smallvec!["\""], smallvec![]),
+        Terraform => (smallvec!["#"], smallvec![("/*", "*/")]),
+        Nix => (smallvec!["#"], smallvec![("/*", "*/")]),
 
         // TODO(cgag): Well, some architectures use ;, @, |, etc.  Figure out something
         // better?
-        Assembly => N(Some("#"), Some(("/*", "*/"))),
-        CoffeeScript => N(Some("#"), Some(("###", "###"))),
-        D => N(Some("//"), Some(("/*", "*/"))),
-        Forth => N(Some("\\"), Some(("(", ")"))),
-        FSharp => N(Some("//"), Some(("(*", "*)"))),
-        Julia => N(Some("#"), Some(("#=", "=#"))),
-        Lisp => N(Some(";"), Some(("#|", "|#"))),
-        Lean => N(Some("--"), Some(("/-", "-/"))),
-        Lua => N(Some("--"), Some(("--[[", "]]"))),
+        Assembly => (smallvec!["#"], smallvec![("/*", "*/")]),
+        CoffeeScript => (smallvec!["#"], smallvec![("###", "###")]),
+        D => (smallvec!["//"], smallvec![("/*", "*/")]),
+        Forth => (smallvec!["\\"], smallvec![("(", ")")]),
+        FSharp => (smallvec!["//"], smallvec![("(*", "*)")]),
+        Julia => (smallvec!["#"], smallvec![("#=", "=#")]),
+        Lisp => (smallvec![";"], smallvec![("#|", "|#")]),
+        Lean => (smallvec!["--"], smallvec![("/-", "-/")]),
+        Lua => (smallvec!["--"], smallvec![("--[[", "]]")]),
         // which one is right? = or =pod?
         // Perl => SM("#""=", "=cut"),
-        Perl => N(Some("#"), Some(("=pod", "=cut"))),
-        Pyret => N(Some("#"), Some(("#|", "|#"))),
-        Python => N(Some("#"), Some(("'''", "'''"))),
-        Ruby => N(Some("#"), Some(("=begin", "=end"))),
-        Sql => N(Some("--"), Some(("/*", "*/"))),
-        Haskell | Idris | Agda | PureScript | Elm => N(Some("--"), Some(("{-", "-}"))),
+        Perl => (smallvec!["#"], smallvec![("=pod", "=cut")]),
+        Pyret => (smallvec!["#"], smallvec![("#|", "|#")]),
+        Python => (smallvec!["#"], smallvec![("'''", "'''")]),
+        Ruby => (smallvec!["#"], smallvec![("=begin", "=end")]),
+        Sql => (smallvec!["--"], smallvec![("/*", "*/")]),
+        Haskell | Idris | Agda | PureScript | Elm => (smallvec!["--"], smallvec![("{-", "-}")]),
 
-        ColdFusion => N(None, Some(("<!---", "--->"))),
-        Mustache => N(None, Some(("{{!", "}}"))),
+        ColdFusion => (smallvec![], smallvec![("<!---", "--->")]),
+        Mustache => (smallvec![], smallvec![("{{!", "}}")]),
 
-        Asp => EV(vec!["'", "REM"], vec![]),
-        AspNet => EV(vec![], vec![("<!--", "-->"), ("<%--", "-->")]),
-        Autoconf => EV(vec!["#", "dnl"], vec![]),
-        Clojure => EV(vec![";", "#"], vec![]),
-        FortranLegacy => EV(vec!["c", "C", "!", "*"], vec![]),
-        Handlebars => EV(vec![], vec![("<!--", "-->"), ("{{!", "}}")]),
-        Php => EV(vec!["#", "//"], vec![("/*", "*/")]),
+        Asp => (smallvec!["'", "REM"], smallvec![]),
+        AspNet => (smallvec![], smallvec![("<!--", "-->"), ("<%--", "-->")]),
+        Autoconf => (smallvec!["#", "dnl"], smallvec![]),
+        Clojure => (smallvec![";", "#"], smallvec![]),
+        FortranLegacy => (smallvec!["c", "C", "!", "*"], smallvec![]),
+        Handlebars => (smallvec![], smallvec![("<!--", "-->"), ("{{!", "}}")]),
+        Php => (smallvec!["#", "//"], smallvec![("/*", "*/")]),
         Isabelle => {
-            EV(
-                vec!["--"],
+            (
+                smallvec!["--"],
                 // Is that angle bracket utf8?  What's going to happen with that?
-                vec![
+                smallvec![
                     ("{*", "*}"),
                     ("(*", "*)"),
                     ("‹", "›"),
@@ -483,8 +464,8 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
                 ],
             )
         }
-        Razor => EV(vec![], vec![("<!--", "-->"), ("@*", "*@")]),
-        Pascal => EV(vec!["//", "(*"], vec![("{", "}")]),
+        Razor => (smallvec![], smallvec![("<!--", "-->"), ("@*", "*@")]),
+        Pascal => (smallvec!["//", "(*"], smallvec![("{", "}")]),
         Text | Markdown | Json | IntelHex | Hex | ReStructuredText => no_comments,
 
         Oz | Prolog => prolog_style,
@@ -505,16 +486,7 @@ pub fn counter_config_for_lang<'a>(lang: &Lang) -> LineConfig<'a> {
         Unrecognized => unreachable!(),
     };
 
-    match ctuple {
-        N(single, multi) => LineConfig::Normal {
-            single: single,
-            multi: multi,
-        },
-        EV(singles, multies) => LineConfig::Everything {
-            singles: singles,
-            multies: multies,
-        },
-    }
+    ctuple
 }
 
 struct ByteLinesState<'a> {
@@ -558,31 +530,15 @@ impl<'a> Iterator for ByteLinesState<'a> {
 
 pub fn count(filepath: &str) -> Count {
     let lang = lang_from_ext(filepath);
-    let config = counter_config_for_lang(&lang);
-    match config {
-        LineConfig::Normal { single, multi } => {
-            // TODO(cgag):get rid of this once we unify count_normal and count_everything
-            let singles = match single {
-                Some(s) => vec![s],
-                None => vec![],
-            };
-            let multies = match multi {
-                Some(m) => vec![m],
-                None => vec![],
-            };
-            count_normal(filepath, &singles, multies)
-        }
-        // TODO(cgag): get rid of this or normal
-        LineConfig::Everything { singles, multies } => {
-            count_normal(filepath, &singles, multies)
-        }
-    }
+    let (singles, multis) = counter_config_for_lang(lang);
+
+    count_normal(filepath, &singles, &multis)
 }
 
 pub fn count_normal(
     filepath: &str,
     singles: &[&str],
-    multies: Vec<(&str, &str)>,
+    multis: &SmallVec<[(&str, &str); 3]>,
 ) -> Count {
     let mfile = File::open(filepath);
     let mut file = match mfile {
@@ -623,7 +579,7 @@ pub fn count_normal(
                     // TODO(cgag): donm't do this check here
                     // TODO(cgag): this assumption that the multi-line comment is always the longer one
                     //             may well be a terrible one
-                    if multies.iter().clone().any(|(m_start, _)| line.starts_with(m_start)) {
+                    if multis.iter().any(|(m_start, _)| line.starts_with(m_start)) {
                         break;
                     }
 
@@ -632,13 +588,13 @@ pub fn count_normal(
                 }
             }
 
-            if multies.len() == 0 {
+            if multis.is_empty() {
                 c.code += 1;
                 continue 'line;
             }
         }
 
-        if multi_stack.is_empty() && !multies.iter().any(|(start, end)| line.contains(start) || line.contains(end)) {
+        if multi_stack.is_empty() && !multis.iter().any(|(start, end)| line.contains(start) || line.contains(end)) {
             c.code += 1;
             continue 'line;
         }
@@ -658,8 +614,7 @@ pub fn count_normal(
 
             // TODO(cgag): merge the representation of in_comment with the multi_stack
             { // new version
-                // TODO(cgag): figure out how to remove all these clones
-                for multi in multies.iter() {
+                for multi in multis.iter() {
                     let (start, end) = multi;
                     let start_len    = start.len();
                     let end_len      = end.len();
@@ -688,14 +643,14 @@ pub fn count_normal(
                         continue;
                     }
 
-                    if multi_stack.len() > 0 {
+                    if !multi_stack.is_empty() {
                         // TODO(cgag): clone, bad
-                        let (_, end) = multi_stack.last().expect("stack clone").clone();
+                        let (_, mut end) = multi_stack.last().expect("stack clone");
                         if pos+end.len() <= line_len && &line[pos..pos+end.len()] == end {
                             let _ = multi_stack.pop();
                             pos += end.len();
                         }
-                    } else if multi_stack.is_empty() && pos+1 <= line_len && !&line[pos..pos + 1].chars().next().expect("whitespace check").is_whitespace() {
+                    } else if multi_stack.is_empty() && pos < line_len && !&line[pos..pos + 1].chars().next().expect("whitespace check").is_whitespace() {
                         found_code += 1;
                     }
                 }
@@ -703,7 +658,7 @@ pub fn count_normal(
             }
         }
 
-        if found_code >= multies.len() {
+        if found_code >= multis.len() {
             c.code += 1;
         } else {
             c.comment += 1;
