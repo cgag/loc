@@ -284,7 +284,13 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
     } else {
         match path.extension() {
             Some(os_str) => os_str.to_str().expect("path to_str").to_lowercase(),
-            None => file_name_lower,
+            None => {
+                if let Some(ext) = check_shebang(path) {
+                    ext
+                } else {
+                    file_name_lower
+                }
+            }
         }
     };
 
@@ -645,4 +651,55 @@ pub fn count(filepath: &str) -> Count {
     }
 
     c
+}
+
+fn check_shebang(path: &Path) -> Option<String> {
+    let mfile = File::open(path);
+    let mut file = match mfile {
+        Ok(file) => file,
+        Err(_) => {
+            // TODO(cgag): print warning
+            return None;
+        }
+    };
+    let mut bytes = vec![];
+    // TODO(cgag): don't need to read full file, just first line
+    file.read_to_end(&mut bytes).expect("nani?!");
+    let s = match std::str::from_utf8(&bytes) {
+        Ok(x) => x,
+        // TODO(cgag): warning
+        Err(_) => return None,
+    };
+
+    let first_line = s.lines().next();
+    if first_line.is_none() {
+        return None;
+    }
+
+    // credit to polyglot (ats line counter) for these shebangs
+    let ext = match first_line.expect("it's some, i'm sure of it") {
+        "#!python"
+      | "#!python2"
+      | "#!python3"
+      | "#!/usr/bin/env python"
+      | "#!/usr/bin/env python2"
+      | "#!/usr/bin/env python3" => "py",
+
+        "#!/usr/bin/env bash"
+      | "#!/usr/bin/env sh"
+      | "#!/bin/bash"
+      | "#!/bin/sh" => "sh",
+
+        "#!/usr/bin/env perl"
+      | "#!/usr/bin/env perl6"
+      | "#!/usr/bin/perl" => "pl",
+
+        "#!/usr/bin/env stack"
+      | "#!/usr/bin/env runhaskell"
+      | "#!/usr/bin/env node" => "hs",
+
+        _ => return None
+    };
+
+    return Some(String::from(ext));
 }
