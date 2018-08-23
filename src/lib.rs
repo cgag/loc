@@ -609,11 +609,6 @@ pub fn count(filepath: &str) -> Count {
                 // position of that multi hits unicode, we might have skipped over a perfectly
                 // valid comment start that was unaffected by the unicode.
                 if contains_utf8 {
-                    // TODO(cgag): was: for i in pos..pos + min(max(start_len, end_len) + 1, line_len - pos) {
-                    // ensure the next N bytes are true characters, where N is the largest thing we
-                    // might be looking for.
-                    // TODO(cgag): Now that we're looking for multiple possible things, we've got
-                    // problems.  Really not sure what this should look like.
                     for i in pos..pos + min(max(start_len, end_len) + 1, line_len - pos) {
                         if !line.is_char_boundary(i) {
                             pos += 1;
@@ -641,6 +636,7 @@ pub fn count(filepath: &str) -> Count {
             pos += 1;
         }
 
+        // TODO(cgag): can this ever be greater or was that just defensive coding
         if found_code >= multis.len() {
             c.code += 1;
         } else {
