@@ -534,14 +534,6 @@ pub fn count(filepath: &str) -> Count {
     let lang = lang_from_ext(filepath);
     let (singles, multis) = counter_config_for_lang(lang);
 
-    count_normal(filepath, &singles, &multis)
-}
-
-pub fn count_normal(
-    filepath: &str,
-    singles: &[&str],
-    multis: &SmallVec<[(&str, &str); 3]>,
-) -> Count {
     let mfile = File::open(filepath);
     let mut file = match mfile {
         Ok(file) => file,
@@ -658,3 +650,10 @@ pub fn count_normal(
 
     c
 }
+
+// pub fn count_normal(
+//     filepath: &str,
+//     singles: &[&str],
+//     multis: &SmallVec<[(&str, &str); 3]>,
+// ) -> Count {
+// }
