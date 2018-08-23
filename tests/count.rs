@@ -170,3 +170,33 @@ const POWERSHELL_EXPECTED: Count = Count {
     lines: 2+1+6,
 };
 test_count![POWERSHELL, POWERSHELL_EXPECTED, powershell_count, powershell_code, powershell_comment, powershell_blank, powershell_lines];
+
+const HANDLEBARS: &'static str = "tests/data/test.handlebars";
+const HANDLEBARS_EXPECTED: Count = Count {
+    code: 2,
+    blank: 0,
+    comment: 2,
+    lines: 2+0+2,
+};
+test_count![HANDLEBARS,
+            HANDLEBARS_EXPECTED,
+            handlebars_count,
+            handlebars_code,
+            handlebars_comment,
+            handlebars_blank,
+            handlebars_lines];
+
+const NESTED_HASKELL: &'static str = "tests/data/nested-comments.hs";
+const NESTED_HASKELL_EXPECTED: Count = Count {
+    code: 2,
+    blank: 4,
+    comment: 8,
+    lines: 2+4+8,
+};
+test_count![NESTED_HASKELL,
+            NESTED_HASKELL_EXPECTED,
+            nested_haskell_count,
+            nested_haskell_code,
+            nested_haskell_comment,
+            nested_haskell_blank,
+            nested_haskell_lines];
