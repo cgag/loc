@@ -152,6 +152,7 @@ ignore files with `loc -u`, and include hidden files/dirs with `loc -uu`.
 - ActionScript
 - Ada
 - Agda
+- AmbientTalk
 - ASP
 - ASP.NET
 - Assembly
@@ -212,6 +213,7 @@ ignore files with `loc -u`, and include hidden files/dirs with `loc -uu`.
 - Objective-C
 - Objective-C++
 - OCaml
+- OpenCL
 - Oz
 - Pascal
 - Perl
