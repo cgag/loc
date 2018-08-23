@@ -67,6 +67,7 @@ pub enum Lang {
     D,
     Dart,
     DeviceTree,
+    Docker,
     Elixir,
     Elm,
     Erlang,
@@ -186,6 +187,7 @@ impl Lang {
             D => "D",
             Dart => "Dart",
             DeviceTree => "DeviceTree",
+            Docker => "Docker",
             Elixir => "Elixir",
             Elm => "Elm",
             Erlang => "Erlang",
@@ -291,6 +293,8 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
 
     let ext = if file_name_lower.contains("makefile") {
         String::from("makefile")
+    } else if file_name_lower == "dockerfile" {
+        String::from("docker")
     } else if file_name_lower == "cmakelists.txt" {
         String::from("cmake")
     } else {
@@ -330,6 +334,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "d" => D,
         "dart" => Dart,
         "dts" | "dtsi" => DeviceTree,
+        "docker" => Docker,
         "el" | "lisp" | "lsp" | "scm" | "ss" | "rkt" => Lisp,
         "ex" | "exs" => Elixir,
         "elm" => Elm,
@@ -451,13 +456,13 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
         CMake        =>  (smallvec!["#"], smallvec![("#[[", "]]")]),
         CoffeeScript => (smallvec!["#"], smallvec![("###", "###")]),
         D            => (smallvec!["//"], smallvec![("/*", "*/")]),
+        Docker       => (smallvec!["#"], smallvec![]),
         Forth        => (smallvec!["\\"], smallvec![("(", ")")]),
         FSharp       => (smallvec!["//"], smallvec![("(*", "*)")]),
         Julia        => (smallvec!["#"], smallvec![("#=", "=#")]),
         Lisp         => (smallvec![";"], smallvec![("#|", "|#")]),
         Lean         => (smallvec!["--"], smallvec![("/-", "-/")]),
         Lua          => (smallvec!["--"], smallvec![("--[[", "]]")]),
-      
         // which one is right? = or =pod?
         // Perl => SM("#""=", "=cut"),
         Perl   => (smallvec!["#"], smallvec![("=pod", "=cut")]),
