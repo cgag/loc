@@ -690,13 +690,18 @@ fn check_shebang(path: &Path) -> Option<String> {
       | "#!/bin/bash"
       | "#!/bin/sh" => "sh",
 
+
         "#!/usr/bin/env perl"
       | "#!/usr/bin/env perl6"
       | "#!/usr/bin/perl" => "pl",
 
         "#!/usr/bin/env stack"
-      | "#!/usr/bin/env runhaskell"
-      | "#!/usr/bin/env node" => "hs",
+      | "#!/usr/bin/env runhaskell" => "hs",
+
+        "#!/usr/bin/csh"      => "csh",
+        "#!/usr/bin/env node" => "js",
+        "#!/usr/bin/ruby"     => "rb",
+        "#!/usr/bin/env ruby" => "rb",
 
         _ => return None
     };
