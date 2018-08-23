@@ -601,8 +601,8 @@ pub fn count(filepath: &str) -> Count {
         'outer: while pos < line_len {
             for multi in multis.iter() {
                 let (start, end) = multi;
-                let start_len    = start.len();
-                let end_len      = end.len();
+                let start_len = start.len();
+                let end_len   = end.len();
 
                 // TODO(cgag): this is almost ceratinly giving us incorrect results.  Say the
                 // first multi is the longest.  If we advance position because the final byte
@@ -650,10 +650,3 @@ pub fn count(filepath: &str) -> Count {
 
     c
 }
-
-// pub fn count_normal(
-//     filepath: &str,
-//     singles: &[&str],
-//     multis: &SmallVec<[(&str, &str); 3]>,
-// ) -> Count {
-// }
