@@ -52,6 +52,7 @@ pub enum Lang {
     BourneShell,
     C,
     CCppHeader,
+    CMake,
     CSharp,
     CShell,
     Clojure,
@@ -170,6 +171,7 @@ impl Lang {
             BourneShell      => "Bourne Shell",
             C                => "C",
             CCppHeader       => "C/C++ Header",
+            CMake            => "CMake",
             CSharp           => "C#",
             CShell           => "C Shell",
             Clojure          => "Clojure",
@@ -289,6 +291,8 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
 
     let ext = if file_name_lower.contains("makefile") {
         String::from("makefile")
+    } else if file_name_lower == "cmakelists.txt" {
+        String::from("cmake")
     } else {
         match path.extension() {
             Some(os_str) => os_str.to_str().expect("path to_str").to_lowercase(),
@@ -315,6 +319,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "c" | "ec" | "pgc" => C,
         "cc" | "cpp" | "cxx" | "c++" | "pcc" => Cpp,
         "cfc" => ColdFusionScript,
+        "cmake" => CMake,
         "cl" => OpenCl,
         "coffee" => CoffeeScript,
         "cs" => CSharp,
@@ -443,6 +448,7 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
         // TODO(cgag): Well, some architectures use ;, @, |, etc.  Figure out something
         // better?
         Assembly     => (smallvec!["#"], smallvec![("/*", "*/")]),
+        CMake        =>  (smallvec!["#"], smallvec![("#[[", "]]")]),
         CoffeeScript => (smallvec!["#"], smallvec![("###", "###")]),
         D            => (smallvec!["//"], smallvec![("/*", "*/")]),
         Forth        => (smallvec!["\\"], smallvec![("(", ")")]),
@@ -451,6 +457,7 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
         Lisp         => (smallvec![";"], smallvec![("#|", "|#")]),
         Lean         => (smallvec!["--"], smallvec![("/-", "-/")]),
         Lua          => (smallvec!["--"], smallvec![("--[[", "]]")]),
+      
         // which one is right? = or =pod?
         // Perl => SM("#""=", "=cut"),
         Perl   => (smallvec!["#"], smallvec![("=pod", "=cut")]),
