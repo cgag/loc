@@ -471,6 +471,7 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
         FortranLegacy => (smallvec!["c", "C", "!", "*"], smallvec![]),
         Handlebars    => (smallvec![],   smallvec![("<!--", "-->"), ("{{!", "}}")]),
         Php           => (smallvec!["#", "//"], smallvec![("/*", "*/")]),
+        PowerShell    => (smallvec!["#"], smallvec![("<#", "#>")]),
 
         Isabelle => {
             (
@@ -498,7 +499,6 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
         BourneShell | Make | Awk | CShell | Gherkin | Makefile | Nim | R | SaltStack | Tcl
         | Toml | Yaml | Zsh | Elixir => sh_style,
 
-        PowerShell => N(Some("#"), Some(("<#", "#>"))),
 
         // TODO(cgag): not 100% sure that yacc belongs here.
         AmbientTalk | C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA
