@@ -1,118 +1,100 @@
+# Based on the "trust" template v0.1.1
+# https://github.com/japaric/trust/tree/v0.1.1
+
+dist: trusty
 language: rust
-cache: cargo
+services: docker
+sudo: required
+
+# TODO Rust builds on stable by default, this can be
+# overridden on a case by case basis down below.
 
 env:
   global:
-    # This will be part of the release tarball
-    # TODO change the project name
-    - PROJECT_NAME=loc
-    # TODO comment out this variable if you don't want to build .deb packages on all the targets.
-    - MAKE_DEB=yes
-    # TODO update these two variables. They are part of the .deb package metadata
-    - DEB_MAINTAINER="Curtis Gagliardi <curtis@curtis.io>"
-    - DEB_DESCRIPTION="Count lines of code quickly."
+    # TODO Update this to match the name of your project.
+    - CRATE_NAME=trust
 
-# AFAICT There are a few ways to set up the build jobs. This one is not the DRYest but I feel is the
-# easiest to reason about.
-# TODO Feel free to remove the channels/targets you don't need
-# NOTE Make *sure* you don't remove a reference (&foo) if you are going to dereference it (*foo)
 matrix:
+  # TODO These are all the build jobs. Adjust as necessary. Comment out what you
+  # don't need
   include:
-    # Nightly channel
-    # - os: linux
-    #   rust: nightly
-    #   env: TARGET=aarch64-unknown-linux-gnu
-    #   dist: trusty
-    #   sudo: required
-    #   addons:
-    #     apt:
-    #       packages: *aarch64_unknown_linux_gnu
-    # - os: linux
-    #   rust: nightly
-    #   env: TARGET=armv7-unknown-linux-gnueabihf
-    #   sudo: required
-    #   addons:
-    #     apt:
-    #       # Use the same packages the stable version uses
-    #       packages: *armv7_unknown_linux_gnueabihf
-    # - os: osx
-    #   rust: nightly
-    #   env: TARGET=i686-apple-darwin
-    # - os: linux
-    #   rust: nightly
-    #   env: TARGET=i686-unknown-linux-gnu
-    #   addons:
-    #     apt:
-    #       packages: *i686_unknown_linux_gnu
-    # - os: linux
-    #   rust: nightly
-    #   env: TARGET=i686-unknown-linux-musl
-    #   dist: trusty
-    #   sudo: required
-    #   addons:
-    #     apt:
-    #       packages: *musl_packages
-    - os: osx
+    # Linux
+    # - env: TARGET=i686-unknown-linux-gnu
+    # - env: TARGET=i686-unknown-linux-musl
+    - env: TARGET=x86_64-unknown-linux-gnu
+    - env: TARGET=x86_64-unknown-linux-musl
+
+    # OSX
+    - env: TARGET=i686-apple-darwin
+      os: osx
+    - env: TARGET=x86_64-apple-darwin
+      os: osx
+
+    # *BSD
+    - env: TARGET=i686-unknown-freebsd DISABLE_TESTS=1
+    - env: TARGET=x86_64-unknown-freebsd DISABLE_TESTS=1
+    - env: TARGET=x86_64-unknown-netbsd DISABLE_TESTS=1
+
+    # Other architectures
+    - env: TARGET=aarch64-unknown-linux-gnu
+    - env: TARGET=armv7-unknown-linux-gnueabihf
+    # - env: TARGET=mips-unknown-linux-gnu
+    # - env: TARGET=mips64-unknown-linux-gnuabi64
+    # - env: TARGET=mips64el-unknown-linux-gnuabi64
+    # - env: TARGET=mipsel-unknown-linux-gnu
+    # - env: TARGET=powerpc-unknown-linux-gnu
+    # - env: TARGET=powerpc64-unknown-linux-gnu
+    # - env: TARGET=powerpc64le-unknown-linux-gnu
+    # - env: TARGET=s390x-unknown-linux-gnu DISABLE_TESTS=1
+
+    # Testing other channels
+    - env: TARGET=x86_64-unknown-linux-gnu
       rust: nightly
-      env: TARGET=x86_64-apple-darwin
-    - os: linux
+    - env: TARGET=x86_64-apple-darwin
+      os: osx
       rust: nightly
-      env: TARGET=x86_64-unknown-linux-gnu
-    - os: linux
-      rust: nightly
-      env: TARGET=x86_64-unknown-linux-musl
-      dist: trusty
-      sudo: required
-      addons:
-        apt:
-          packages: *musl_packages
-  allow_failures:
-    # TODO(cgag): fix this build, we should absolutely work with musl
-    - os: linux
-      rust: nightly
-      env: TARGET=x86_64-unknown-linux-musl
 
 before_install:
-  - export PATH="$PATH:$HOME/.cargo/bin"
+  - set -e
+  - rustup self update
 
 install:
-  - bash ci/install.sh
+  - sh ci/install.sh
+  - source ~/.cargo/env || true
 
 script:
   - bash ci/script.sh
 
+after_script: set +e
+
 before_deploy:
-  - bash ci/before_deploy.sh
+  - sh ci/before_deploy.sh
 
 deploy:
-  provider: releases
-  # TODO Regenerate this api_key for your project, this one won't work for you. Here's how:
-  # - Go to 'https://github.com/settings/tokens/new' and generate a Token with only the
-  # `public_repo` scope enabled
-  # - Call `travis encrypt $github_token` where $github_token is the token you got in the previous
-  # step and `travis` is the official Travis CI gem (see https://rubygems.org/gems/travis/)
-  # - Enter the "encrypted value" below
   api_key:
-    secure: hix+9W6Zsmh3jgcW0H9XQnX+FTaNFB0qeQGwSqxe1dgjHs93m+7QIdvDwWkkTGwdXcn5508e8VkGbpQKzH/nQ6pR+0zbCSRjZIJuENlxW183Wqd0uTDzn3IAxBMHieQTTMsZixQRKKVJDYtGJ1Ev2s2MCYkeUNKSIYF3uxxxf+/PhSU3jQEFN4xYf8IKkPPEEroYSojBdCeS8jLsqGIk+S74WyH7tNxVJDJiX5HOarUZXWLiAqKwx9rfGztZ2axg3zz6ic1B9PrYdn8xxMsUn7/ZyG5ok5u823U5euPFGqvFCaPuZH4jnOYde/zAGfa+o6RXNfi9dBLEdXCQGUuYRUca/QGQNGO6Fiu4Di1vwCniXoIwg7IZos1OFQz5biLnZD31JELMveliUg+L6uVOPSIp2v2ow1M1arR0jOcMxge2Wl9Bp+4GhMrax0WqQckdDZCZ//VRc31nT6DmRdfk/y8uzJMo98gAiS+6FWP0D35u2jh/rNJgIPk6mmIRsoL3ZLdLAWKYY0zLV7LJ0bmtyWzMe933xwnxVqJXKWSODkk2oYQLKrgN/leAi3THgMT6mfigH0u1Y6rhDwMewaWjczxwdHGYL2PqVK4qXfcvCLpzyYk4+acCcMRi+S8q7hggMzY4ZJQ7rybH39953W5gfGNMnc2IN5WwYzMiot3Pmhs=
+    secure: ru/43ejUelnvh6acUxM6rNEnw1XA6+dHjoVTXkJPE/Vp0pFhRXwRrjvRP+Oo4TjLFKSp9IL9Y2RUyUE2QKGn3AaMNTX4TLjP0WaMA4lU5Fm/RiCIr5/As/XJVTnHENNCQ0pKEDPiP6HzbV2DAZSqaZTSSTkmFNTNVIUCz1+/m8wsgv+geZAOeV7UVD9olW2g2vDeXY0cQjRx+QQRvuqgTp2HsPypYVjNTeM9YDiAGXbIMz4xOpxKBKkQA/bGLVkyXgur1+SW/Ps+z9HPNtBqs02kMzhozOF2skSIhx1TsqBnl2OE8yMp6KqfjmDr61Po/P8yZBp3pG4dg18I/BLPyndQ0NZEyXScmDqSuaeTQfUVQ8QWEiIM1mpiyrZPhRbrMntyBCICglzJmVuGI/L7KH3rUcsjAa2C6ehZAw1rSlkc/rchcLdnAzdJ6R7M5AIlL6xKF/D0MOBXNRY9S3HKowpqNn3yYh4hcf4xFs2Ms5tSI5GPyKsKDIiimUoAHEpIMhNi7ojZVPucctc2ybf2Op3DXCJvRdstxA9Sln+1Ubb+0tz2/9i5w1P/dPq1v51HUj+eB5gcHqOSA5jSAJ9JuT3FQsmLyC6Xm9Pyv1sMVYrKchYleLezahG8hmwfzxdyQT+3LFjIV2Yx8ALcjvxs3cwolqcQ7T6cO1YQmBn/lag=
   file_glob: true
-  file: ${PROJECT_NAME}-${TRAVIS_TAG}-${TARGET}.*
-  # don't delete the artifacts from previous phases
-  skip_cleanup: true
-  # deploy when a new tag is pushed
+  file: $CRATE_NAME-$TRAVIS_TAG-$TARGET.*
   on:
-    # channel to use to produce the release artifacts
-    # NOTE make sure you only release *once* per target
-    # TODO you may want to pick a different channel
-    condition: $TRAVIS_RUST_VERSION = nightly
+    # TODO Here you can pick which targets will generate binary releases
+    # In this example, there are some targets that are tested using the stable
+    # and nightly channels. This condition makes sure there is only one release
+    # for such targets and that's generated using the stable channel
+    condition: $TRAVIS_RUST_VERSION = stable
     tags: true
+  provider: releases
+  skip_cleanup: true
+
+cache: cargo
+before_cache:
+  # Travis can't cache files that are not readable by "others"
+  - chmod -R a+r $HOME/.cargo
 
 branches:
   only:
-    # Pushes and PR to the master branch
-    - master
-    # IMPORTANT Ruby regex to match tags. Required, or travis won't trigger deploys when a new tag
-    # is pushed. This regex matches semantic versions like v1.2.3-rc4+2016.02.22
+    # release tags
     - /^v\d+\.\d+\.\d+.*$/
+    - master
 
 notifications:
   email:

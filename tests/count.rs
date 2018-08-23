@@ -125,3 +125,78 @@ const GHERKIN_EXPECTED: Count = Count {
     lines: 8+2+2,
 };
 test_count![GHERKIN, GHERKIN_EXPECTED, gherkin_count, gherkin_code, gherkin_comment, gherkin_blank, gherkin_lines];
+
+const GROOVY: &'static str = "tests/data/test.groovy";
+const GROOVY_EXPECTED: Count = Count {
+    code: 6,
+    blank: 1,
+    comment: 10,
+    lines: 6+1+10,
+};
+test_count![GROOVY, GROOVY_EXPECTED, groovy_count, groovy_code, groovy_comment, groovy_blank, groovy_lines];
+
+const TERRAFORM: &'static str = "tests/data/test.tf";
+const TERRAFORM_EXPECTED: Count = Count {
+    code: 65,
+    blank: 13,
+    comment: 11,
+    lines: 65+13+11,
+};
+test_count![TERRAFORM, TERRAFORM_EXPECTED, terraform_count, terraform_code, terraform_comment, terraform_blank, terraform_lines];
+
+const ZIG: &'static str = "tests/data/zig.zig";
+const ZIG_EXPECTED: Count = Count {
+    code: 5,
+    blank: 2,
+    comment: 2,
+    lines: 5+2+2,
+};
+test_count![ZIG, ZIG_EXPECTED, zig_count, zig_code, zig_comment, zig_blank, zig_lines];
+
+const NIX: &'static str = "tests/data/test.nix";
+const NIX_EXPECTED: Count = Count {
+    code: 3,
+    blank: 2,
+    comment: 3,
+    lines: 3+2+3,
+};
+test_count![NIX, NIX_EXPECTED, nix_count, nix_code, nix_comment, nix_blank, nix_lines];
+
+const POWERSHELL: &'static str = "tests/data/test.ps1";
+const POWERSHELL_EXPECTED: Count = Count {
+    code: 2,
+    blank: 1,
+    comment: 6,
+    lines: 2+1+6,
+};
+test_count![POWERSHELL, POWERSHELL_EXPECTED, powershell_count, powershell_code, powershell_comment, powershell_blank, powershell_lines];
+
+const HANDLEBARS: &'static str = "tests/data/test.handlebars";
+const HANDLEBARS_EXPECTED: Count = Count {
+    code: 2,
+    blank: 0,
+    comment: 2,
+    lines: 2+0+2,
+};
+test_count![HANDLEBARS,
+            HANDLEBARS_EXPECTED,
+            handlebars_count,
+            handlebars_code,
+            handlebars_comment,
+            handlebars_blank,
+            handlebars_lines];
+
+const NESTED_HASKELL: &'static str = "tests/data/nested-comments.hs";
+const NESTED_HASKELL_EXPECTED: Count = Count {
+    code: 2,
+    blank: 4,
+    comment: 8,
+    lines: 2+4+8,
+};
+test_count![NESTED_HASKELL,
+            NESTED_HASKELL_EXPECTED,
+            nested_haskell_count,
+            nested_haskell_code,
+            nested_haskell_comment,
+            nested_haskell_blank,
+            nested_haskell_lines];

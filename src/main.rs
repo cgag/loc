@@ -3,10 +3,10 @@ extern crate loc;
 #[macro_use]
 extern crate clap;
 extern crate deque;
-extern crate itertools;
 extern crate num_cpus;
 extern crate regex;
 extern crate ignore;
+extern crate edit_distance;
 
 use clap::{Arg, App, AppSettings};
 use ignore::WalkBuilder;
@@ -14,9 +14,11 @@ use ignore::WalkBuilder;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::thread;
+use std::str::FromStr;
 
 use deque::{Stealer, Stolen};
 use regex::Regex;
+use edit_distance::edit_distance as distance;
 
 use loc::*;
 
@@ -51,7 +53,7 @@ impl Worker {
                         let count = count(&path);
                         v.push(FileCount {
                             lang: lang,
-                            path: String::from(path),
+                            path: path,
                             count: count,
                         });
                     }
@@ -62,14 +64,50 @@ impl Worker {
     }
 }
 
-fn main() {
+#[derive(PartialEq)]
+enum Sort {
+    Code,
+    Comment,
+    Blank,
+    Lines,
+    // The following options are only used if the --files flag is NOT present
+    Language,
+    Files,
+}
 
-    let matches = App::new("count")
+impl FromStr for Sort {
+    /// A Some variant indicates a suggested value -- the given value was close (perhaps
+    /// because of a typo) to a valid value. None indicates that the given value was not
+    /// close to a correct value.
+    type Err = Option<String>;
+    fn from_str(s: &str) -> Result<Sort, Self::Err> {
+        match s {
+            "blank"    | "Blank"    => Ok(Sort::Blank),
+            "code"     | "Code"     => Ok(Sort::Code),
+            "comment"  | "Comment"  => Ok(Sort::Comment),
+            "lines"    | "Lines"    => Ok(Sort::Lines),
+            "language" | "Language" => Ok(Sort::Language),
+            "files"    | "Files"    => Ok(Sort::Files),
+            s if distance(&s.to_lowercase(), "blank")    <= 2  => Err(Some("Blank".into())),
+            s if distance(&s.to_lowercase(), "code")     <= 2  => Err(Some("Code".into())),
+            s if distance(&s.to_lowercase(), "comment")  <= 2  => Err(Some("Comment".into())),
+            s if distance(&s.to_lowercase(), "lines")    <= 2  => Err(Some("Lines".into())),
+            s if distance(&s.to_lowercase(), "language") <= 2  => Err(Some("Language".into())),
+            s if distance(&s.to_lowercase(), "files")    <= 2  => Err(Some("Files".into())),
+            _ => Err(None)
+        }
+    }
+}
+
+// TODO(cgag): tune smallvec array sizes
+// TODO(cgag): try smallstring
+// TODO(cgag): more tests for nested comments
+fn main() {
+    let matches = App::new("loc")
         .global_settings(&[AppSettings::ColoredHelp])
         .version(crate_version!())
         .author("Curtis Gagliardi <curtis@curtis.io>")
         .about("counts things quickly hopefully")
-        // TODO(cgag): actually implement filtering
         .arg(Arg::with_name("exclude")
             .required(false)
             .multiple(true)
@@ -104,15 +142,40 @@ fn main() {
              .help("A single -u won't respect .gitignore (etc.) files. Two -u flags will additionally count hidden files and directories."))
         .arg(Arg::with_name("target")
             .multiple(true)
-            .help("File or directory to count"))
+            .help("File or directory to count (multiple arguments accepted)"))
         .get_matches();
 
     let targets = match matches.values_of("target") {
         Some(targets) => targets.collect(),
         None => vec!["."]
     };
-    let sort = matches.value_of("sort").unwrap_or("code");
-    let by_file = matches.is_present("files");
+
+    let sort: Sort = match matches.value_of("sort") {
+        Some(string) => match Sort::from_str(string) {
+            Ok(sort) => sort,
+            Err(err) => {
+                if let Some(suggestion) = err {
+                    println!("Error: invalid value for --sort: '{}', perhaps you meant '{}'?",
+                             string, suggestion);
+                } else {
+                    println!("Error: invalid value for --sort: '{}'", string);
+                }
+                println!(" Hint: legal values are Code, Comment, Blank, Lines, Language, \
+                          and Files");
+                return
+            },
+        },
+        // Default to sorting by lines of code
+        None => Sort::Code,
+    };
+
+    let by_file: bool = matches.is_present("files");
+
+    if by_file && (sort == Sort::Language || sort == Sort::Files) {
+        println!("Error: cannot sort by Language or Files when --files is present");
+        return
+    }
+
     let (use_ignore, ignore_hidden) = match matches.occurrences_of("unrestricted") {
         0 => (true,  true),
         1 => (false, true),
@@ -232,14 +295,14 @@ fn main() {
                      total.code);
 
             match sort {
-                "code" => filecounts.sort_by(|fc1, fc2| fc2.count.code.cmp(&fc1.count.code)),
-                "comment" => {
-                    filecounts.sort_by(|fc1, fc2| fc2.count.comment.cmp(&fc1.count.comment))
-                }
-                "blank" => filecounts.sort_by(|fc1, fc2| fc2.count.blank.cmp(&fc1.count.blank)),
-                "lines" => filecounts.sort_by(|fc1, fc2| fc2.count.lines.cmp(&fc1.count.lines)),
-                // No sorting by language or files here. Need to do it at a higher level.
-                _ => (),
+                Sort::Code    => filecounts.sort_by(|fc1, fc2| fc2.count.code.cmp(&fc1.count.code)),
+                Sort::Comment => filecounts.sort_by(|fc1, fc2| fc2.count.comment.cmp(&fc1.count.comment)),
+                Sort::Blank   => filecounts.sort_by(|fc1, fc2| fc2.count.blank.cmp(&fc1.count.blank)),
+                Sort::Lines   => filecounts.sort_by(|fc1, fc2| fc2.count.lines.cmp(&fc1.count.lines)),
+                // No sorting by language or files here when using --files. This should
+                // have been checked above.
+                Sort::Language | Sort::Files => panic!("Sorting by language or files \
+                                                        when using the --sort flag"),
             }
 
             println!("{}", linesep);
@@ -269,24 +332,12 @@ fn main() {
 
         let mut totals_by_lang = lang_totals.iter().collect::<Vec<(&&Lang, &LangTotal)>>();
         match sort {
-            "language" => totals_by_lang.sort_by(|&(l1, _), &(l2, _)| l1.to_s().cmp(l2.to_s())),
-            "files" => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.files.cmp(&c1.files)),
-            "code" => {
-                totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.code.cmp(&c1.count.code))
-            }
-            "comment" => {
-                totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.comment.cmp(&c1.count.comment))
-            }
-            "blank" => {
-                totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.blank.cmp(&c1.count.blank))
-            }
-            "lines" => {
-                totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.lines.cmp(&c1.count.lines))
-            }
-            _ => {
-                println!("invalid sort option {}, sorting by code", sort);
-                totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.code.cmp(&c1.count.code))
-            }
+            Sort::Language => totals_by_lang.sort_by(|&(l1, _), &(l2, _)| l1.to_s().cmp(l2.to_s())),
+            Sort::Files    => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.files.cmp(&c1.files)),
+            Sort::Code     => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.code.cmp(&c1.count.code)),
+            Sort::Comment  => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.comment.cmp(&c1.count.comment)),
+            Sort::Blank    => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.blank.cmp(&c1.count.blank)),
+            Sort::Lines    => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.lines.cmp(&c1.count.lines)),
         }
 
         print_totals_by_lang(&linesep, &totals_by_lang);
@@ -294,6 +345,7 @@ fn main() {
 
 }
 
+// TODO(cgag): i think this is in the stdlib
 fn last_n_chars(s: &str, n: usize) -> String {
     if s.len() <= n {
         return String::from(s);
@@ -301,7 +353,7 @@ fn last_n_chars(s: &str, n: usize) -> String {
     s.chars().skip(s.len() - n).collect::<String>()
 }
 
-
+// TODO(cgag): i think this is in the stdlib
 fn str_repeat(s: &str, n: usize) -> String {
     std::iter::repeat(s).take(n).collect::<Vec<_>>().join("")
 }
@@ -332,11 +384,11 @@ fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) 
         count: Count::default(),
     };
     for &(_, total) in totals_by_lang {
-        totals.files += total.files;
-        totals.count.code += total.count.code;
-        totals.count.blank += total.count.blank;
+        totals.files         += total.files;
+        totals.count.code    += total.count.code;
+        totals.count.blank   += total.count.blank;
         totals.count.comment += total.count.comment;
-        totals.count.lines += total.count.lines;
+        totals.count.lines   += total.count.lines;
     }
 
     println!("{}", linesep);
