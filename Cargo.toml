@@ -11,14 +11,16 @@ documentation = "https://github.com/cgag/loc"
 license="MIT"
 
 [dependencies]
-clap          = "2.31.2"
+clap          = "2.32.0"
 deque         = "0.3.2"
 memchr        = "2.0.1"
-memmap        = "0.6.2"
-regex         = "1.0.0"
+regex         = "1.0.2"
 num_cpus      = "1.8.0"
 ignore        = "0.4.2"
 edit-distance = "2.0.1"
+# TODO(cgag): set explicit version
+smallvec = "*"
 
-# [profile.release]
-# lto = true
+[profile.release]
+incremental = false
+lto = true
