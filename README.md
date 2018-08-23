@@ -220,6 +220,7 @@ ignore files with `loc -u`, and include hidden files/dirs with `loc -uu`.
 - PHP
 - Plain Text
 - Polly
+- PowerShell
 - Prolog
 - Protobuf
 - Pyret

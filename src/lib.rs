@@ -112,6 +112,7 @@ pub enum Lang {
     Perl,
     Php,
     Polly,
+    PowerShell,
     Prolog,
     Protobuf,
     Puppet,
@@ -229,6 +230,7 @@ impl Lang {
             Perl => "Perl",
             Php => "PHP",
             Polly => "Polly",
+            PowerShell => "PowerShell",
             Prolog => "Prolog",
             Protobuf => "Protobuf",
             Puppet => "Puppet",
@@ -381,6 +383,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "text" | "txt" => Text,
 
         "polly" => Polly,
+        "ps1" | "psd1" | "psm1" => PowerShell,
         "proto" => Protobuf,
         "purs" => PureScript,
         "arr" => Pyret,
@@ -494,6 +497,8 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
 
         BourneShell | Make | Awk | CShell | Gherkin | Makefile | Nim | R | SaltStack | Tcl
         | Toml | Yaml | Zsh | Elixir => sh_style,
+
+        PowerShell => N(Some("#"), Some(("<#", "#>"))),
 
         // TODO(cgag): not 100% sure that yacc belongs here.
         AmbientTalk | C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA
