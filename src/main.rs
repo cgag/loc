@@ -82,31 +82,32 @@ impl FromStr for Sort {
     type Err = Option<String>;
     fn from_str(s: &str) -> Result<Sort, Self::Err> {
         match s {
-            "blank"    | "Blank" => Ok(Sort::Blank),
-            "code"     | "Code" => Ok(Sort::Code),
-            "comment"  | "Comment" => Ok(Sort::Comment),
-            "lines"    | "Lines" => Ok(Sort::Lines),
+            "blank"    | "Blank"    => Ok(Sort::Blank),
+            "code"     | "Code"     => Ok(Sort::Code),
+            "comment"  | "Comment"  => Ok(Sort::Comment),
+            "lines"    | "Lines"    => Ok(Sort::Lines),
             "language" | "Language" => Ok(Sort::Language),
-            "files"    | "Files" => Ok(Sort::Files),
-            s if distance(&s.to_lowercase(), "blank") <= 2 => Err(Some("Blank".into())),
-            s if distance(&s.to_lowercase(), "code") <= 2 => Err(Some("Code".into())),
-            s if distance(&s.to_lowercase(), "comment") <= 2 => Err(Some("Comment".into())),
-            s if distance(&s.to_lowercase(), "lines") <= 2 => Err(Some("Lines".into())),
-            s if distance(&s.to_lowercase(), "language") <= 2 => Err(Some("Language".into())),
-            s if distance(&s.to_lowercase(), "files") <= 2 => Err(Some("Files".into())),
+            "files"    | "Files"    => Ok(Sort::Files),
+            s if distance(&s.to_lowercase(), "blank")    <= 2  => Err(Some("Blank".into())),
+            s if distance(&s.to_lowercase(), "code")     <= 2  => Err(Some("Code".into())),
+            s if distance(&s.to_lowercase(), "comment")  <= 2  => Err(Some("Comment".into())),
+            s if distance(&s.to_lowercase(), "lines")    <= 2  => Err(Some("Lines".into())),
+            s if distance(&s.to_lowercase(), "language") <= 2  => Err(Some("Language".into())),
+            s if distance(&s.to_lowercase(), "files")    <= 2  => Err(Some("Files".into())),
             _ => Err(None)
         }
     }
 }
 
+// TODO(cgag): tune smallvec array sizes
+// TODO(cgag): try smallstring
+// TODO(cgag): more tests for nested comments
 fn main() {
-
     let matches = App::new("loc")
         .global_settings(&[AppSettings::ColoredHelp])
         .version(crate_version!())
         .author("Curtis Gagliardi <curtis@curtis.io>")
         .about("counts things quickly hopefully")
-        // TODO(cgag): actually implement filtering
         .arg(Arg::with_name("exclude")
             .required(false)
             .multiple(true)
@@ -294,14 +295,10 @@ fn main() {
                      total.code);
 
             match sort {
-                Sort::Code =>
-                    filecounts.sort_by(|fc1, fc2| fc2.count.code.cmp(&fc1.count.code)),
-                Sort::Comment =>
-                    filecounts.sort_by(|fc1, fc2| fc2.count.comment.cmp(&fc1.count.comment)),
-                Sort::Blank =>
-                    filecounts.sort_by(|fc1, fc2| fc2.count.blank.cmp(&fc1.count.blank)),
-                Sort::Lines =>
-                    filecounts.sort_by(|fc1, fc2| fc2.count.lines.cmp(&fc1.count.lines)),
+                Sort::Code    => filecounts.sort_by(|fc1, fc2| fc2.count.code.cmp(&fc1.count.code)),
+                Sort::Comment => filecounts.sort_by(|fc1, fc2| fc2.count.comment.cmp(&fc1.count.comment)),
+                Sort::Blank   => filecounts.sort_by(|fc1, fc2| fc2.count.blank.cmp(&fc1.count.blank)),
+                Sort::Lines   => filecounts.sort_by(|fc1, fc2| fc2.count.lines.cmp(&fc1.count.lines)),
                 // No sorting by language or files here when using --files. This should
                 // have been checked above.
                 Sort::Language | Sort::Files => panic!("Sorting by language or files \
@@ -335,18 +332,12 @@ fn main() {
 
         let mut totals_by_lang = lang_totals.iter().collect::<Vec<(&&Lang, &LangTotal)>>();
         match sort {
-            Sort::Language => totals_by_lang
-                .sort_by(|&(l1, _), &(l2, _)| l1.to_s().cmp(l2.to_s())),
-            Sort::Files => totals_by_lang
-                .sort_by(|&(_, c1), &(_, c2)| c2.files.cmp(&c1.files)),
-            Sort::Code => totals_by_lang
-                .sort_by(|&(_, c1), &(_, c2)| c2.count.code.cmp(&c1.count.code)),
-            Sort::Comment => totals_by_lang
-                .sort_by(|&(_, c1), &(_, c2)| c2.count.comment.cmp(&c1.count.comment)),
-            Sort::Blank => totals_by_lang
-                .sort_by(|&(_, c1), &(_, c2)| c2.count.blank.cmp(&c1.count.blank)),
-            Sort::Lines => totals_by_lang
-                .sort_by(|&(_, c1), &(_, c2)| c2.count.lines.cmp(&c1.count.lines)),
+            Sort::Language => totals_by_lang.sort_by(|&(l1, _), &(l2, _)| l1.to_s().cmp(l2.to_s())),
+            Sort::Files    => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.files.cmp(&c1.files)),
+            Sort::Code     => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.code.cmp(&c1.count.code)),
+            Sort::Comment  => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.comment.cmp(&c1.count.comment)),
+            Sort::Blank    => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.blank.cmp(&c1.count.blank)),
+            Sort::Lines    => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.lines.cmp(&c1.count.lines)),
         }
 
         print_totals_by_lang(&linesep, &totals_by_lang);
@@ -393,11 +384,11 @@ fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) 
         count: Count::default(),
     };
     for &(_, total) in totals_by_lang {
-        totals.files += total.files;
-        totals.count.code += total.count.code;
-        totals.count.blank += total.count.blank;
+        totals.files         += total.files;
+        totals.count.code    += total.count.code;
+        totals.count.blank   += total.count.blank;
         totals.count.comment += total.count.comment;
-        totals.count.lines += total.count.lines;
+        totals.count.lines   += total.count.lines;
     }
 
     println!("{}", linesep);
