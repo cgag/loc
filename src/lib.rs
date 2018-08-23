@@ -42,6 +42,7 @@ pub enum Lang {
     ActionScript,
     Ada,
     Agda,
+    AmbientTalk,
     Asp,
     AspNet,
     Assembly,
@@ -156,6 +157,7 @@ impl Lang {
             ActionScript     => "ActionScript",
             Ada              => "Ada",
             Agda             => "Agda",
+            AmbientTalk      => "AmbientTalk",
             Asp              => "ASP",
             AspNet           => "ASP.NET",
             Assembly         => "Assembly",
@@ -301,6 +303,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "ada" | "adb" | "ads" | "pad" => Ada,
         "agda" => Agda,
         "as" => ActionScript,
+        "at" => AmbientTalk,
         "awk" => Awk,
         "bat" | "btm" | "cmd" => Batch,
         "c" | "ec" | "pgc" => C,
@@ -486,10 +489,11 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
         | Toml | Yaml | Zsh | Elixir => sh_style,
 
         // TODO(cgag): not 100% sure that yacc belongs here.
-        C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA
-          | CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx
-          | Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift
-          | TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe | Groovy => c_style,
+        AmbientTalk | C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA
+        | CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx
+        | Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | Qcl | Sass | Scala | Swift
+        | TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe | Groovy => c_style,
+
 
         Unrecognized => unreachable!(),
     };
