@@ -688,6 +688,9 @@ fn check_shebang(path: &Path) -> Option<String> {
         "#!python"
       | "#!python2"
       | "#!python3"
+      | "#!/bin/python"
+      | "#!/bin/python2"
+      | "#!/bin/python3"
       | "#!/usr/bin/env python"
       | "#!/usr/bin/env python2"
       | "#!/usr/bin/env python3" => "py",
@@ -700,6 +703,8 @@ fn check_shebang(path: &Path) -> Option<String> {
 
         "#!/usr/bin/env perl"
       | "#!/usr/bin/env perl6"
+      | "#!/bin/perl"
+      | "#!/bin/perl6"
       | "#!/usr/bin/perl" => "pl",
 
         "#!/usr/bin/env stack"
