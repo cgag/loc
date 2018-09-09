@@ -564,6 +564,8 @@ impl<'a> Iterator for ByteLinesState<'a> {
     }
 }
 
+// TODO(cgag): do we have to worry about the case of single line comments being nested in multis?
+// I dn't think so but i should think about it.
 pub fn count(filepath: &str) -> Count {
     let lang = lang_from_ext(filepath);
     let (singles, multis) = counter_config_for_lang(lang);
@@ -575,6 +577,8 @@ pub fn count(filepath: &str) -> Count {
             return Count::default();
         }
     };
+    // TODO(cgag): set the size of this vec to size of the file + a byte? a reddit comment
+    // somewhere says fs::read will do this ofr you.
     let mut bytes = vec![];
     file.read_to_end(&mut bytes).expect("nani?!");
 
