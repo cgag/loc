@@ -107,6 +107,16 @@ const OCAML_EXPECTED: Count = Count {
 };
 test_count![OCAML, OCAML_EXPECTED, ocaml_count, ocaml_code, ocaml_comment, ocaml_blank, ocaml_lines];
 
+const REASON: &'static str = "tests/data/reason.re";
+const REASON_EXPECTED: Count = Count {
+    code: 3,
+    blank: 4,
+    comment: 6,
+    lines: 3+4+6,
+};
+test_count![REASON, REASON_EXPECTED, reason_count, reason_code, reason_comment, reason_blank, reason_lines];
+
+
 // single only
 const ADA: &'static str = "tests/data/ada.ada";
 const ADA_EXPECTED: Count = Count {

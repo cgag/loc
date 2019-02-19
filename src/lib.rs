@@ -125,6 +125,7 @@ pub enum Lang {
     Qml,
     R,
     Razor,
+    Reason,
     ReStructuredText,
     Ruby,
     RubyHtml,
@@ -245,6 +246,7 @@ impl Lang {
             Qml => "Qml",
             R => "R",
             Razor => "Razor",
+            Reason           => "Reason",
             ReStructuredText => "reStructuredText",
             Ruby             => "Ruby",
             RubyHtml         => "RubyHtml",
@@ -400,6 +402,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "py" => Python,
         "r" => R,
         "rake" | "rb" => Ruby,
+        "re" | "rei" => Reason,
         "rhtml" | "erb" => RubyHtml,
         "rs" => Rust,
         "s" | "asm" => Assembly,
@@ -516,7 +519,7 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
         AmbientTalk | C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA
         | CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx
         | Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | OpenCl | Qcl | Sass | Scala | Swift
-        | TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe | Groovy => c_style,
+        | TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe | Groovy | Reason => c_style,
 
 
         Unrecognized => unreachable!(),
