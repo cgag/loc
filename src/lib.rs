@@ -146,6 +146,7 @@ pub enum Lang {
     Tsx,
     UnrealScript,
     VimScript,
+    Vue,
     Wolfram,
     XML,
     Yacc,
@@ -267,6 +268,7 @@ impl Lang {
             Tsx              => "Typescript JSX",
             UnrealScript     => "UnrealScript",
             VimScript        => "VimL",
+            Vue              => "Vue",
             Wolfram          => "Wolfram",
             XML              => "XML",
             Yacc             => "Yacc",
@@ -423,6 +425,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "uc" | "uci" | "upkg" => UnrealScript,
         "v" => Coq,
         "vim" => VimScript,
+        "vue" => Vue,
         "xml" => XML,
         "yaml" | "yml" => Yaml,
         "y" => Yacc,
@@ -503,6 +506,7 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
 
         Razor  => (smallvec![], smallvec![("<!--", "-->"), ("@*", "*@")]),
         Pascal => (smallvec!["//", "(*"], smallvec![("{", "}")]),
+        Vue    => (smallvec!["//"], smallvec![("/*", "*/"), ("<!--", "-->")]),
         Text | Markdown | Json | IntelHex | Hex | ReStructuredText => no_comments,
 
         Oz | Prolog => prolog_style,
