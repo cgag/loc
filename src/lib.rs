@@ -445,7 +445,7 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
     let prolog_style = (smallvec!["%"],  smallvec![("/*", "*/")]);
     let sh_style     = (smallvec!["#"],  smallvec![]);
 
-    let ctuple = match lang {
+    match lang {
         Ada            => (smallvec!["--"], smallvec![]),
         Batch          => (smallvec!["REM"], smallvec![]),
         Erlang | Tex   => (smallvec!["%"], smallvec![]),
@@ -527,9 +527,7 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
 
 
         Unrecognized => unreachable!(),
-    };
-
-    ctuple
+    }
 }
 
 struct ByteLinesState<'a> {
@@ -600,7 +598,7 @@ pub fn count(filepath: &str) -> Count {
         };
         c.lines += 1;
 
-        let line = line.trim_left();
+        let line = line.trim_start();
         // should blanks within a comment count as blank or comment? This counts them as blank.
         if line.is_empty() {
             c.blank += 1;
@@ -750,5 +748,5 @@ fn check_shebang(path: &Path) -> Option<String> {
         _ => return None
     };
 
-    return Some(String::from(ext));
+    Some(String::from(ext))
 }

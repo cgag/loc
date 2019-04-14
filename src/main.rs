@@ -225,8 +225,7 @@ fn main() {
                                              .hidden(ignore_hidden)
                                              .build();
         let files = walker
-            .into_iter()
-            .filter_map(|entry| entry.ok())
+            .filter_map(Result::ok)
             .filter(|entry| entry.file_type().expect("no filetype").is_file())
             .map(|entry| String::from(entry.path().to_str().unwrap()))
             .filter(|path| match include_regex {
