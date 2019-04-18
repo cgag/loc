@@ -308,7 +308,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
                 if let Some(ext) = check_shebang(path) {
                     ext
                 } else {
-                    file_name_lower
+                    return Unrecognized;
                 }
             }
         }
