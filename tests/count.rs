@@ -210,3 +210,19 @@ test_count![NESTED_HASKELL,
             nested_haskell_comment,
             nested_haskell_blank,
             nested_haskell_lines];
+
+const PYTHON: &'static str = "tests/data/test.py";
+const PYTHON_EXPECTED: Count = Count {
+    code: 3,
+    blank: 1,
+    comment: 6,
+    lines: 10,
+};
+test_count![PYTHON,
+            PYTHON_EXPECTED,
+            python_count,
+            python_code,
+            python_comment,
+            python_blank,
+            python_lines];
+

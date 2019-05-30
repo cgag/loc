@@ -474,7 +474,7 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
         Perl   => (smallvec!["#"], smallvec![("=pod", "=cut")]),
         Puppet => (smallvec!["#"], smallvec![]),
         Pyret  => (smallvec!["#"], smallvec![("#|", "|#")]),
-        Python => (smallvec!["#"], smallvec![("'''", "'''")]),
+        Python => (smallvec!["#"], smallvec![("'''", "'''"), ("\"\"\"", "\"\"\"")]),
         Ruby   => (smallvec!["#"], smallvec![("=begin", "=end")]),
         Sql    => (smallvec!["--"], smallvec![("/*", "*/")]),
 
@@ -660,7 +660,7 @@ pub fn count(filepath: &str) -> Count {
                     }
                 }
 
-                if pos + start_len <= line_len && &line[pos..pos + start_len] == *start {
+                if pos + start_len <= line_len && &line[pos..pos + start_len] == *start  && (start != end || multi_stack.is_empty()) {
                     pos += start_len;
                     multi_stack.push(*multi);
                     continue;
