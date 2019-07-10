@@ -485,7 +485,7 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
         Asp           => (smallvec!["'", "REM"], smallvec![]),
         AspNet        => (smallvec![],   smallvec![("<!--", "-->"), ("<%--", "-->")]),
         Autoconf      => (smallvec!["#", "dnl"], smallvec![]),
-        Clojure       => (smallvec![";", "#"], smallvec![]),
+        Clojure       => (smallvec![";"], smallvec![]),
         FortranLegacy => (smallvec!["c", "C", "!", "*"], smallvec![]),
         Handlebars    => (smallvec![],   smallvec![("<!--", "-->"), ("{{!", "}}")]),
         Php           => (smallvec!["#", "//"], smallvec![("/*", "*/")]),
