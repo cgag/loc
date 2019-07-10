@@ -56,6 +56,8 @@ pub enum Lang {
     CSharp,
     CShell,
     Clojure,
+    ClojureScript,
+    ClojureC,
     CoffeeScript,
     ColdFusion,
     ColdFusionScript,
@@ -178,6 +180,8 @@ impl Lang {
             CSharp           => "C#",
             CShell           => "C Shell",
             Clojure          => "Clojure",
+            ClojureScript    => "ClojureScript",
+            ClojureC         => "ClojureC",
             CoffeeScript     => "CoffeeScript",
             ColdFusion       => "ColdFusion",
             ColdFusionScript => "ColdFusionScript",
@@ -371,8 +375,9 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "asa" | "asp" => Asp,
         "asax" | "ascx" | "asmx" | "aspx" | "master" | "sitemap" | "webinfo" => AspNet,
         "in" => Autoconf,
-        "clj" | "cljs" | "cljc" => Clojure,
-
+        "clj" => Clojure,
+        "cljs" => ClojureScript,
+        "cljc" => ClojureC,
         "f" | "for" | "ftn" | "f77" | "pfo" => FortranLegacy,
         "f03" | "f08" | "f90" | "f95" => FortranModern,
         "makefile" | "mk" => Makefile,
@@ -485,11 +490,12 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
         Asp           => (smallvec!["'", "REM"], smallvec![]),
         AspNet        => (smallvec![],   smallvec![("<!--", "-->"), ("<%--", "-->")]),
         Autoconf      => (smallvec!["#", "dnl"], smallvec![]),
-        Clojure       => (smallvec![";"], smallvec![]),
         FortranLegacy => (smallvec!["c", "C", "!", "*"], smallvec![]),
         Handlebars    => (smallvec![],   smallvec![("<!--", "-->"), ("{{!", "}}")]),
         Php           => (smallvec!["#", "//"], smallvec![("/*", "*/")]),
         PowerShell    => (smallvec!["#"], smallvec![("<#", "#>")]),
+
+        Clojure | ClojureScript | ClojureC => (smallvec![";"], smallvec![]),
 
         Isabelle => {
             (
