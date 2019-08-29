@@ -4,12 +4,12 @@ pragma solidity ^0.4.0;
 contract SimpleStorage {
     uint storedData;
 
-	// This is a setter
+    // This is a setter
     function set(uint x) public {
         storedData = x;
     }
 
-	// This is a getter
+    // This is a getter
     function get() public view returns (uint) {
         return storedData;
     }
