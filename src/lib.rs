@@ -134,6 +134,7 @@ pub enum Lang {
     Sass,
     Scala,
     Sml,
+    Solidity,
     Sql,
     Stylus,
     Swift,
@@ -256,6 +257,7 @@ impl Lang {
             Sass             => "Sass",
             Scala            => "Scala",
             Sml              => "SML",
+            Solidity         => "Solidity",
             Sql              => "SQL",
             Stylus           => "Stylus",
             Swift            => "Swift",
@@ -412,6 +414,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "sc" | "scala" => Scala,
         "sls" => SaltStack,
         "sml" => Sml,
+        "sol" => Solidity,
         "sql" => Sql,
         "styl" => Stylus,
         "swift" => Swift,
@@ -523,7 +526,7 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
         AmbientTalk | C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA
         | CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx
         | Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | OpenCl | Qcl | Sass | Scala | Swift
-        | TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe | Groovy | Reason => c_style,
+        | TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe | Groovy | Reason | Solidity => c_style,
 
 
         Unrecognized => unreachable!(),
