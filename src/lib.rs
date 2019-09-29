@@ -1,11 +1,11 @@
 extern crate memchr;
 extern crate smallvec;
 
-use std::path::Path;
-use std::fs::File;
 use std::cmp::{max, min};
 use std::fmt;
+use std::fs::File;
 use std::io::prelude::*;
+use std::path::Path;
 
 use memchr::memchr;
 use smallvec::*;
@@ -13,18 +13,18 @@ use smallvec::*;
 // Why is it called partialEq?
 #[derive(Debug, PartialEq, Default, Clone)]
 pub struct Count {
-    pub code:    u32,
+    pub code: u32,
     pub comment: u32,
-    pub blank:   u32,
-    pub lines:   u32,
+    pub blank: u32,
+    pub lines: u32,
 }
 
 impl Count {
     pub fn merge(&mut self, o: &Count) {
-        self.code    += o.code;
+        self.code += o.code;
         self.comment += o.comment;
-        self.blank   += o.blank;
-        self.lines   += o.lines;
+        self.blank += o.blank;
+        self.lines += o.lines;
     }
 }
 
@@ -161,25 +161,25 @@ use self::Lang::*;
 impl Lang {
     pub fn to_s(&self) -> &str {
         match *self {
-            ActionScript     => "ActionScript",
-            Ada              => "Ada",
-            Agda             => "Agda",
-            AmbientTalk      => "AmbientTalk",
-            Asp              => "ASP",
-            AspNet           => "ASP.NET",
-            Assembly         => "Assembly",
-            Autoconf         => "Autoconf",
-            Awk              => "Awk",
-            Batch            => "Batch",
-            BourneShell      => "Bourne Shell",
-            C                => "C",
-            CCppHeader       => "C/C++ Header",
-            CMake            => "CMake",
-            CSharp           => "C#",
-            CShell           => "C Shell",
-            Clojure          => "Clojure",
-            CoffeeScript     => "CoffeeScript",
-            ColdFusion       => "ColdFusion",
+            ActionScript => "ActionScript",
+            Ada => "Ada",
+            Agda => "Agda",
+            AmbientTalk => "AmbientTalk",
+            Asp => "ASP",
+            AspNet => "ASP.NET",
+            Assembly => "Assembly",
+            Autoconf => "Autoconf",
+            Awk => "Awk",
+            Batch => "Batch",
+            BourneShell => "Bourne Shell",
+            C => "C",
+            CCppHeader => "C/C++ Header",
+            CMake => "CMake",
+            CSharp => "C#",
+            CShell => "C Shell",
+            Clojure => "Clojure",
+            CoffeeScript => "CoffeeScript",
+            ColdFusion => "ColdFusion",
             ColdFusionScript => "ColdFusionScript",
             Coq => "Coq",
             Cpp => "C++",
@@ -247,36 +247,36 @@ impl Lang {
             Qml => "Qml",
             R => "R",
             Razor => "Razor",
-            Reason           => "Reason",
+            Reason => "Reason",
             ReStructuredText => "reStructuredText",
-            Ruby             => "Ruby",
-            RubyHtml         => "RubyHtml",
-            Rust             => "Rust",
-            SaltStack        => "SaltStack",
-            Sass             => "Sass",
-            Scala            => "Scala",
-            Sml              => "SML",
-            Sql              => "SQL",
-            Stylus           => "Stylus",
-            Swift            => "Swift",
-            Tcl              => "Tcl",
-            Terraform        => "Terraform",
-            Tex              => "TeX",
-            Text             => "Plain Text",
-            Toml             => "Toml",
-            TypeScript       => "TypeScript",
-            Tsx              => "Typescript JSX",
-            UnrealScript     => "UnrealScript",
-            VimScript        => "VimL",
-            Vue              => "Vue",
-            Wolfram          => "Wolfram",
-            XML              => "XML",
-            Yacc             => "Yacc",
-            Yaml             => "YAML",
-            Zig              => "Zig",
-            Zsh              => "Z Shell",
-            Haxe             => "Haxe",
-            Unrecognized     => "Unrecognized",
+            Ruby => "Ruby",
+            RubyHtml => "RubyHtml",
+            Rust => "Rust",
+            SaltStack => "SaltStack",
+            Sass => "Sass",
+            Scala => "Scala",
+            Sml => "SML",
+            Sql => "SQL",
+            Stylus => "Stylus",
+            Swift => "Swift",
+            Tcl => "Tcl",
+            Terraform => "Terraform",
+            Tex => "TeX",
+            Text => "Plain Text",
+            Toml => "Toml",
+            TypeScript => "TypeScript",
+            Tsx => "Typescript JSX",
+            UnrealScript => "UnrealScript",
+            VimScript => "VimL",
+            Vue => "Vue",
+            Wolfram => "Wolfram",
+            XML => "XML",
+            Yacc => "Yacc",
+            Yaml => "YAML",
+            Zig => "Zig",
+            Zsh => "Z Shell",
+            Haxe => "Haxe",
+            Unrecognized => "Unrecognized",
         }
     }
 }
@@ -289,7 +289,8 @@ impl fmt::Display for Lang {
 
 pub fn lang_from_ext(filepath: &str) -> Lang {
     let path = Path::new(filepath);
-    let file_name_lower = path.file_name()
+    let file_name_lower = path
+        .file_name()
         .expect("no filename?")
         .to_str()
         .expect("to_str")
@@ -437,59 +438,61 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
     }
 }
 
-pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, SmallVec<[(&'a str, &'a str); 3]>) {
-    let c_style      = (smallvec!["//"], smallvec![("/*", "*/")]);
-    let html_style   = (smallvec![],     smallvec![("<!--", "-->")]);
-    let ml_style     = (smallvec![],     smallvec![("(*", "*)")]);
-    let no_comments  = (smallvec![],     smallvec![]);
-    let prolog_style = (smallvec!["%"],  smallvec![("/*", "*/")]);
-    let sh_style     = (smallvec!["#"],  smallvec![]);
+pub fn counter_config_for_lang<'a>(
+    lang: Lang,
+) -> (SmallVec<[&'a str; 3]>, SmallVec<[(&'a str, &'a str); 3]>) {
+    let c_style = (smallvec!["//"], smallvec![("/*", "*/")]);
+    let html_style = (smallvec![], smallvec![("<!--", "-->")]);
+    let ml_style = (smallvec![], smallvec![("(*", "*)")]);
+    let no_comments = (smallvec![], smallvec![]);
+    let prolog_style = (smallvec!["%"], smallvec![("/*", "*/")]);
+    let sh_style = (smallvec!["#"], smallvec![]);
 
     match lang {
-        Ada            => (smallvec!["--"], smallvec![]),
-        Batch          => (smallvec!["REM"], smallvec![]),
-        Erlang | Tex   => (smallvec!["%"], smallvec![]),
-        FortranModern  => (smallvec!["!"], smallvec![]),
-        INI            => (smallvec![";"], smallvec![]),
+        Ada => (smallvec!["--"], smallvec![]),
+        Batch => (smallvec!["REM"], smallvec![]),
+        Erlang | Tex => (smallvec!["%"], smallvec![]),
+        FortranModern => (smallvec!["!"], smallvec![]),
+        INI => (smallvec![";"], smallvec![]),
         Protobuf | Zig => (smallvec!["//"], smallvec![]),
-        VimScript      => (smallvec!["\""], smallvec![]),
-        Terraform      => (smallvec!["#"], smallvec![("/*", "*/")]),
-        Nix            => (smallvec!["#"], smallvec![("/*", "*/")]),
+        VimScript => (smallvec!["\""], smallvec![]),
+        Terraform => (smallvec!["#"], smallvec![("/*", "*/")]),
+        Nix => (smallvec!["#"], smallvec![("/*", "*/")]),
 
         // TODO(cgag): Well, some architectures use ;, @, |, etc.  Figure out something
         // better?
-        Assembly     => (smallvec!["#"], smallvec![("/*", "*/")]),
-        CMake        =>  (smallvec!["#"], smallvec![("#[[", "]]")]),
+        Assembly => (smallvec!["#"], smallvec![("/*", "*/")]),
+        CMake => (smallvec!["#"], smallvec![("#[[", "]]")]),
         CoffeeScript => (smallvec!["#"], smallvec![("###", "###")]),
-        D            => (smallvec!["//"], smallvec![("/*", "*/")]),
-        Docker       => (smallvec!["#"], smallvec![]),
-        Forth        => (smallvec!["\\"], smallvec![("(", ")")]),
-        FSharp       => (smallvec!["//"], smallvec![("(*", "*)")]),
-        Julia        => (smallvec!["#"], smallvec![("#=", "=#")]),
-        Lisp         => (smallvec![";"], smallvec![("#|", "|#")]),
-        Lean         => (smallvec!["--"], smallvec![("/-", "-/")]),
-        Lua          => (smallvec!["--"], smallvec![("--[[", "]]")]),
+        D => (smallvec!["//"], smallvec![("/*", "*/")]),
+        Docker => (smallvec!["#"], smallvec![]),
+        Forth => (smallvec!["\\"], smallvec![("(", ")")]),
+        FSharp => (smallvec!["//"], smallvec![("(*", "*)")]),
+        Julia => (smallvec!["#"], smallvec![("#=", "=#")]),
+        Lisp => (smallvec![";"], smallvec![("#|", "|#")]),
+        Lean => (smallvec!["--"], smallvec![("/-", "-/")]),
+        Lua => (smallvec!["--"], smallvec![("--[[", "]]")]),
         // which one is right? = or =pod?
         // Perl => SM("#""=", "=cut"),
-        Perl   => (smallvec!["#"], smallvec![("=pod", "=cut")]),
+        Perl => (smallvec!["#"], smallvec![("=pod", "=cut")]),
         Puppet => (smallvec!["#"], smallvec![]),
-        Pyret  => (smallvec!["#"], smallvec![("#|", "|#")]),
+        Pyret => (smallvec!["#"], smallvec![("#|", "|#")]),
         Python => (smallvec!["#"], smallvec![("'''", "'''")]),
-        Ruby   => (smallvec!["#"], smallvec![("=begin", "=end")]),
-        Sql    => (smallvec!["--"], smallvec![("/*", "*/")]),
+        Ruby => (smallvec!["#"], smallvec![("=begin", "=end")]),
+        Sql => (smallvec!["--"], smallvec![("/*", "*/")]),
 
         Haskell | Idris | Agda | PureScript | Elm => (smallvec!["--"], smallvec![("{-", "-}")]),
 
-        ColdFusion    => (smallvec![],   smallvec![("<!---", "--->")]),
-        Mustache      => (smallvec![],   smallvec![("{{!", "}}")]),
-        Asp           => (smallvec!["'", "REM"], smallvec![]),
-        AspNet        => (smallvec![],   smallvec![("<!--", "-->"), ("<%--", "-->")]),
-        Autoconf      => (smallvec!["#", "dnl"], smallvec![]),
-        Clojure       => (smallvec![";", "#"], smallvec![]),
+        ColdFusion => (smallvec![], smallvec![("<!---", "--->")]),
+        Mustache => (smallvec![], smallvec![("{{!", "}}")]),
+        Asp => (smallvec!["'", "REM"], smallvec![]),
+        AspNet => (smallvec![], smallvec![("<!--", "-->"), ("<%--", "-->")]),
+        Autoconf => (smallvec!["#", "dnl"], smallvec![]),
+        Clojure => (smallvec![";", "#"], smallvec![]),
         FortranLegacy => (smallvec!["c", "C", "!", "*"], smallvec![]),
-        Handlebars    => (smallvec![],   smallvec![("<!--", "-->"), ("{{!", "}}")]),
-        Php           => (smallvec!["#", "//"], smallvec![("/*", "*/")]),
-        PowerShell    => (smallvec!["#"], smallvec![("<#", "#>")]),
+        Handlebars => (smallvec![], smallvec![("<!--", "-->"), ("{{!", "}}")]),
+        Php => (smallvec!["#", "//"], smallvec![("/*", "*/")]),
+        PowerShell => (smallvec!["#"], smallvec![("<#", "#>")]),
 
         Isabelle => {
             (
@@ -504,9 +507,9 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
             )
         }
 
-        Razor  => (smallvec![], smallvec![("<!--", "-->"), ("@*", "*@")]),
+        Razor => (smallvec![], smallvec![("<!--", "-->"), ("@*", "*@")]),
         Pascal => (smallvec!["//", "(*"], smallvec![("{", "}")]),
-        Vue    => (smallvec!["//"], smallvec![("/*", "*/"), ("<!--", "-->")]),
+        Vue => (smallvec!["//"], smallvec![("/*", "*/"), ("<!--", "-->")]),
         Text | Markdown | Json | IntelHex | Hex | ReStructuredText => no_comments,
 
         Oz | Prolog => prolog_style,
@@ -518,13 +521,12 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
         BourneShell | Make | Awk | CShell | Gherkin | Makefile | Nim | R | SaltStack | Tcl
         | Toml | Yaml | Zsh | Elixir => sh_style,
 
-
         // TODO(cgag): not 100% sure that yacc belongs here.
-        AmbientTalk | C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA
-        | CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx
-        | Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | OpenCl | Qcl | Sass | Scala | Swift
-        | TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe | Groovy | Reason => c_style,
-
+        AmbientTalk | C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css
+        | Cpp | CUDA | CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java
+        | JavaScript | Jsx | Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | OpenCl
+        | Qcl | Sass | Scala | Swift | TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe
+        | Groovy | Reason => c_style,
 
         Unrecognized => unreachable!(),
     }
@@ -631,7 +633,11 @@ pub fn count(filepath: &str) -> Count {
             }
         }
 
-        if multi_stack.is_empty() && !multis.iter().any(|(start, end)| line.contains(start) || line.contains(end)) {
+        if multi_stack.is_empty()
+            && !multis
+                .iter()
+                .any(|(start, end)| line.contains(start) || line.contains(end))
+        {
             c.code += 1;
             continue 'line;
         }
@@ -645,7 +651,7 @@ pub fn count(filepath: &str) -> Count {
             for multi in multis.iter() {
                 let (start, end) = multi;
                 let start_len = start.len();
-                let end_len   = end.len();
+                let end_len = end.len();
 
                 // TODO(cgag): this is almost ceratinly giving us incorrect results.  Say the
                 // first multi is the longest.  If we advance position because the final byte
@@ -668,11 +674,18 @@ pub fn count(filepath: &str) -> Count {
 
                 if !multi_stack.is_empty() {
                     let (_, mut end) = multi_stack.last().expect("stack last");
-                    if pos+end.len() <= line_len && &line[pos..pos+end.len()] == end {
+                    if pos + end.len() <= line_len && &line[pos..pos + end.len()] == end {
                         let _ = multi_stack.pop();
                         pos += end.len();
                     }
-                } else if multi_stack.is_empty() && pos < line_len && !&line[pos..pos + 1].chars().next().expect("whitespace check").is_whitespace() {
+                } else if multi_stack.is_empty()
+                    && pos < line_len
+                    && !&line[pos..pos + 1]
+                        .chars()
+                        .next()
+                        .expect("whitespace check")
+                        .is_whitespace()
+                {
                     found_code += 1;
                 }
             }
@@ -716,36 +729,31 @@ fn check_shebang(path: &Path) -> Option<String> {
     // credit to polyglot (ats line counter) for these shebangs
     let ext = match first_line.expect("it's some, i'm sure of it") {
         "#!python"
-      | "#!python2"
-      | "#!python3"
-      | "#!/bin/python"
-      | "#!/bin/python2"
-      | "#!/bin/python3"
-      | "#!/usr/bin/env python"
-      | "#!/usr/bin/env python2"
-      | "#!/usr/bin/env python3" => "py",
+        | "#!python2"
+        | "#!python3"
+        | "#!/bin/python"
+        | "#!/bin/python2"
+        | "#!/bin/python3"
+        | "#!/usr/bin/env python"
+        | "#!/usr/bin/env python2"
+        | "#!/usr/bin/env python3" => "py",
 
-        "#!/usr/bin/env bash"
-      | "#!/usr/bin/env sh"
-      | "#!/bin/bash"
-      | "#!/bin/sh" => "sh",
-
+        "#!/usr/bin/env bash" | "#!/usr/bin/env sh" | "#!/bin/bash" | "#!/bin/sh" => "sh",
 
         "#!/usr/bin/env perl"
-      | "#!/usr/bin/env perl6"
-      | "#!/bin/perl"
-      | "#!/bin/perl6"
-      | "#!/usr/bin/perl" => "pl",
+        | "#!/usr/bin/env perl6"
+        | "#!/bin/perl"
+        | "#!/bin/perl6"
+        | "#!/usr/bin/perl" => "pl",
 
-        "#!/usr/bin/env stack"
-      | "#!/usr/bin/env runhaskell" => "hs",
+        "#!/usr/bin/env stack" | "#!/usr/bin/env runhaskell" => "hs",
 
-        "#!/usr/bin/csh"      => "csh",
+        "#!/usr/bin/csh" => "csh",
         "#!/usr/bin/env node" => "js",
-        "#!/usr/bin/ruby"     => "rb",
+        "#!/usr/bin/ruby" => "rb",
         "#!/usr/bin/env ruby" => "rb",
 
-        _ => return None
+        _ => return None,
     };
 
     Some(String::from(ext))
