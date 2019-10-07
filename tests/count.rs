@@ -210,3 +210,18 @@ test_count![NESTED_HASKELL,
             nested_haskell_comment,
             nested_haskell_blank,
             nested_haskell_lines];
+
+const SOLIDITY: &'static str = "tests/data/test.sol";
+const SOLIDITY_EXPECTED: Count = Count {
+    code: 10,
+    blank: 3,
+    comment: 3,
+    lines: 10+3+3,
+};
+test_count![SOLIDITY,
+            SOLIDITY_EXPECTED,
+            solidity_count,
+            solidity_code,
+            solidity_comment,
+            solidity_blank,
+            solidity_lines];

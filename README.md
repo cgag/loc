@@ -237,6 +237,7 @@ ignore files with `loc -u`, and include hidden files/dirs with `loc -uu`.
 - Sass
 - Scala
 - SML
+- Solidity
 - SQL
 - Stylus
 - Swift
