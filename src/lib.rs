@@ -66,6 +66,7 @@ pub enum Lang {
     CUDAHeader,
     D,
     Dart,
+    Dhall,
     DeviceTree,
     Docker,
     Elixir,
@@ -189,6 +190,7 @@ impl Lang {
             CUDAHeader => "CUDA Header",
             D => "D",
             Dart => "Dart",
+            Dhall => "Dhall",
             DeviceTree => "DeviceTree",
             Docker => "Docker",
             Elixir => "Elixir",
@@ -339,6 +341,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "cuh" => CUDAHeader,
         "d" => D,
         "dart" => Dart,
+        "dhall" => Dhall,
         "dts" | "dtsi" => DeviceTree,
         "docker" => Docker,
         "el" | "lisp" | "lsp" | "scm" | "ss" | "rkt" => Lisp,
@@ -481,7 +484,7 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
         Ruby   => (smallvec!["#"], smallvec![("=begin", "=end")]),
         Sql    => (smallvec!["--"], smallvec![("/*", "*/")]),
 
-        Haskell | Idris | Agda | PureScript | Elm => (smallvec!["--"], smallvec![("{-", "-}")]),
+        Dhall | Haskell | Idris | Agda | PureScript | Elm => (smallvec!["--"], smallvec![("{-", "-}")]),
 
         ColdFusion    => (smallvec![],   smallvec![("<!---", "--->")]),
         Mustache      => (smallvec![],   smallvec![("{{!", "}}")]),
