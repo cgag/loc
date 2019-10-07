@@ -1,3 +1,5 @@
+2019-10-07: I really haven't been on top of accepting pull requests or looking at issues, you guy should definitely look at [SCC](https://github.com/boyter/scc).  It's faster and more accurate than this, and Boyter has written a great series of blog posts detailing how it got this way:  [https://boyter.org/posts/sloc-cloc-code/](https://boyter.org/posts/sloc-cloc-code/)
+
 2018-03-08:
 I saw a bunch of stars pop up and thought I should mention that tokei is smarter and more accurate so please give that a look and see if there are any wild discrepancies (mostly for your benefit but please let me know if so).  Tokei is linked below but it's also rust so `cargo install tokei` is all you need.  Also these benchmarks are quite old. I doubt cloc has changed but tokei probably has. 
 
