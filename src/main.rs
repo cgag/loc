@@ -7,6 +7,7 @@ extern crate num_cpus;
 extern crate regex;
 extern crate ignore;
 extern crate edit_distance;
+extern crate serde_json;
 
 use clap::{Arg, App, AppSettings};
 use ignore::WalkBuilder;
@@ -99,6 +100,23 @@ impl FromStr for Sort {
     }
 }
 
+#[derive(PartialEq)]
+enum Format {
+    Table,
+    JSON
+}
+
+impl FromStr for Format {
+    type Err = Option<String>;
+    fn from_str(s: &str) -> Result<Format, Self::Err> {
+        match s {
+            "table" | "Table"         => Ok(Format::Table),
+            "json"  | "Json" | "JSON" => Ok(Format::JSON),
+            _ => Err(None)
+        }
+    }
+}
+
 // TODO(cgag): tune smallvec array sizes
 // TODO(cgag): try smallstring
 // TODO(cgag): more tests for nested comments
@@ -133,6 +151,12 @@ fn main() {
             .value_name("COLUMN")
             .takes_value(true)
             .help("Column to sort by"))
+        .arg(Arg::with_name("format")
+             .required(false)
+             .long("format")
+             .short("f")
+             .takes_value(true)
+             .help("The output format, defaults to 'table' and accepts 'json'."))
         .arg(Arg::with_name("unrestricted")
              .required(false)
              .multiple(true)
@@ -167,6 +191,18 @@ fn main() {
         },
         // Default to sorting by lines of code
         None => Sort::Code,
+    };
+
+    let format = match matches.value_of("format") {
+        Some(string) => match Format::from_str(string) {
+            Ok(format) => format,
+            Err(_) => {
+                println!("Error: invalid value for --format: '{}'", string);
+                println!(" Hint: legal values are Table and Json");
+                return
+            }
+        },
+        None => Format::Table,
     };
 
     let by_file: bool = matches.is_present("files");
@@ -339,7 +375,10 @@ fn main() {
             Sort::Lines    => totals_by_lang.sort_by(|&(_, c1), &(_, c2)| c2.count.lines.cmp(&c1.count.lines)),
         }
 
-        print_totals_by_lang(&linesep, &totals_by_lang);
+        match format {
+            Format::Table => print_totals_by_lang_table(&linesep, &totals_by_lang),
+            Format::JSON => print_totals_by_lang_json(&totals_by_lang),
+        }
     }
 
 }
@@ -357,7 +396,15 @@ fn str_repeat(s: &str, n: usize) -> String {
     std::iter::repeat(s).take(n).collect::<Vec<_>>().join("")
 }
 
-fn print_totals_by_lang(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) {
+fn print_totals_by_lang_json(totals_by_lang: &[(&&Lang, &LangTotal)]) {
+    let mut langs = std::collections::HashMap::new();
+    for (l, t) in totals_by_lang {
+        langs.insert((***l).to_string(), **t);
+    }
+    println!("{}", serde_json::to_string(&langs).unwrap());
+}
+
+fn print_totals_by_lang_table(linesep: &str, totals_by_lang: &[(&&Lang, &LangTotal)]) {
     println!("{}", linesep);
     println!(" {0: <17} {1: >8} {2: >12} {3: >12} {4: >12} {5: >12}",
              "Language",
