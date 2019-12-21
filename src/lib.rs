@@ -327,6 +327,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "as" => ActionScript,
         "at" => AmbientTalk,
         "awk" => Awk,
+        "bash" => BourneShell,
         "bat" | "btm" | "cmd" => Batch,
         "c" | "ec" | "pgc" => C,
         "cc" | "cpp" | "cxx" | "c++" | "pcc" => Cpp,
