@@ -129,6 +129,7 @@ pub enum Lang {
     R,
     Razor,
     Reason,
+    Ron,
     ReStructuredText,
     Ruby,
     RubyHtml,
@@ -256,6 +257,7 @@ impl Lang {
             R => "R",
             Razor => "Razor",
             Reason           => "Reason",
+            Ron              => "RON",
             ReStructuredText => "reStructuredText",
             Ruby             => "Ruby",
             RubyHtml         => "RubyHtml",
@@ -418,6 +420,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "rake" | "rb" => Ruby,
         "re" | "rei" => Reason,
         "rhtml" | "erb" => RubyHtml,
+        "ron" => Ron,
         "rs" => Rust,
         "s" | "asm" => Assembly,
         "sass" | "scss" => Sass,
@@ -539,7 +542,7 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
         AmbientTalk | C | CCppHeader | Rust | Yacc | ActionScript | ColdFusionScript | Css | Cpp | CUDA
         | CUDAHeader | CSharp | Dart | DeviceTree | Glsl | Go | Jai | Java | JavaScript | Jsx
         | Kotlin | Less | LinkerScript | ObjectiveC | ObjectiveCpp | OpenCl | Qcl | Sass | Scala | Swift
-        | TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe | Groovy | Reason | Solidity => c_style,
+        | TypeScript | Tsx | UnrealScript | Stylus | Qml | Haxe | Groovy | Reason | Solidity | Ron => c_style,
 
 
         Unrecognized => unreachable!(),
