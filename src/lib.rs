@@ -1,5 +1,7 @@
 extern crate memchr;
 extern crate smallvec;
+#[macro_use]
+extern crate serde_derive;
 
 use std::path::Path;
 use std::fs::File;
@@ -11,7 +13,7 @@ use memchr::memchr;
 use smallvec::*;
 
 // Why is it called partialEq?
-#[derive(Debug, PartialEq, Default, Clone)]
+#[derive(Debug, PartialEq, Default, Copy, Clone, Serialize)]
 pub struct Count {
     pub code:    u32,
     pub comment: u32,
@@ -28,6 +30,7 @@ impl Count {
     }
 }
 
+#[derive(Serialize, Copy, Clone)]
 pub struct LangTotal {
     pub files: u32,
     pub count: Count,
@@ -37,7 +40,7 @@ pub struct LangTotal {
 // We can probably do something with the encoding crate where we decode
 // as ascii, and then use unsafe_from_utf8. If decoding fails,
 // we catch it and just use the safe from_utf8 as we're doing now.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Copy, Clone)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Copy, Clone, Serialize)]
 pub enum Lang {
     ActionScript,
     Ada,
