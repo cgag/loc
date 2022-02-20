@@ -52,9 +52,9 @@ impl Worker {
                     if lang != Lang::Unrecognized {
                         let count = count(&path);
                         v.push(FileCount {
-                            lang: lang,
-                            path: path,
-                            count: count,
+                            lang,
+                            path,
+                            count,
                         });
                     }
                 }
