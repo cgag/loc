@@ -89,6 +89,15 @@ const LUA_EXPECTED: Count = Count {
 };
 test_count![LUA, LUA_EXPECTED, lua_count, lua_code, lua_comment, lua_blank, lua_lines];
 
+const RBI: &'static str = "tests/data/test.rbi";
+const RBI_EXPECTED: Count = Count {
+    code: 5,
+    blank: 2,
+    comment: 2,
+    lines: 9,
+};
+test_count![RBI, RBI_EXPECTED, ruby_count, ruby_code, ruby_comment, ruby_blank, ruby_lines];
+
 const RUBY: &'static str = "tests/data/test.rb";
 const RUBY_EXPECTED: Count = Count {
     code: 2,
