@@ -420,7 +420,7 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "arr" => Pyret,
         "py" => Python,
         "r" => R,
-        "rake" | "rb" => Ruby,
+        "rake" | "rb" | "rbi" => Ruby,
         "re" | "rei" => Reason,
         "rhtml" | "erb" => RubyHtml,
         "ron" => Ron,
