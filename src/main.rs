@@ -19,6 +19,7 @@ use std::str::FromStr;
 use deque::{Stealer, Stolen};
 use regex::Regex;
 use edit_distance::edit_distance as distance;
+use std::panic;
 
 use loc::*;
 
@@ -50,12 +51,19 @@ impl Worker {
                 Stolen::Data(Work::File(path)) => {
                     let lang = lang_from_ext(&path);
                     if lang != Lang::Unrecognized {
-                        let count = count(&path);
-                        v.push(FileCount {
-                            lang,
-                            path,
-                            count,
+                        panic::set_hook(Box::new(|_info| {
+                            // do nothing
+                        }));
+                        let result = panic::catch_unwind(|| {
+                            count(&path)
                         });
+                        if let Ok(count) = result {
+                            v.push(FileCount {
+                                lang,
+                                path,
+                                count,
+                            });
+                        }
                     }
                 }
             };
