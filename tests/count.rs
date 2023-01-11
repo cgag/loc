@@ -225,3 +225,18 @@ test_count![SOLIDITY,
             solidity_comment,
             solidity_blank,
             solidity_lines];
+
+const VYPER: &'static str = "tests/data/vyper.vy";
+const VYPER_EXPECTED: Count = Count {
+    code: 30,
+    blank: 18,
+    comment: 19,
+    lines: 30+18+19,
+};
+test_count![VYPER,
+            VYPER_EXPECTED,
+            vyper_count,
+            vyper_code,
+            vyper_comment,
+            vyper_blank,
+            vyper_lines];
