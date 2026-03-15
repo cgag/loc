@@ -225,3 +225,33 @@ test_count![SOLIDITY,
             solidity_comment,
             solidity_blank,
             solidity_lines];
+
+const MATLAB: &'static str = "tests/data/test.m";
+const MATLAB_EXPECTED: Count = Count {
+    code: 6,
+    blank: 0,
+    comment: 6,
+    lines: 12,
+};
+test_count![MATLAB,
+            MATLAB_EXPECTED,
+            matlab_count,
+            matlab_code,
+            matlab_comment,
+            matlab_blank,
+            matlab_lines];
+
+const OBJECTIVE_C: &'static str = "tests/data/test_objc.m";
+const OBJECTIVE_C_EXPECTED: Count = Count {
+    code: 7,
+    blank: 0,
+    comment: 3,
+    lines: 10,
+};
+test_count![OBJECTIVE_C,
+            OBJECTIVE_C_EXPECTED,
+            objective_c_count,
+            objective_c_code,
+            objective_c_comment,
+            objective_c_blank,
+            objective_c_lines];

@@ -206,6 +206,7 @@ ignore files with `loc -u`, and include hidden files/dirs with `loc -uu`.
 - LinkerScript
 - Lisp
 - Lua
+- MATLAB
 - Make
 - Makefile
 - Markdown
