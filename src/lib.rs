@@ -143,6 +143,7 @@ pub enum Lang {
     Sql,
     Stylus,
     Svelte,
+    SystemVerilog,
     Swift,
     Tcl,
     Terraform,
@@ -152,6 +153,8 @@ pub enum Lang {
     TypeScript,
     Tsx,
     UnrealScript,
+    Verilog,
+    VHDL,
     VimScript,
     Vue,
     Wolfram,
@@ -272,6 +275,7 @@ impl Lang {
             Sql              => "SQL",
             Stylus           => "Stylus",
             Svelte           => "Svelte",
+            SystemVerilog    => "SystemVerilog",
             Swift            => "Swift",
             Tcl              => "Tcl",
             Terraform        => "Terraform",
@@ -281,6 +285,8 @@ impl Lang {
             TypeScript       => "TypeScript",
             Tsx              => "Typescript JSX",
             UnrealScript     => "UnrealScript",
+            Verilog          => "Verilog",
+            VHDL             => "VHDL",
             VimScript        => "VimL",
             Vue              => "Vue",
             Wolfram          => "Wolfram",
@@ -443,7 +449,11 @@ pub fn lang_from_ext(filepath: &str) -> Lang {
         "tsx" => Tsx,
         "thy" => Isabelle,
         "uc" | "uci" | "upkg" => UnrealScript,
-        "v" => Coq,
+        // .v is ambiguous: could be Coq or Verilog, use heuristic
+        "v" => check_coq_or_verilog(path),
+        "vh" => Verilog,
+        "sv" | "svh" => SystemVerilog,
+        "vhd" | "vhdl" => VHDL,
         "vim" => VimScript,
         "vue" => Vue,
         "xml" => XML,
@@ -469,6 +479,8 @@ pub fn counter_config_for_lang<'a>(lang: Lang) -> (SmallVec<[&'a str; 3]>, Small
         Ada            => (smallvec!["--"], smallvec![]),
         Batch          => (smallvec!["REM"], smallvec![]),
         Erlang | Tex   => (smallvec!["%"], smallvec![]),
+        SystemVerilog | Verilog => (smallvec!["//"], smallvec![("/*", "*/")]),
+        VHDL           => (smallvec!["--"], smallvec![("/*", "*/")]),
         FortranModern  => (smallvec!["!"], smallvec![]),
         INI            => (smallvec![";"], smallvec![]),
         Protobuf | Zig => (smallvec!["//"], smallvec![]),
@@ -772,4 +784,47 @@ fn check_shebang(path: &Path) -> Option<String> {
     };
 
     Some(String::from(ext))
+}
+
+// Distinguishes between Coq and Verilog for .v files by checking content
+fn check_coq_or_verilog(path: &Path) -> Lang {
+    let mfile = File::open(path);
+    let mut file = match mfile {
+        Ok(file) => file,
+        Err(_) => return Verilog, // Default to Verilog on error
+    };
+    let mut bytes = vec![];
+    // Read up to 8KB to check for keywords
+    let mut handle = file.take(8192);
+    let _ = handle.read_to_end(&mut bytes);
+    
+    let s = match std::str::from_utf8(&bytes) {
+        Ok(x) => x,
+        Err(_) => return Verilog, // Default to Verilog
+    };
+
+    // Count Coq-specific keywords
+    let coq_keywords = ["Theorem", "Lemma", "Proof", "Qed", "Definition", "Inductive", 
+                        "Fixpoint", "Corollary", "Axiom", "Variable", "Require Import",
+                        "CoInductive", "Record", "Structure"];
+    let mut coq_count = 0;
+    for keyword in &coq_keywords {
+        coq_count += s.matches(keyword).count();
+    }
+
+    // Count Verilog-specific keywords
+    let verilog_keywords = ["module", "endmodule", "wire", "reg", "always", "assign",
+                            "input", "output", "inout", "posedge", "negedge", "begin",
+                            "end", "parameter"];
+    let mut verilog_count = 0;
+    for keyword in &verilog_keywords {
+        verilog_count += s.matches(keyword).count();
+    }
+
+    // Return the language with more keyword matches
+    if coq_count > verilog_count {
+        Coq
+    } else {
+        Verilog  // Default to Verilog if equal or Verilog has more
+    }
 }

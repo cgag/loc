@@ -242,6 +242,7 @@ ignore files with `loc -u`, and include hidden files/dirs with `loc -uu`.
 - Solidity
 - SQL
 - Stylus
+- SystemVerilog
 - Swift
 - Tcl
 - Terraform
@@ -250,6 +251,8 @@ ignore files with `loc -u`, and include hidden files/dirs with `loc -uu`.
 - TypeScript
 - Tsx
 - UnrealScript
+- Verilog
+- VHDL
 - VimL
 - Wolfram
 - XML
